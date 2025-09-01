@@ -6,8 +6,10 @@ export default function MessagesPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const API_URL = import.meta.env.VITE_API_URL;
+
     useEffect(() => {
-        fetch('https://localhost:7025/Messages')
+        fetch(`${API_URL}/Messages`)
             .then((response) => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
