@@ -7,6 +7,15 @@ public class Message
 {
     public int Id { get; set; }
     public string? Text { get; set; }
+
+    public SupabaseMessage ToSupabaseMessage()
+    {
+        return new SupabaseMessage
+        {
+            Id = this.Id,
+            Text = this.Text
+        };
+    }
 }
 
 [Table("Messages")]
@@ -17,12 +26,12 @@ public class SupabaseMessage : BaseModel
     [Column("text")]
     public string? Text { get; set; }
 
-    public static Message ToMessage(SupabaseMessage supabaseMessage)
+    public Message ToMessage()
     {
         return new Message
         {
-            Id = supabaseMessage.Id,
-            Text = supabaseMessage.Text
+            Id = this.Id,
+            Text = this.Text
         };
     }
 }
