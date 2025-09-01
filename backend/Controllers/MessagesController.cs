@@ -5,16 +5,14 @@ namespace backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class MessagesController : ControllerBase
+public class MessagesController(Supabase.Client supabase) : ControllerBase
 {
+    private readonly Supabase.Client _supabase = supabase;
+
     [HttpGet]
-    public IEnumerable<Message> Get()
+    public async Task<ActionResult<IEnumerable<Message>>> Get()
     {
-        return
-        [
-            new Message { Id = 1, Text = "Message 1" },
-            new Message { Id = 2, Text = "Message 2" },
-            new Message { Id = 3, Text = "Message 3" }
-        ];
+        var response = await _supabase.From<SupabaseMessage>().Get();
+        return Ok(response.Models.Select(SupabaseMessage.ToMessage));
     }
 }
