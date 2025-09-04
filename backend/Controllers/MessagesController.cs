@@ -12,7 +12,10 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Message>>> Get()
     {
-        var response = await _supabase.From<SupabaseMessage>().Get();
+        var response = await _supabase
+            .From<SupabaseMessage>()
+            .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Ascending)
+            .Get();
         return Ok(response.Models.Select(x => x.ToMessage()));
     }
 

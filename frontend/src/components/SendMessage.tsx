@@ -1,21 +1,38 @@
 import { sendMessage } from "../queries/messagesQueries";
+import Button from "./Button";
+import { useEffect, useRef } from "react";
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 
 export default function SendMessage() {
     const sendMutation = sendMessage();
-    
+    const formRef = useRef<HTMLFormElement>(null);
+
+    useEffect(() => {
+        if (sendMutation.isSuccess && formRef.current) { 
+            formRef.current.reset();
+        }
+    }, [sendMutation.isSuccess]);
     return (
-        <form style={{display: 'flex', gap: '10px', marginBottom: '20px'}} onSubmit={(e) => {
+        <form
+            ref={formRef}
+            className="flex gap-2 w-full"
+            onSubmit={(e) => {
             e.preventDefault();
             const formData = new FormData(e.target as HTMLFormElement);
             const newMessage = formData.get('text') as string;
             sendMutation.mutate({ text: newMessage });
-            (e.target as HTMLFormElement).reset();
-        }}>
-            <input type="text" name="text" placeholder="Type your message..."
-                style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ccc'}}
+            }}
+        >
+            <input
+                type="text"
+                name="text"
+                placeholder="Type your message..."
+                className="flex-1 p-2 border rounded-xl w-full"
             />
-
-            <button type="submit">Send</button>
+            <Button
+              icon={faPaperPlane}
+              loading={sendMutation.isPending}
+            />
         </form>
     );
 }

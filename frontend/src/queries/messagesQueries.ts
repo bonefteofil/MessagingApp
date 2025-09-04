@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type Message from "../models/message";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -24,7 +25,7 @@ export function sendMessage() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (newMessage: { text: string }) => {
+        mutationFn: async (newMessage: Message) => {
             const response = await fetch(`${API_URL}/messages`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -47,7 +48,7 @@ export function editMessage() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (updatedMessage: { id: number; text: string }) => {
+        mutationFn: async (updatedMessage: Message) => {
             const response = await fetch(`${API_URL}/messages/${updatedMessage.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
