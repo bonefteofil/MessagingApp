@@ -1,56 +1,67 @@
-import { deleteMessage, getMessages } from '../queries/messagesQueries';
-import type Message from '../models/message';
-import Button from './Button';
 import { useEffect, useRef } from 'react';
+import type Message from '../models/message';
+import { deleteMessage, getMessages } from '../queries/messagesQueries';
 import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { Skeleton, Stack, Group, ActionIcon, Paper, Text, Center } from "@mantine/core";
 
-export default function MessagesList({setEditingMessage}: { setEditingMessage: (message: Message | null) => void }) {
+export default function MessagesList({ setEditingMessage }: { setEditingMessage: (message: Message | null) => void }) {
     const { isPending, error, data } = getMessages();
     const deleteMutation = deleteMessage();
-    const containerRef = useRef<HTMLDivElement>(null);
 
+    // Instantly scroll to the bottom on first load, then use smooth scrolling on updates
     const firstLoad = useRef(true);
-
     useEffect(() => {
-        if (containerRef.current && data) {
-            containerRef.current.scrollTo({
-                top: containerRef.current.scrollHeight,
-                behavior: firstLoad.current ? 'auto' : 'smooth'
-            });
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: firstLoad.current ? 'auto' : 'smooth'
+        });
+        if (data)
             firstLoad.current = false;
-        }
     }, [data]);
 
     return (
-        <div ref={containerRef} className="flex flex-col w-full h-full overflow-y-scroll [&::-webkit-scrollbar]:hidden">
-
-            {(isPending || !data) && (
-                <div className="flex h-full justify-center items-center">
-                    <FontAwesomeIcon icon={faSpinner} size="4x" className="animate-spin" />
-                </div>
-            )}
+        <Stack p='md'>
+            {(isPending || !data || error) && <>
+                <Skeleton p={16} height={48} radius='lg' width='70%' />
+                <Skeleton p={16} height={48} radius='lg' width='30%' />
+                <Skeleton p={16} height={48} radius='lg' width='70%' />
+                <Skeleton p={16} height={48} radius='lg' width='30%' />
+            </>}
 
             {error && (
-                <div className='h-full flex justify-center'>
-                    <p className="bg-red-700 rounded-xl p-4 h-min">Error loading messages: {error?.message || "Unknown error"}</p>
-                </div>
+                <Center>
+                    <Paper bg='red.9' shadow="md" radius='md'>
+                        <Text p='sm'> Error loading messages: {error?.message || "Unknown error"} </Text>
+                    </Paper>
+                </Center>
             )}
 
             {data && data.map((message: Message) => (
-                <div key={message.id} className="flex items-center justify-between my-2">
-                    <div className='p-3 rounded-xl bg-green-700 max-w-4/6 wrap-anywhere'>{message.id}, {message.text || "NULL"}</div>
-                    <div>
-                        <Button onClick={() => setEditingMessage(message)} icon={faPenToSquare} />
-                        <Button
+                <Group key={message.id} justify='space-between'>
+                    <Paper shadow="md" radius='md' p='sm' bg='green.9' className='wrap-anywhere max-w-3/5'>
+                        <Text>{message.id}, {message.text || "NULL"}</Text>
+                    </Paper>
+                    <Group gap='sm'>
+                        <ActionIcon
+                            variant="outline"
+                            size='xl'
+                            radius='md'
+                            onClick={() => setEditingMessage(message)}>
+                                <FontAwesomeIcon icon={faPenToSquare} />
+                        </ActionIcon>
+                        <ActionIcon
+                            variant="outline"
+                            size='xl'
+                            radius='md'
+                            color="red"
                             onClick={() => deleteMutation.mutate(message.id!)}
-                            icon={faTrash}
-                            loading={deleteMutation.isPending && deleteMutation.variables === message.id}
-                        />
-                    </div>
-                </div>
+                            loading={deleteMutation.isPending && deleteMutation.variables === message.id}>
+                                <FontAwesomeIcon icon={faTrash} />
+                        </ActionIcon>
+                    </Group>
+                </Group>
             ))}
-        </div>
+        </Stack>
     );
 }

@@ -1,20 +1,19 @@
 import { useState } from "react";
+import type Message from "../models/message";
 import MessagesList from "./MessagesList"
 import SendMessage from "./SendMessage"
-import EditMessage from "./EditMessage"
-import type Message from "../models/message";
+import { Affix, Box } from "@mantine/core";
 
-export default function App() {
+export default function Layout() {
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
 
   return (
-    <div className="flex flex-col gap-4 p-5 h-dvh">
-        <h1 className="text-2xl font-bold p-2 border rounded-sm">Messaging App</h1>
-        <MessagesList setEditingMessage={setEditingMessage} />
-        {editingMessage
-            ? <EditMessage message={editingMessage} setEditingMessage={setEditingMessage} />
-            : <SendMessage />
-        }
-    </div>
-  )
+    <>
+      <MessagesList setEditingMessage={setEditingMessage} />
+      <Box h={70} />
+      <Affix position={{ bottom: 0, left: 0, right: 0 }} zIndex={50} p='md' className="backdrop-blur-lg bg-gray-700/30">
+          <SendMessage editingMessage={editingMessage} setEditingMessage={setEditingMessage} />
+      </Affix>
+    </>
+  );
 }

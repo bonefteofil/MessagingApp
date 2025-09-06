@@ -1,38 +1,90 @@
-import { sendMessage } from "../queries/messagesQueries";
-import Button from "./Button";
-import { useEffect, useRef } from "react";
-import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
+import { editMessage, sendMessage } from "../queries/messagesQueries";
+import { useEffect } from "react";
+import { faFloppyDisk, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ActionIcon, Button, Group, Textarea, Text } from "@mantine/core";
+import { useForm } from "@mantine/form";
+import type Message from "../models/message";
 
-export default function SendMessage() {
+export default function SendMessage({ editingMessage, setEditingMessage }: { editingMessage: Message | null; setEditingMessage: (message: Message | null) => void }) {
     const sendMutation = sendMessage();
-    const formRef = useRef<HTMLFormElement>(null);
+    const editMutation = editMessage();
+
+    const form = useForm({
+        initialValues: {
+            text: ""
+        },
+    });
 
     useEffect(() => {
-        if (sendMutation.isSuccess && formRef.current) { 
-            formRef.current.reset();
+        form.setValues({
+            text: editingMessage?.text || "",
+        });
+    }, [editingMessage]);
+
+    useEffect(() => {
+        if (sendMutation.isSuccess || editMutation.isSuccess) {
+            setEditingMessage(null);
+            form.reset();
         }
-    }, [sendMutation.isSuccess]);
+    }, [sendMutation.isSuccess, editMutation.isSuccess]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (editingMessage) {
+            editMutation.mutate({ id: editingMessage.id, text: form.values.text });
+        } else {
+            sendMutation.mutate({ text: form.values.text });
+        }
+    };
+
     return (
-        <form
-            ref={formRef}
-            className="flex gap-2 w-full"
-            onSubmit={(e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target as HTMLFormElement);
-            const newMessage = formData.get('text') as string;
-            sendMutation.mutate({ text: newMessage });
-            }}
-        >
-            <input
-                type="text"
-                name="text"
-                placeholder="Type your message..."
-                className="flex-1 p-2 border rounded-xl w-full"
-            />
-            <Button
-              icon={faPaperPlane}
-              loading={sendMutation.isPending}
-            />
+        <form onSubmit={handleSubmit}>
+            <Group>
+                <Textarea
+                    name="text"
+                    placeholder="Type your message..."
+                    disabled={sendMutation.isPending}
+                    radius="md"
+                    size="md"
+                    className="flex-grow"
+                    minRows={1}
+                    maxRows={6}
+                    autosize
+                    styles={{ input: { backgroundColor: 'transparent', borderColor: 'lightgrey'} }}
+                    {...form.getInputProps('text')}
+                />
+
+                {editingMessage ? <>
+                    <Button
+                        variant="gradient"
+                        type="button"
+                        radius='md'
+                        size='input-md'
+                        onClick={() => setEditingMessage(null)}>
+                            <Text>Cancel</Text>
+                    </Button>
+                    <Button
+                        variant="gradient"
+                        type="submit"
+                        radius='md'
+                        size='input-md'
+                        loading={editMutation.isPending}
+                        loaderProps={{ size: 'sm' }}>
+                            <FontAwesomeIcon icon={faFloppyDisk} />
+                            <Text ml='xs'>Save</Text>
+                    </Button>
+                </> :
+                    <ActionIcon
+                        variant="gradient"
+                        type="submit"
+                        radius='md'
+                        size='input-md'
+                        loading={sendMutation.isPending}>
+                            <FontAwesomeIcon icon={faPaperPlane} />
+                    </ActionIcon>
+                }
+            </Group>
         </form>
     );
 }
