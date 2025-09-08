@@ -1,14 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type Message from "../models/message";
+import type MessageScheme from "../types/message";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export function getMessages() {
-    
+export function getMessages(groupId: number) {
     return useQuery({
-        queryKey: ["messages"],
+        queryKey: ["messages", groupId],
         queryFn: async () => {
-            const response = await fetch(`${API_URL}/messages`, {method: "GET"});
+            const response = await fetch(`${API_URL}/groups/${groupId}/messages`);
             const result = await response.json();
 
             if (!response.ok) {
@@ -25,8 +24,8 @@ export function sendMessage() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (newMessage: Message) => {
-            const response = await fetch(`${API_URL}/messages`, {
+        mutationFn: async (newMessage: any) => {
+            const response = await fetch(`${API_URL}/groups/${newMessage.groupId}/messages`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newMessage),
@@ -48,8 +47,8 @@ export function editMessage() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (updatedMessage: Message) => {
-            const response = await fetch(`${API_URL}/messages/${updatedMessage.id}`, {
+        mutationFn: async (updatedMessage: MessageScheme) => {
+            const response = await fetch(`${API_URL}/groups/${updatedMessage.groupId}/messages/${updatedMessage.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedMessage),
@@ -71,8 +70,8 @@ export function deleteMessage() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (id: number) => {
-            const response = await fetch(`${API_URL}/messages/${id}`, { method: 'DELETE' });
+        mutationFn: async (message: MessageScheme) => {
+            const response = await fetch(`${API_URL}/groups/${message.groupId}/messages/${message.id}`, { method: 'DELETE' });
             const result = await response.json();
             
             if (!response.ok) {
@@ -81,7 +80,7 @@ export function deleteMessage() {
             }
             console.log("Deleted message:", result);
             queryClient.invalidateQueries({ queryKey: ['messages'] });
-            return id;
+            return result;
         },
     });
 }

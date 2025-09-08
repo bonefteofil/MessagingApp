@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react';
-import type Message from '../models/message';
+import type MessageScheme from '../types/message';
 import { deleteMessage, getMessages } from '../queries/messagesQueries';
 import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Skeleton, Stack, Group, ActionIcon, Paper, Text, Center } from "@mantine/core";
+import { Skeleton, Stack, Group, ActionIcon, Paper, Text } from "@mantine/core";
+import Error from './Error';
 
-export default function MessagesList({ setEditingMessage }: { setEditingMessage: (message: Message | null) => void }) {
-    const { isPending, error, data } = getMessages();
+export default function MessagesList({ setEditingMessage, groupId }: { setEditingMessage: (message: MessageScheme | null) => void, groupId: number }) {
+    const { error, data } = getMessages(groupId);
     const deleteMutation = deleteMessage();
 
     // Instantly scroll to the bottom on first load, then use smooth scrolling on updates
@@ -19,25 +20,21 @@ export default function MessagesList({ setEditingMessage }: { setEditingMessage:
         if (data)
             firstLoad.current = false;
     }, [data]);
-
+    
+    if (error)
+        return <Error message={"Error loading messages: " + error?.message} />;
+    
     return (
         <Stack p='md'>
-            {(isPending || !data || error) && <>
+            {!data && <>
                 <Skeleton p={16} height={48} radius='lg' width='70%' />
                 <Skeleton p={16} height={48} radius='lg' width='30%' />
                 <Skeleton p={16} height={48} radius='lg' width='70%' />
                 <Skeleton p={16} height={48} radius='lg' width='30%' />
             </>}
 
-            {error && (
-                <Center>
-                    <Paper bg='red.9' shadow="md" radius='md'>
-                        <Text p='sm'> Error loading messages: {error?.message || "Unknown error"} </Text>
-                    </Paper>
-                </Center>
-            )}
 
-            {data && data.map((message: Message) => (
+            {data && data.map((message: MessageScheme) => (
                 <Group key={message.id} justify='space-between'>
                     <Paper shadow="md" radius='md' p='sm' bg='green.9' className='wrap-anywhere max-w-3/5'>
                         <Text>{message.id}, {message.text || "NULL"}</Text>
@@ -55,8 +52,8 @@ export default function MessagesList({ setEditingMessage }: { setEditingMessage:
                             size='xl'
                             radius='md'
                             color="red"
-                            onClick={() => deleteMutation.mutate(message.id!)}
-                            loading={deleteMutation.isPending && deleteMutation.variables === message.id}>
+                            onClick={() => deleteMutation.mutate(message)}
+                            loading={deleteMutation.isPending && deleteMutation.variables === message}>
                                 <FontAwesomeIcon icon={faTrash} />
                         </ActionIcon>
                     </Group>

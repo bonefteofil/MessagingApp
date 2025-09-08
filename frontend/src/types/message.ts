@@ -1,0 +1,5 @@
+export default interface MessageScheme {
+  id?: number;
+  text: string;
+  groupId: number;
+}

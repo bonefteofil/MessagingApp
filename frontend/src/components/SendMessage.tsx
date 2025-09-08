@@ -4,9 +4,15 @@ import { faFloppyDisk, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ActionIcon, Button, Group, Textarea, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import type Message from "../models/message";
+import type MessageScheme from "../types/message";
 
-export default function SendMessage({ editingMessage, setEditingMessage }: { editingMessage: Message | null; setEditingMessage: (message: Message | null) => void }) {
+interface SendMessageProps {
+    editingMessage: MessageScheme | null;
+    groupId: number;
+    clearEditingMessage: () => void;
+}
+
+export default function SendMessage({ editingMessage, groupId, clearEditingMessage } : SendMessageProps) {
     const sendMutation = sendMessage();
     const editMutation = editMessage();
 
@@ -24,7 +30,7 @@ export default function SendMessage({ editingMessage, setEditingMessage }: { edi
 
     useEffect(() => {
         if (sendMutation.isSuccess || editMutation.isSuccess) {
-            setEditingMessage(null);
+            clearEditingMessage();
             form.reset();
         }
     }, [sendMutation.isSuccess, editMutation.isSuccess]);
@@ -32,9 +38,9 @@ export default function SendMessage({ editingMessage, setEditingMessage }: { edi
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (editingMessage) {
-            editMutation.mutate({ id: editingMessage.id, text: form.values.text });
+            editMutation.mutate({ id: editingMessage.id, text: form.values.text, groupId: editingMessage.groupId });
         } else {
-            sendMutation.mutate({ text: form.values.text });
+            sendMutation.mutate({ text: form.values.text, groupId: groupId });
         }
     };
 
@@ -61,7 +67,7 @@ export default function SendMessage({ editingMessage, setEditingMessage }: { edi
                         type="button"
                         radius='md'
                         size='input-md'
-                        onClick={() => setEditingMessage(null)}>
+                        onClick={() => clearEditingMessage()}>
                             <Text>Cancel</Text>
                     </Button>
                     <Button
