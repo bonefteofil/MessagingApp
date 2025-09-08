@@ -23,7 +23,7 @@ public class SupabaseGroup : BaseModel
 {
     [PrimaryKey("id")]
     public int Id { get; set; }
-    [Column("Name")]
+    [Column("name")]
     public string? Name { get; set; }
 
     public Group ToGroup()

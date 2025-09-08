@@ -4,13 +4,13 @@ using backend.Models;
 namespace backend.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("groups")]
 public class GroupsController(Supabase.Client supabase) : ControllerBase
 {
     private readonly Supabase.Client _supabase = supabase;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Group>>> Get()
+    public async Task<ActionResult<IEnumerable<Group>>> GetGroups()
     {
         var response = await _supabase
             .From<SupabaseGroup>()
@@ -20,7 +20,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Group>> Create(Group group)
+    public async Task<ActionResult<Group>> CreateGroup(Group group)
     {
         var response = await _supabase.From<SupabaseGroup>().Insert(group.ToSupabaseGroup());
         var createdGroup = response.Models.FirstOrDefault();
