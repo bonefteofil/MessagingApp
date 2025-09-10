@@ -1,18 +1,16 @@
+import { useEffect, useContext } from "react";
 import { editMessage, sendMessage } from "../queries/messagesQueries";
-import { useEffect } from "react";
 import { faFloppyDisk, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ActionIcon, Button, Group, Textarea, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import type MessageScheme from "../types/message";
+import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
+import { EditingMessageContext } from "../contexts/EditingMessageContext";
 
-interface SendMessageProps {
-    groupId: number;
-    editingMessage: MessageScheme | null;
-    clearEditingMessage: () => void;
-}
-
-export default function SendMessage({ groupId, editingMessage, clearEditingMessage } : SendMessageProps) {
+export default function SendMessage() {
+    const { currentGroup } = useContext(CurrentGroupContext);
+    const { editingMessage, setEditingMessage } = useContext(EditingMessageContext);
+    const groupId = currentGroup!.id!;
     const sendMutation = sendMessage();
     const editMutation = editMessage();
 
@@ -30,7 +28,7 @@ export default function SendMessage({ groupId, editingMessage, clearEditingMessa
 
     useEffect(() => {
         if (sendMutation.isSuccess || editMutation.isSuccess) {
-            clearEditingMessage();
+            setEditingMessage(null);
             form.reset();
         }
     }, [sendMutation.isSuccess, editMutation.isSuccess]);
@@ -67,7 +65,7 @@ export default function SendMessage({ groupId, editingMessage, clearEditingMessa
                         type="button"
                         radius='md'
                         size='input-md'
-                        onClick={() => clearEditingMessage()}
+                        onClick={() => setEditingMessage(null)}
                     >
                         <Text>Cancel</Text>
                     </Button>

@@ -1,10 +1,13 @@
+import { useContext } from "react";
 import type GroupScheme from "../types/group";
 import { getGroups } from "../queries/groupsQueries";
 import Error from "../components/Error";
 import Loading from "../components/Loading";
 import { Avatar, Divider, Group, Stack, Text, ScrollArea } from "@mantine/core";
+import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 
-export default function InboxPage({setCurrentGroup} : {setCurrentGroup: (id: GroupScheme | null) => void}) {
+export default function InboxPage() {
+    const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { error, data } = getGroups();
 
     if (error)

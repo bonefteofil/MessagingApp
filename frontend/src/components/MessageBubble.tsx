@@ -1,15 +1,13 @@
+import { useContext } from 'react';
 import type MessageScheme from '../types/message';
 import { deleteMessage } from '../queries/messagesQueries';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { Group, ActionIcon, Text, Card } from "@mantine/core"
+import { EditingMessageContext } from '../contexts/EditingMessageContext';
 
-interface MessageBubbleProps {
-    message: MessageScheme;
-    setEditingMessage: (message: MessageScheme | null) => void;
-}
-
-export default function MessageBubble({ message, setEditingMessage } : MessageBubbleProps) {
+export default function MessageBubble({ message } : { message: MessageScheme }) {
+    const { setEditingMessage } = useContext(EditingMessageContext);
     const deleteMutation = deleteMessage();
 
     return (

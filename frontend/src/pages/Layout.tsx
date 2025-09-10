@@ -1,16 +1,14 @@
-import type MessageScheme from "../types/message";
-import type GroupScheme from "../types/group";
-import { useState } from "react";
+import { useContext } from "react";
 import ChatPage from "./ChatPage"
 import InboxPage from "./InboxPage";
 import WellcomePage from "./WellcomePage";
 import Header from "../components/Header";
 import SendMessage from "../components/SendMessage";
 import { AppShell } from "@mantine/core";
+import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 
 export default function Layout() {
-	const [editingMessage, setEditingMessage] = useState<MessageScheme | null>(null);
-	const [currentGroup, setCurrentGroup] = useState<GroupScheme | null>(null);
+	const { currentGroup } = useContext(CurrentGroupContext);
 	const navbarSize = 400;
 
 	return (
@@ -24,17 +22,17 @@ export default function Layout() {
 		>
 			{currentGroup && (
 				<AppShell.Header p='sm' ml={{ base: 0, sm: navbarSize }} className="!backdrop-blur-lg !bg-gray-700/30" >
-					<Header currentGroup={currentGroup} removeCurrentGroup={() => setCurrentGroup(null)} />
+					<Header />
 				</AppShell.Header>
 			)}
 
 			<AppShell.Navbar>
-				<InboxPage setCurrentGroup={setCurrentGroup} />
+				<InboxPage />
 			</AppShell.Navbar>
 
 			<AppShell.Main bg={currentGroup ? "gray.9" : undefined} py={70}>
 				{currentGroup ? (
-					<ChatPage currentGroup={currentGroup} setEditingMessage={setEditingMessage} />
+					<ChatPage />
 				) : (
 					<WellcomePage />
 				)}
@@ -42,7 +40,7 @@ export default function Layout() {
 
 			{currentGroup && 
 				<AppShell.Footer p='md' ml={{ base: 0, sm: navbarSize }} className="!backdrop-blur-lg !bg-gray-700/30">
-					<SendMessage groupId={currentGroup.id!} editingMessage={editingMessage} clearEditingMessage={() => setEditingMessage(null)} />
+					<SendMessage />
 				</AppShell.Footer>
 			}
 		</AppShell>
