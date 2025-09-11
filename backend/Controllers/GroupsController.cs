@@ -16,6 +16,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             .From<SupabaseGroup>()
             .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Ascending)
             .Get();
+            
         return Ok(response.Models.Select(x => x.ToGroup()));
     }
 
@@ -47,13 +48,20 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteGroup(int id)
     {
+
         var response = await _supabase
             .From<SupabaseGroup>()
             .Where(x => x.Id == id)
             .Get();
+
         var deletedGroup = response.Models.FirstOrDefault();
         if (deletedGroup == null)
             return NotFound();
+
+        await _supabase
+            .From<SupabaseMessage>()
+            .Where(x => x.GroupId == id)
+            .Delete();
 
         await _supabase
             .From<SupabaseGroup>()

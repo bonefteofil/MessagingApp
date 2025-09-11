@@ -8,6 +8,7 @@ public class Message
     public int Id { get; set; }
     public string? Text { get; set; }
     public int GroupId { get; set; }
+    public DateTime? CreatedAt { get; set; }
 
     public SupabaseMessage ToSupabaseMessage()
     {
@@ -15,7 +16,8 @@ public class Message
         {
             Id = this.Id,
             Text = this.Text,
-            GroupId = this.GroupId
+            GroupId = this.GroupId,
+            CreatedAt = this.CreatedAt
         };
     }
 }
@@ -29,6 +31,8 @@ public class SupabaseMessage : BaseModel
     public string? Text { get; set; }
     [Column("group_id")]
     public int GroupId { get; set; }
+    [Column("created_at")]
+    public DateTime? CreatedAt { get; set; }
 
     public Message ToMessage()
     {
@@ -36,7 +40,8 @@ public class SupabaseMessage : BaseModel
         {
             Id = this.Id,
             Text = this.Text,
-            GroupId = this.GroupId
+            GroupId = this.GroupId,
+            CreatedAt = this.CreatedAt
         };
     }
 }

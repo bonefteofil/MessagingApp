@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
+using Microsoft.VisualBasic;
 
 namespace backend.Controllers;
 
@@ -15,6 +16,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             .From<SupabaseGroup>()
             .Where(g => g.Id == group_id)
             .Get();
+            
         return response.Models.Count != 0;
     }
 
@@ -29,6 +31,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             .Where(m => m.GroupId == group_id)
             .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Ascending)
             .Get();
+        
         return Ok(messages.Models.Select(x => x.ToMessage()));
     }
 
@@ -41,6 +44,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
         if (!await GroupExists(group_id))
             return NotFound(new { title = $"Group with id {group_id} not found." });
 
+        message.CreatedAt = DateTime.UtcNow;
         var response = await _supabase.From<SupabaseMessage>().Insert(message.ToSupabaseMessage());
         var createdMessage = response.Models.FirstOrDefault();
         if (createdMessage == null)
@@ -61,7 +65,12 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
         if (!await GroupExists(group_id))
             return NotFound(new { title = $"Group with id {group_id} not found." });
 
-        var response = await _supabase.From<SupabaseMessage>().Update(message.ToSupabaseMessage());
+        var response = await _supabase
+            .From<SupabaseMessage>()
+            .Where(x => x.Id == id)
+            .Set(x => x.Text!, message.Text)
+            .Update();
+            
         var updatedMessage = response.Models.FirstOrDefault();
         if (updatedMessage == null)
             return NotFound();
@@ -76,6 +85,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             .From<SupabaseMessage>()
             .Where(x => x.Id == id)
             .Get();
+
         var deletedMessage = response.Models.FirstOrDefault();
         if (deletedMessage == null)
             return NotFound();

@@ -14,8 +14,14 @@ export function getMessages(groupId: number) {
                 console.log("Error getting messages:", result.title);
                 throw new Error(result.title);
             }
-            console.log("Fetched messages:", result);
-            return result;
+
+            const messagesWithLocalTime = result.map((message: MessageScheme) => {
+                const date = new Date(message.createdAt!);
+                const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                return { ...message, createdAt: localDate.toISOString() };
+            });
+            console.log("Fetched messages:", messagesWithLocalTime);
+            return messagesWithLocalTime;
         }
     });
 }
