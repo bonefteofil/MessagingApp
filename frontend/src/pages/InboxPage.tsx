@@ -5,6 +5,8 @@ import Error from "../components/Error";
 import Loading from "../components/Loading";
 import { Avatar, Divider, Group, Stack, Text, ScrollArea } from "@mantine/core";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
+import GroupForm from "../components/GroupForm";
+
 
 export default function InboxPage() {
     const { setCurrentGroup } = useContext(CurrentGroupContext);
@@ -17,6 +19,7 @@ export default function InboxPage() {
         <ScrollArea type="scroll" px='sm'>
             <Group p='md'>
                 <Text flex={1} size="xl">Wellcome user!</Text>
+                <GroupForm />
                 <Avatar size="md" />
             </Group>
 

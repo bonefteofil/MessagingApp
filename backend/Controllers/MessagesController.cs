@@ -57,10 +57,10 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     public async Task<IActionResult> UpdateMessage(int group_id, int id, Message message)
     {
         if (message.GroupId != group_id)
-            return BadRequest(new { title = "Group ID in URL does not match Group ID in message." });
+            return BadRequest(new { title = $"Group ID in URL: {group_id} does not match Group ID in message: {message.GroupId}." });
 
         if (id != message.Id)
-            return BadRequest(new { title = "Invalid ID" });
+            return BadRequest(new { title = $"Message ID: {id} in URL does not match Message ID in body: {message.Id}." });
 
         if (!await GroupExists(group_id))
             return NotFound(new { title = $"Group with id {group_id} not found." });

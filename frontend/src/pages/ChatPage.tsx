@@ -9,26 +9,27 @@ import { CurrentGroupContext } from '../contexts/CurrentGroupContext';
 
 export default function ChatPage() {
     const { currentGroup } = useContext(CurrentGroupContext);
-    const { error, data } = getMessages(currentGroup!.id!);
+    const { error, data, isLoading } = getMessages(currentGroup!.id!);
 
     if (error)
         return <Error message={"Error loading messages: " + error.message} />;
 
     // Instantly scroll to the bottom on first load, then use smooth scrolling on updates
-    const firstLoad = useRef(true);
+    const instantScroll = useRef(true);
+    useEffect(() => { instantScroll.current = true; }, [currentGroup]);
     useEffect(() => {
         window.scrollTo({
             top: document.body.scrollHeight,
-            behavior: firstLoad.current ? 'auto' : 'smooth'
+            behavior: instantScroll.current ? 'auto' : 'smooth'
         });
-        if (data)
-            firstLoad.current = false;
+        if (!isLoading)
+            instantScroll.current = false;
     }, [data]);
     
     let lastDate: string | null = null;
     return (
         <Stack p='md'>
-            <Loading loading={!data} />
+            <Loading loading={isLoading || !data} />
 
             {data && data.map((message: MessageScheme) => {
                 const messageDate = new Date(message.createdAt!).toLocaleDateString([], {

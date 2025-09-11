@@ -23,6 +23,9 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Group>> CreateGroup(Group group)
     {
+        if (string.IsNullOrWhiteSpace(group.Name))
+            return BadRequest(new { title = "Name is required" });
+        
         var response = await _supabase.From<SupabaseGroup>().Insert(group.ToSupabaseGroup());
         var createdGroup = response.Models.FirstOrDefault();
         if (createdGroup == null)
@@ -35,9 +38,17 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     public async Task<IActionResult> UpdateGroup(int id, Group group)
     {
         if (id != group.Id)
-            return BadRequest(new { title = "Invalid ID" });
+            return BadRequest(new { title = $"Group ID: {id} in URL does not match Group ID in body: {group.Id}." });
 
-        var response = await _supabase.From<SupabaseGroup>().Update(group.ToSupabaseGroup());
+        if (string.IsNullOrWhiteSpace(group.Name))
+            return BadRequest(new { title = "Name is required" });
+
+        var response = await _supabase
+            .From<SupabaseGroup>()
+            .Where(x => x.Id == id)
+            .Set(x => x.Name!, group.Name)
+            .Update();
+        
         var updatedGroup = response.Models.FirstOrDefault();
         if (updatedGroup == null)
             return NotFound();

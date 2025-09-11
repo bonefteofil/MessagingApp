@@ -1,11 +1,20 @@
-import { useContext } from "react";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { useContext, useEffect } from "react";
+import { faAngleLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Group, Button, Text, Avatar } from "@mantine/core";
+import { deleteGroup } from "../queries/groupsQueries";
+import { Group, Button, Text, Avatar, ActionIcon } from "@mantine/core";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
+import GroupForm from "./GroupForm";
 
 export default function Header() {
     const { currentGroup, setCurrentGroup } = useContext(CurrentGroupContext);
+    const deleteMutation = deleteGroup();
+
+    useEffect(() => {
+        if (deleteMutation.isSuccess) {
+            setCurrentGroup(null);
+        }
+    }, [deleteMutation.isSuccess]);
 
     return (
         <Group gap='5'>
@@ -14,7 +23,21 @@ export default function Header() {
                 <Text size="lg">Back</Text>
             </Button>
             <Avatar />
-            <Text size="xl" className=""> {currentGroup!.name} (ID: {currentGroup!.id}) </Text>
+            <Text size="sm" className="truncate max-w-[38%]"> {currentGroup!.name} (ID: {currentGroup!.id}) </Text>
+            <div style={{ flexGrow: 1 }} />
+
+            <GroupForm editingGroup={currentGroup!} />
+            <ActionIcon
+                variant="outline"
+                size='lg'
+                radius='md'
+                color="red"
+                mx='xs'
+                onClick={() => {deleteMutation.mutate(currentGroup!)}}
+                loading={deleteMutation.isPending}
+            >
+                <FontAwesomeIcon icon={faTrash} />
+            </ActionIcon>
         </Group>
     );
 }

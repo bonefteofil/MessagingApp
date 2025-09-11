@@ -71,8 +71,8 @@ export function deleteGroup() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (groupId: number) => {
-            const response = await fetch(`${API_URL}/groups/${groupId}`, {
+        mutationFn: async (group: GroupScheme) => {
+            const response = await fetch(`${API_URL}/groups/${group.id}`, {
                 method: 'DELETE',
             });
             const result = await response.json();
