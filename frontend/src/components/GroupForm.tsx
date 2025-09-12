@@ -5,7 +5,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { createGroup, editGroup } from "../queries/groupsQueries";
 import type GroupScheme from "../types/group";
 import Error from "./Error";
-import { Modal, Button, ActionIcon } from "@mantine/core";
+import { Modal, Button, ActionIcon, Input } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 
@@ -57,13 +57,22 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
             <Modal opened={opened} onClose={close} title="Create a new group" centered radius='md'>
                 <form onSubmit={handleSubmit}>
                     {error && <Error message={`Error: ${error.message}`} />}
-                    <input
+                    <Input
                         type="text"
                         placeholder="Group Name"
-                        className="w-full mb-4 p-2 border border-gray-300 rounded"
+                        radius='md'
+                        size="md"
+                        mb='sm'
                         {...form.getInputProps('name')}
                     />
-                    <Button type="submit" fullWidth loading={isLoading}>
+                    <Button
+                        variant="gradient"
+                        type="submit"
+                        radius='md'
+                        size='input-md'
+                        fullWidth
+                        loading={isLoading}
+                    >
                         {editingGroup ? "Save group changes" : "Create group"}
                     </Button>
                 </form>

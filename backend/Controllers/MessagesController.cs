@@ -69,6 +69,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             .From<SupabaseMessage>()
             .Where(x => x.Id == id)
             .Set(x => x.Text!, message.Text)
+            .Set(x => x.Edited, true)
             .Update();
             
         var updatedMessage = response.Models.FirstOrDefault();

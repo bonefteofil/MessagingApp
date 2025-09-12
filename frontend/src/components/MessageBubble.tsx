@@ -18,9 +18,12 @@ export default function MessageBubble({ message } : { message: MessageScheme }) 
                 className="wrap-anywhere max-w-3/5 bg-gradient-to-tr from-blue-600 to-cyan-700"
             >
                 <Text>{message.id}, {message.text || "NULL"}</Text>
-                <Text size="xs" style={{ textAlign: 'right' }}>
-                    {(new Date(message.createdAt!)).toTimeString().substring(0, 5)}
-                </Text>
+                <Group gap='xs' justify='end'>
+                    {message.edited && <Text size="xs">Edited</Text>}
+                    <Text size="xs">
+                        {(new Date(message.createdAt!)).toTimeString().substring(0, 5)}
+                    </Text>
+                </Group>
             </Card>
 
             <Group gap='sm'>

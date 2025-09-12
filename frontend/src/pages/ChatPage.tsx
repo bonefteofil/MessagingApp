@@ -31,7 +31,7 @@ export default function ChatPage() {
         <Stack p='md'>
             <Loading loading={isLoading || !data} />
 
-            {data && data.map((message: MessageScheme) => {
+            {data && !isLoading && data.map((message: MessageScheme) => {
                 const messageDate = new Date(message.createdAt!).toLocaleDateString([], {
                     weekday: "long",
                     day: "2-digit",
