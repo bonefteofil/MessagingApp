@@ -3,5 +3,5 @@ export default interface MessageScheme {
   text: string;
   groupId: number;
   createdAt?: string;
-  edited: boolean;
+  edited?: boolean;
 }

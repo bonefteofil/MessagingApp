@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef } from 'react';
 import type MessageScheme from '../types/message';
 import { getMessages } from '../queries/messagesQueries';
-import Error from '../components/Error';
+import ErrorPage from './ErrorPage';
 import Loading from '../components/Loading';
 import MessageBubble from '../components/MessageBubble';
 import { Stack, Text, Chip } from "@mantine/core";
@@ -10,10 +10,7 @@ import { CurrentGroupContext } from '../contexts/CurrentGroupContext';
 export default function ChatPage() {
     const { currentGroup } = useContext(CurrentGroupContext);
     const { error, data, isLoading } = getMessages(currentGroup!.id!);
-
-    if (error)
-        return <Error message={"Error loading messages: " + error.message} />;
-
+    
     // Instantly scroll to the bottom on first load, then use smooth scrolling on updates
     const instantScroll = useRef(true);
     useEffect(() => { instantScroll.current = true; }, [currentGroup]);
@@ -25,6 +22,9 @@ export default function ChatPage() {
         if (!isLoading)
             instantScroll.current = false;
     }, [data]);
+    
+    if (error)
+        return <ErrorPage message="Failed to load messages" />;
     
     let lastDate: string | null = null;
     return (

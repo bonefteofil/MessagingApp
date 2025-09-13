@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type MessageScheme from "../types/message";
+import { ShowError } from "../components/ShowError";
+import { cleanNotifications } from "@mantine/notifications";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -7,12 +9,14 @@ export function getMessages(groupId: number) {
     return useQuery({
         queryKey: ["messages", groupId],
         queryFn: async () => {
-            const response = await fetch(`${API_URL}/groups/${groupId}/messages`);
+            const response = await fetch(`${API_URL}/groups/${groupId}/messages`, {method: "GET"});
             const result = await response.json();
 
             if (!response.ok) {
-                console.log("Error getting messages:", result.title);
-                throw new Error(result.title);
+                const error = new Error("Error getting messages: " + result.title);
+                console.log(error.message);
+                ShowError(error.message);
+                throw error;
             }
 
             const messagesWithLocalTime = result.map((message: MessageScheme) => {
@@ -21,8 +25,10 @@ export function getMessages(groupId: number) {
                 return { ...message, createdAt: localDate.toISOString() };
             });
             console.log("Fetched messages:", messagesWithLocalTime);
+            cleanNotifications();
             return messagesWithLocalTime;
-        }
+        },
+        retry: false,
     });
 }
 
@@ -39,11 +45,14 @@ export function sendMessage() {
             const result = await response.json();
 
             if (!response.ok) {
-                console.log("Error sending message:", result.title);
-                throw new Error(result.title);
+                const error = new Error("Error sending message: " + result.title);
+                console.log(error.message);
+                ShowError(error.message);
+                throw error;
             }
             console.log("Message sent:", result);
-            queryClient.invalidateQueries({ queryKey: ['messages'] });
+            queryClient.invalidateQueries({ queryKey: ['messages', newMessage.groupId] });
+            cleanNotifications();
             return result;
         }
     });
@@ -62,11 +71,14 @@ export function editMessage() {
             const result = await response.json();
 
             if (!response.ok) {
-                console.log("Error editing message:", result.title);
-                throw new Error(result.title);
+                const error = new Error("Error editing message: " + result.title);
+                console.log(error.message);
+                ShowError(error.message);
+                throw error;
             }
             console.log("Message edited:", result);
-            queryClient.invalidateQueries({ queryKey: ['messages'] });
+            queryClient.invalidateQueries({ queryKey: ['messages', updatedMessage.groupId] });
+            cleanNotifications();
             return result;
         }
     });
@@ -81,11 +93,14 @@ export function deleteMessage() {
             const result = await response.json();
             
             if (!response.ok) {
-                console.log("Error deleting message:", result.title);
-                throw new Error(result.title);
+                const error = new Error("Error deleting message: " + result.title);
+                console.log(error.message);
+                ShowError(error.message);
+                throw error;
             }
             console.log("Deleted message:", result);
-            queryClient.invalidateQueries({ queryKey: ['messages'] });
+            queryClient.invalidateQueries({ queryKey: ['messages', message.groupId] });
+            cleanNotifications();
             return result;
         },
     });

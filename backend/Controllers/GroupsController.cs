@@ -59,7 +59,6 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteGroup(int id)
     {
-
         var response = await _supabase
             .From<SupabaseGroup>()
             .Where(x => x.Id == id)

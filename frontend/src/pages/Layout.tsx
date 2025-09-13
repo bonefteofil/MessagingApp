@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import ChatPage from "./ChatPage"
 import InboxPage from "./InboxPage";
-import WellcomePage from "./WellcomePage";
+import WelcomePage from "./WelcomePage";
 import Header from "../components/Header";
 import SendMessage from "../components/SendMessage";
 import { AppShell } from "@mantine/core";
@@ -34,7 +34,7 @@ export default function Layout() {
 				{currentGroup ? (
 					<ChatPage />
 				) : (
-					<WellcomePage />
+					<WelcomePage />
 				)}
 			</AppShell.Main>
 

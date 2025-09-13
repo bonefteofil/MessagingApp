@@ -1,24 +1,23 @@
 import { useContext } from "react";
 import type GroupScheme from "../types/group";
 import { getGroups } from "../queries/groupsQueries";
-import Error from "../components/Error";
+import ErrorPage from "./ErrorPage";
 import Loading from "../components/Loading";
 import { Avatar, Divider, Group, Stack, Text, ScrollArea } from "@mantine/core";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import GroupForm from "../components/GroupForm";
 
-
 export default function InboxPage() {
     const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { error, data } = getGroups();
-
+    
     if (error)
-        return <Error message={"Error loading groups: " + error.message} />;
+        return <ErrorPage message="Failed to load chats" />;
 
     return (
         <ScrollArea type="scroll" px='sm'>
             <Group p='md'>
-                <Text flex={1} size="xl">Wellcome user!</Text>
+                <Text flex={1} size="xl">Welcome user!</Text>
                 <GroupForm />
                 <Avatar size="md" />
             </Group>

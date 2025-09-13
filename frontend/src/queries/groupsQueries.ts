@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type GroupScheme from "../types/group";
+import { ShowError } from "../components/ShowError";
+import { cleanNotifications } from "@mantine/notifications";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export function getGroups() {
-    
     return useQuery({
         queryKey: ["groups"],
         queryFn: async () => {
@@ -12,12 +13,16 @@ export function getGroups() {
             const result = await response.json();
 
             if (!response.ok) {
-                console.log("Error getting groups:", result.title);
-                throw new Error(result.title);
+                const error = new Error("Error getting groups: " + result.title);
+                console.log(error.message);
+                ShowError(error.message);
+                throw error;
             }
             console.log("Fetched groups:", result);
+            cleanNotifications();
             return result;
-        }
+        },
+        retry: false,
     });
 }
 
@@ -34,11 +39,14 @@ export function createGroup() {
             const result = await response.json();
 
             if (!response.ok) {
-                console.log("Error creating group:", result.title);
-                throw new Error(result.title);
+                const error = new Error("Error creating group: " + result.title);
+                console.log(error.message);
+                ShowError(error.message);
+                throw error;
             }
             console.log("Group created:", result);
             queryClient.invalidateQueries({ queryKey: ['groups'] });
+            cleanNotifications();
             return result;
         }
     });
@@ -57,11 +65,14 @@ export function editGroup() {
             const result = await response.json();
 
             if (!response.ok) {
-                console.log("Error updating group:", result.title);
-                throw new Error(result.title);
+                const error = new Error("Error updating group: " + result.title);
+                console.log(error.message);
+                ShowError(error.message);
+                throw error;
             }
             console.log("Group updated:", result);
             queryClient.invalidateQueries({ queryKey: ['groups'] });
+            cleanNotifications();
             return result;
         }
     });
@@ -78,11 +89,14 @@ export function deleteGroup() {
             const result = await response.json();
 
             if (!response.ok) {
-                console.log("Error deleting group:", result.title);
-                throw new Error(result.title);
+                const error = new Error("Error deleting group: " + result.title);
+                console.log(error.message);
+                ShowError(error.message);
+                throw error;
             }
             console.log("Group deleted:", result);
             queryClient.invalidateQueries({ queryKey: ['groups'] });
+            cleanNotifications();
             return result;
         }
     });

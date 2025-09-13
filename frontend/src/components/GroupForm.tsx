@@ -4,7 +4,6 @@ import { faPenToSquare, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useDisclosure } from '@mantine/hooks';
 import { createGroup, editGroup } from "../queries/groupsQueries";
 import type GroupScheme from "../types/group";
-import Error from "./Error";
 import { Modal, Button, ActionIcon, Input } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
@@ -39,9 +38,6 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
         }
     };
 
-    const isLoading = createMutation.isPending || editMutation.isPending;
-    const error = createMutation.error || editMutation.error;
-
     return (
         <>
             <ActionIcon
@@ -49,14 +45,13 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
                 variant="outline"
                 radius={editingGroup ? 'md' : 'xl'}
                 onClick={open}
-                loading={isLoading}
+                loading={createMutation.isPending || editMutation.isPending}
             >
                 <FontAwesomeIcon icon={editingGroup ? faPenToSquare : faPlus} />
             </ActionIcon>
 
             <Modal opened={opened} onClose={close} title="Create a new group" centered radius='md'>
                 <form onSubmit={handleSubmit}>
-                    {error && <Error message={`Error: ${error.message}`} />}
                     <Input
                         type="text"
                         placeholder="Group Name"
@@ -71,7 +66,7 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
                         radius='md'
                         size='input-md'
                         fullWidth
-                        loading={isLoading}
+                        loading={createMutation.isPending || editMutation.isPending}
                     >
                         {editingGroup ? "Save group changes" : "Create group"}
                     </Button>

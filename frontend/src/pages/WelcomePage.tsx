@@ -1,6 +1,6 @@
 import { Avatar, Stack, Text } from "@mantine/core";
 
-export default function WellcomePage() {
+export default function WelcomePage() {
     return (
         <Stack align="center">
             <Avatar size={100} className="mx-auto mt-20" />
