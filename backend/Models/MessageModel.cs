@@ -3,25 +3,13 @@ using Supabase.Postgrest.Models;
 
 namespace backend.Models;
 
-public class Message
+public class MessageDTO
 {
     public int Id { get; set; }
     public string? Text { get; set; }
     public int GroupId { get; set; }
     public DateTime? CreatedAt { get; set; }
-    public bool Edited { get; set; }
-
-    public SupabaseMessage ToSupabaseMessage()
-    {
-        return new SupabaseMessage
-        {
-            Id = this.Id,
-            Text = this.Text,
-            GroupId = this.GroupId,
-            CreatedAt = this.CreatedAt,
-            Edited = this.Edited
-        };
-    }
+    public bool? Edited { get; set; }
 }
 
 [Table("Messages")]
@@ -36,11 +24,11 @@ public class SupabaseMessage : BaseModel
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
     [Column("edited")]
-    public bool Edited { get; set; }
+    public bool Edited { get; set; } 
 
-    public Message ToMessage()
+    public MessageDTO ToDTO()
     {
-        return new Message
+        return new MessageDTO
         {
             Id = this.Id,
             Text = this.Text,

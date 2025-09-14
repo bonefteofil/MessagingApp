@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
-using Microsoft.VisualBasic;
 
 namespace backend.Controllers;
 
@@ -13,7 +12,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     private async Task<bool> GroupExists(int group_id)
     {
         var response = await _supabase
-            .From<SupabaseGroup>()
+            .From<SupabaseGroupWithLastMessage>()
             .Where(g => g.Id == group_id)
             .Get();
             
@@ -21,7 +20,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Message>>> GetMessages(int group_id)
+    public async Task<ActionResult<IEnumerable<MessageDTO>>> GetMessages(int group_id)
     {
         if (!await GroupExists(group_id))
             return NotFound(new { title = $"Group with id {group_id} not found." });
@@ -32,11 +31,11 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Ascending)
             .Get();
         
-        return Ok(messages.Models.Select(x => x.ToMessage()));
+        return Ok(messages.Models.Select(x => x.ToDTO()));
     }
 
     [HttpPost]
-    public async Task<ActionResult<Message>> CreateMessage(int group_id, Message message)
+    public async Task<ActionResult<MessageDTO>> CreateMessage(int group_id, MessageDTO message)
     {
         if (message.GroupId != group_id)
             return BadRequest(new { title = $"Group ID in URL: {group_id} does not match Group ID in message: {message.GroupId}." });
@@ -44,17 +43,23 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
         if (!await GroupExists(group_id))
             return NotFound(new { title = $"Group with id {group_id} not found." });
 
-        message.CreatedAt = DateTime.UtcNow;
-        var response = await _supabase.From<SupabaseMessage>().Insert(message.ToSupabaseMessage());
-        var createdMessage = response.Models.FirstOrDefault();
-        if (createdMessage == null)
-            return BadRequest();
+    var supabaseMessage = new SupabaseMessage
+    {
+        GroupId = message.GroupId,
+        Text = message.Text,
+        CreatedAt = DateTime.UtcNow,
+        Edited = false,
+    };
+    var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
+    var createdMessage = response.Models.FirstOrDefault();
+    if (createdMessage == null)
+        return BadRequest();
 
-        return Ok(createdMessage.ToMessage());
+    return Ok(createdMessage.ToDTO());
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateMessage(int group_id, int id, Message message)
+    public async Task<IActionResult> UpdateMessage(int group_id, int id, MessageDTO message)
     {
         if (message.GroupId != group_id)
             return BadRequest(new { title = $"Group ID in URL: {group_id} does not match Group ID in message: {message.GroupId}." });
@@ -76,7 +81,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
         if (updatedMessage == null)
             return NotFound();
 
-        return Ok(updatedMessage.ToMessage());
+        return Ok(updatedMessage.ToDTO());
     }
 
     [HttpDelete("{id}")]
@@ -96,6 +101,6 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             .Where(x => x.Id == id)
             .Delete();
 
-        return Ok(deletedMessage.ToMessage());
+        return Ok(deletedMessage.ToDTO());
     }
 }

@@ -10,32 +10,36 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     private readonly Supabase.Client _supabase = supabase;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Group>>> GetGroups()
+    public async Task<ActionResult<IEnumerable<GroupDTO>>> GetGroups()
     {
         var response = await _supabase
-            .From<SupabaseGroup>()
-            .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Ascending)
+            .From<SupabaseGroupWithLastMessage>()
+            .Select("*")
+            .Order("last_message_sent_at", Supabase.Postgrest.Constants.Ordering.Descending)
             .Get();
-            
-        return Ok(response.Models.Select(x => x.ToGroup()));
+
+        return Ok(response.Models.Select(x => x.ToDTO()));
     }
 
     [HttpPost]
-    public async Task<ActionResult<Group>> CreateGroup(Group group)
+    public async Task<ActionResult<GroupDTO>> CreateGroup(GroupDTO group)
     {
         if (string.IsNullOrWhiteSpace(group.Name))
             return BadRequest(new { title = "Name is required" });
+
+        var response = await _supabase
+            .From<SupabaseGroup>()
+            .Insert(new SupabaseGroup{Name = group.Name, CreatedAt = DateTime.UtcNow});
         
-        var response = await _supabase.From<SupabaseGroup>().Insert(group.ToSupabaseGroup());
         var createdGroup = response.Models.FirstOrDefault();
         if (createdGroup == null)
             return BadRequest();
 
-        return Ok(createdGroup.ToGroup());
+        return Ok(createdGroup.ToDTO());
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateGroup(int id, Group group)
+    public async Task<IActionResult> UpdateGroup(int id, GroupDTO group)
     {
         if (id != group.Id)
             return BadRequest(new { title = $"Group ID: {id} in URL does not match Group ID in body: {group.Id}." });
@@ -53,7 +57,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         if (updatedGroup == null)
             return NotFound();
 
-        return Ok(updatedGroup.ToGroup());
+        return Ok(updatedGroup.ToDTO());
     }
 
     [HttpDelete("{id}")]
@@ -78,6 +82,6 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             .Where(x => x.Id == id)
             .Delete();
 
-        return Ok(deletedGroup.ToGroup());
+        return Ok(deletedGroup.ToDTO());
     }
 }
