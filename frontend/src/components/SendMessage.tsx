@@ -57,6 +57,14 @@ export default function SendMessage() {
                     autosize
                     styles={{ input: { backgroundColor: 'transparent', borderColor: 'lightgrey'} }}
                     {...form.getInputProps('text')}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            (e.target as HTMLTextAreaElement).form?.dispatchEvent(
+                                new Event('submit', { cancelable: true, bubbles: true })
+                            );
+                        }
+                    }}
                 />
 
                 {editingMessage ? (<>

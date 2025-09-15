@@ -52,6 +52,7 @@ export function sendMessage() {
             }
             console.log("Message sent:", result);
             queryClient.invalidateQueries({ queryKey: ['messages', newMessage.groupId] });
+            queryClient.invalidateQueries({ queryKey: ['groups'] });
             cleanNotifications();
             return result;
         }
@@ -78,6 +79,7 @@ export function editMessage() {
             }
             console.log("Message edited:", result);
             queryClient.invalidateQueries({ queryKey: ['messages', updatedMessage.groupId] });
+            queryClient.invalidateQueries({ queryKey: ['groups'] });
             cleanNotifications();
             return result;
         }
@@ -100,6 +102,7 @@ export function deleteMessage() {
             }
             console.log("Deleted message:", result);
             queryClient.invalidateQueries({ queryKey: ['messages', message.groupId] });
+            queryClient.invalidateQueries({ queryKey: ['groups'] });
             cleanNotifications();
             return result;
         },

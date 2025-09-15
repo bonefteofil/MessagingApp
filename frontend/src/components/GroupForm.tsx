@@ -50,7 +50,12 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
                 <FontAwesomeIcon icon={editingGroup ? faPenToSquare : faPlus} />
             </ActionIcon>
 
-            <Modal opened={opened} onClose={close} title="Create a new group" centered radius='md'>
+            <Modal
+                opened={opened}
+                onClose={close}
+                title={editingGroup ? "Edit group" : "Create a new group"}
+                centered
+                radius='md'>
                 <form onSubmit={handleSubmit}>
                     <Input
                         type="text"
@@ -67,6 +72,7 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
                         size='input-md'
                         fullWidth
                         loading={createMutation.isPending || editMutation.isPending}
+                        loaderProps={{ size: 'sm' }}
                     >
                         {editingGroup ? "Save group changes" : "Create group"}
                     </Button>

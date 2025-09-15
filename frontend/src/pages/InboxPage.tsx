@@ -8,11 +8,13 @@ import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import GroupForm from "../components/GroupForm";
 
 export default function InboxPage() {
-    const { setCurrentGroup } = useContext(CurrentGroupContext);
+    const { currentGroup, setCurrentGroup } = useContext(CurrentGroupContext);
     const { error, data } = getGroups();
     
-    if (error)
+    if (error) {
+        setCurrentGroup(null);
         return <ErrorPage message="Failed to load chats" />;
+    }
 
     return (
         <ScrollArea type="scroll" px='sm'>
@@ -27,7 +29,7 @@ export default function InboxPage() {
             {data && data.map((group: GroupScheme) => (
                 <div key={group.id}>
                     <Group gap="md" p="xs" align="top"
-                        classNames={{ root: 'hover:bg-gray-700 cursor-pointer rounded-lg' }}
+                        classNames={{ root: `${currentGroup?.id === group.id && 'bg-gray-700'} hover:bg-gray-700 cursor-pointer rounded-lg` }}
                         onClick={() => { setCurrentGroup(group); }}
                     >
                         <Avatar size="lg" />
@@ -35,10 +37,14 @@ export default function InboxPage() {
                         <Stack gap="0" justify="start" className="overflow-hidden h-max flex-1">
                             <Group className="w-full" justify="space-between">
                                 <Text size="lg" className="truncate max-w-[60%]"> {group.name} </Text>
-                                <Text size="sm" className="ml-auto whitespace-nowrap text-gray-400"> 3 days ago </Text>
+                                <Text size="sm" className="ml-auto whitespace-nowrap text-gray-400">
+                                    {group.lastMessageAt ? (new Date(group.lastMessageAt)).toTimeString().substring(0, 5) : 'Unknown'}
+                                </Text>
                             </Group>
 
-                            <Text size="sm" c="dimmed">Last message </Text>
+                            <Text size="sm" c="dimmed">    
+                                {group.lastMessage === "" ? "Message null" : (group.lastMessage == null ? "No messages yet" : group.lastMessage)}
+                            </Text>
                         </Stack>
                     </Group>
 

@@ -18,9 +18,15 @@ export function getGroups() {
                 ShowError(error.message);
                 throw error;
             }
-            console.log("Fetched groups:", result);
+
+            const groupsWithLocalTime = result.map((group: GroupScheme) => {
+                const date = new Date(group.lastMessageAt!);
+                const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                return { ...group, lastMessageAt: localDate.toISOString() };
+            });
+            console.log("Fetched groups:", groupsWithLocalTime);
             cleanNotifications();
-            return result;
+            return groupsWithLocalTime;
         },
         retry: false,
     });
