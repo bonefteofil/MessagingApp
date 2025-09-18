@@ -4,7 +4,7 @@ import { getMessages } from '../queries/messagesQueries';
 import ErrorPage from './ErrorPage';
 import Loading from '../components/Loading';
 import MessageBubble from '../components/MessageBubble';
-import { Stack, Text, Chip } from "@mantine/core";
+import { Stack, Text, Badge, Card } from "@mantine/core";
 import { CurrentGroupContext } from '../contexts/CurrentGroupContext';
 
 export default function ChatPage() {
@@ -29,6 +29,18 @@ export default function ChatPage() {
     let lastDate: string | null = null;
     return (
         <Stack p='md'>
+            <Card mx='auto' radius='md' color='gray' mt='md' className='text-center'>
+                <Text size='md' c='dimmed'>
+                    The group "{currentGroup!.name}" was created on
+                    <br />
+                     {new Date(currentGroup!.createdAt!).toLocaleDateString([], {
+                        weekday: "long",
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric"
+                })}</Text>
+            </Card>
+
             <Loading loading={isLoading || !data} />
 
             {data && !isLoading && data.map((message: MessageScheme) => {
@@ -44,9 +56,9 @@ export default function ChatPage() {
                 return (
                     <Stack key={message.id}>
                         {showSeparator && (
-                            <Chip p='xs' mx='auto' w="fit-content" style={{ textAlign: 'center' }}>
-                                <Text size='xs'>{messageDate}</Text>
-                            </Chip>
+                            <Badge mx='auto' color='gray'>
+                                <Text size='xs' c='dimmed'>{messageDate}</Text>
+                            </Badge>
                         )}
 
                         <MessageBubble message={message} />

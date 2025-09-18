@@ -3,4 +3,5 @@ export default interface GroupScheme {
   name: string;
   lastMessage?: string
   lastMessageAt?: string
+  createdAt?: string;
 }
