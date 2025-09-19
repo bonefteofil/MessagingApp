@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import type GroupScheme from "../types/group";
+import type GroupScheme from "../types/groupScheme";
 import { getGroups } from "../queries/groupsQueries";
 import ErrorPage from "./ErrorPage";
 import Loading from "../components/Loading";
@@ -38,7 +38,7 @@ export default function InboxPage() {
                             <Group className="w-full" justify="space-between">
                                 <Text size="lg" className="truncate max-w-[60%]"> {group.name} </Text>
                                 <Text size="sm" className="ml-auto whitespace-nowrap text-gray-400">
-                                    {group.lastMessageAt ? (new Date(group.lastMessageAt)).toTimeString().substring(0, 5) : 'Unknown'}
+                                    {group.lastMessageAt!}
                                 </Text>
                             </Group>
 

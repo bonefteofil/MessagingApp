@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type GroupScheme from "../types/group";
+import type GroupScheme from "../types/groupScheme";
 import { ShowError } from "../components/ShowError";
 import { cleanNotifications } from "@mantine/notifications";
+import { formatLastMessageDate, formatFullDate } from "../utils/FormatDate";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,11 +20,11 @@ export function getGroups() {
                 throw error;
             }
 
-            const groupsWithLocalTime = result.map((group: GroupScheme) => {
-                const date = new Date(group.lastMessageAt!);
-                const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-                return { ...group, lastMessageAt: localDate.toISOString() };
-            });
+            const groupsWithLocalTime = result.map((group: GroupScheme) => ({
+                ...group,
+                lastMessageAt: formatLastMessageDate(group.lastMessageAt!),
+                createdAt: formatFullDate(group.createdAt!)
+            }));
             console.log("Fetched groups:", groupsWithLocalTime);
             cleanNotifications();
             return groupsWithLocalTime;

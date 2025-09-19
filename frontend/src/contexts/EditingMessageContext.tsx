@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import { useState } from "react";
-import type MessageScheme from "../types/message";
+import type MessageScheme from "../types/messageScheme";
 
 export const EditingMessageContext = createContext<{
     editingMessage: MessageScheme | null;

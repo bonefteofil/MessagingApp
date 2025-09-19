@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import type MessageScheme from '../types/message';
+import type MessageScheme from '../types/messageScheme';
 import { deleteMessage } from '../queries/messagesQueries';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
@@ -21,7 +21,7 @@ export default function MessageBubble({ message } : { message: MessageScheme }) 
                 <Group gap='xs' justify='end'>
                     {message.edited && <Text size="xs">Edited</Text>}
                     <Text size="xs">
-                        {(new Date(message.createdAt!)).toTimeString().substring(0, 5)}
+                        {message.createdTime!}
                     </Text>
                 </Group>
             </Card>

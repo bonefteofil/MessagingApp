@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useDisclosure } from '@mantine/hooks';
 import { createGroup, editGroup } from "../queries/groupsQueries";
-import type GroupScheme from "../types/group";
+import type GroupScheme from "../types/groupScheme";
 import { Modal, Button, ActionIcon, Input } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";

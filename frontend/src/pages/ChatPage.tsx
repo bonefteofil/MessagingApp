@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef } from 'react';
-import type MessageScheme from '../types/message';
+import type MessageScheme from '../types/messageScheme';
 import { getMessages } from '../queries/messagesQueries';
 import ErrorPage from './ErrorPage';
 import Loading from '../components/Loading';
@@ -33,23 +33,14 @@ export default function ChatPage() {
                 <Text size='md' c='dimmed'>
                     The group "{currentGroup!.name}" was created on
                     <br />
-                     {new Date(currentGroup!.createdAt!).toLocaleDateString([], {
-                        weekday: "long",
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric"
-                })}</Text>
+                    {currentGroup!.createdAt}
+                </Text>
             </Card>
 
             <Loading loading={isLoading || !data} />
 
             {data && !isLoading && data.map((message: MessageScheme) => {
-                const messageDate = new Date(message.createdAt!).toLocaleDateString([], {
-                    weekday: "long",
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric"
-                });
+                const messageDate = message.createdAt!;
                 const showSeparator = messageDate !== lastDate;
                 lastDate = messageDate;
 

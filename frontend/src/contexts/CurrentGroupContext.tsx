@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import { useState } from "react";
-import type GroupScheme from "../types/group";
+import type GroupScheme from "../types/groupScheme";
 
 export const CurrentGroupContext = createContext<{
     currentGroup: GroupScheme | null;

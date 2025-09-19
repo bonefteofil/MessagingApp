@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type MessageScheme from "../types/message";
+import type MessageScheme from "../types/messageScheme";
 import { ShowError } from "../components/ShowError";
 import { cleanNotifications } from "@mantine/notifications";
+import { formatFullDate, formatMessageTime } from "../utils/FormatDate";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,11 +20,11 @@ export function getMessages(groupId: number) {
                 throw error;
             }
 
-            const messagesWithLocalTime = result.map((message: MessageScheme) => {
-                const date = new Date(message.createdAt!);
-                const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-                return { ...message, createdAt: localDate.toISOString() };
-            });
+            const messagesWithLocalTime = result.map((message: MessageScheme) => ({
+                ...message, 
+                createdAt: formatFullDate(message.createdAt!),
+                createdTime: formatMessageTime(message.createdAt!)
+            }));
             console.log("Fetched messages:", messagesWithLocalTime);
             cleanNotifications();
             return messagesWithLocalTime;
