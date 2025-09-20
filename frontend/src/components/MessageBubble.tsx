@@ -27,7 +27,7 @@ export default function MessageBubble({ message } : { message: MessageScheme }) 
                     </Text>
                 </Group>
 
-                {developerMode && <Code block mt='md'>{JSON.stringify(message, null, 2)}</Code>}
+                {developerMode && <Code block>{JSON.stringify(message, null, 2)}</Code>}
             </Card>
 
             {developerMode && <Group gap='sm'>

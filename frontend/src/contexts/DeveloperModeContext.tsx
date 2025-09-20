@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 export const DeveloperModeContext = createContext<{
     developerMode: boolean;
@@ -6,7 +6,14 @@ export const DeveloperModeContext = createContext<{
 }>({ developerMode: false, setDeveloperMode: () => {} });
 
 export const DeveloperModeProvider = ({ children }: { children: React.ReactNode }) => {
-    const [developerMode, setDeveloperMode] = useState<boolean>(false);
+    const [developerMode, setDeveloperMode] = useState<boolean>(() => {
+        const saved = localStorage.getItem("developerMode");
+        return saved ? JSON.parse(saved) : false;
+    });
+
+    useEffect(() => {
+        localStorage.setItem("developerMode", JSON.stringify(developerMode));
+    }, [developerMode]);
 
     return (
         <DeveloperModeContext.Provider value={{ developerMode, setDeveloperMode }}>

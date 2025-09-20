@@ -6,10 +6,12 @@ import { createGroup, editGroup } from "../queries/groupsQueries";
 import type GroupScheme from "../types/groupScheme";
 import { Modal, Button, ActionIcon, Input } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { DeveloperModeContext } from "../contexts/DeveloperModeContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 
 export default function GroupForm({ editingGroup } : { editingGroup?: GroupScheme }) {
     const [opened, { open, close }] = useDisclosure(false);
+    const { developerMode } = useContext(DeveloperModeContext);
     const { setCurrentGroup } = useContext(CurrentGroupContext);
     const createMutation = createGroup();
     const editMutation = editGroup();
@@ -31,10 +33,12 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        let name = form.values.name;
+        if (developerMode && name === '') name = 'Dev Group';
         if (editingGroup) {
-            editMutation.mutate({ id: editingGroup.id, name: form.values.name });
+            editMutation.mutate({ id: editingGroup.id, name: name });
         } else {
-            createMutation.mutate({ name: form.values.name });
+            createMutation.mutate({ name: name });
         }
     };
 

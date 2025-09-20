@@ -55,8 +55,9 @@ export default function InboxPage() {
                                 {group.lastMessage === "" ? "Message null" : (group.lastMessage == null ? "No messages yet" : group.lastMessage)}
                             </Text>
                         </Stack>
-                        {developerMode && <Code block>{JSON.stringify(group, null, 2)}</Code>}
                     </Group>
+                    
+                    {developerMode && <Code block>{JSON.stringify(group, null, 2)}</Code>}
 
                     <Divider w={'70%'} mx={'auto'} />
                 </div>
