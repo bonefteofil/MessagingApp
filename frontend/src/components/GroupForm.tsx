@@ -42,7 +42,7 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
         <>
             <ActionIcon
                 p="md"
-                variant="outline"
+                variant="light"
                 radius={editingGroup ? 'md' : 'xl'}
                 onClick={open}
                 loading={createMutation.isPending || editMutation.isPending}

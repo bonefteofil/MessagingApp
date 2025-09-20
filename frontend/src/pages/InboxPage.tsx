@@ -3,11 +3,13 @@ import type GroupScheme from "../types/groupScheme";
 import { getGroups } from "../queries/groupsQueries";
 import ErrorPage from "./ErrorPage";
 import Loading from "../components/Loading";
-import { Avatar, Divider, Group, Stack, Text, ScrollArea } from "@mantine/core";
+import { Avatar, Divider, Group, Stack, Text, ScrollArea, Switch, Tooltip, Code, Box } from "@mantine/core";
+import { DeveloperModeContext } from "../contexts/DeveloperModeContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import GroupForm from "../components/GroupForm";
 
 export default function InboxPage() {
+    const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
     const { currentGroup, setCurrentGroup } = useContext(CurrentGroupContext);
     const { error, data } = getGroups();
     
@@ -20,6 +22,11 @@ export default function InboxPage() {
         <ScrollArea type="scroll" px='sm'>
             <Group p='md'>
                 <Text flex={1} size="xl">Welcome user!</Text>
+
+                <Tooltip label="Development Mode"  refProp="rootRef">
+                    <Switch size="lg" onLabel="Dev" offLabel="Prod" checked={developerMode} onChange={() => {setDeveloperMode(!developerMode)}}/>
+                </Tooltip>
+
                 <GroupForm />
                 <Avatar size="md" />
             </Group>
@@ -36,7 +43,9 @@ export default function InboxPage() {
 
                         <Stack gap="0" justify="start" className="overflow-hidden h-max flex-1">
                             <Group className="w-full" justify="space-between">
-                                <Text size="lg" className="truncate max-w-[60%]"> {group.name} </Text>
+                                <Text size='lg' className="truncate max-w-[60%]">
+                                    {group.name}
+                                </Text>
                                 <Text size="sm" className="ml-auto whitespace-nowrap text-gray-400">
                                     {group.lastMessageAt!}
                                 </Text>
@@ -46,11 +55,13 @@ export default function InboxPage() {
                                 {group.lastMessage === "" ? "Message null" : (group.lastMessage == null ? "No messages yet" : group.lastMessage)}
                             </Text>
                         </Stack>
+                        {developerMode && <Code block>{JSON.stringify(group, null, 2)}</Code>}
                     </Group>
 
                     <Divider w={'70%'} mx={'auto'} />
                 </div>
             ))}
+            <Box h='md' />
         </ScrollArea>
     );
 }

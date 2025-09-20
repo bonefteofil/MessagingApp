@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MantineProvider } from '@mantine/core';
 import { GroupProvider } from './contexts/CurrentGroupContext';
 import { EditingMessageProvider } from './contexts/EditingMessageContext';
+import { DeveloperModeProvider } from './contexts/DeveloperModeContext';
 
 const queryClient = new QueryClient();
 
@@ -15,11 +16,13 @@ createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<QueryClientProvider client={queryClient}>
 			<MantineProvider defaultColorScheme="dark">
-				<GroupProvider>
-					<EditingMessageProvider>
-						<App />
-					</EditingMessageProvider>
-				</GroupProvider>
+				<DeveloperModeProvider>
+					<GroupProvider>
+						<EditingMessageProvider>
+							<App />
+						</EditingMessageProvider>
+					</GroupProvider>
+				</DeveloperModeProvider>
 			</MantineProvider>
 		</QueryClientProvider>
 	</StrictMode>
