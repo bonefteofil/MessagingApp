@@ -16,12 +16,12 @@ export default function Layout() {
 			withBorder={false}
 			navbar={{
 				width: navbarSize,
-				breakpoint: 'sm',
+				breakpoint: 'md',
 				collapsed: { mobile: !!currentGroup, desktop: false },
 			}}
 		>
 			{currentGroup && (
-				<AppShell.Header p='sm' ml={{ base: 0, sm: navbarSize }} className="!backdrop-blur-lg !bg-gray-700/30" >
+				<AppShell.Header p='sm' ml={{ base: 0, md: navbarSize }} className="!backdrop-blur-lg !bg-gray-700/30" >
 					<Header />
 				</AppShell.Header>
 			)}
@@ -30,7 +30,7 @@ export default function Layout() {
 				<InboxPage />
 			</AppShell.Navbar>
 
-			<AppShell.Main bg={currentGroup ? "gray.9" : undefined} py={70}>
+			<AppShell.Main py={80}>
 				{currentGroup ? (
 					<ChatPage />
 				) : (
@@ -38,11 +38,7 @@ export default function Layout() {
 				)}
 			</AppShell.Main>
 
-			{currentGroup && 
-				<AppShell.Footer p='md' ml={{ base: 0, sm: navbarSize }} className="!backdrop-blur-lg !bg-gray-700/30">
-					<SendMessage />
-				</AppShell.Footer>
-			}
+			{currentGroup && <SendMessage />}
 		</AppShell>
   	);
 }

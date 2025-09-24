@@ -1,8 +1,8 @@
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useRef } from "react";
 import { editMessage, sendMessage } from "../queries/messagesQueries";
 import { faFloppyDisk, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ActionIcon, Button, Group, Textarea, Text } from "@mantine/core";
+import { ActionIcon, Button, Group, Textarea, Text, Affix, Card, Stack } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import { EditingMessageContext } from "../contexts/EditingMessageContext";
@@ -13,12 +13,18 @@ export default function SendMessage() {
     const groupId = currentGroup!.id!;
     const sendMutation = sendMessage();
     const editMutation = editMessage();
+    const inputRef = useRef<HTMLTextAreaElement>(null);
 
     const form = useForm({
         initialValues: {
             text: ""
         },
     });
+    
+    useEffect(() => {
+        // Focus the input when the current group changes
+        setTimeout(() => inputRef.current?.focus(), 100);
+    }, [currentGroup]);
 
     useEffect(() => {
         form.setValues({
@@ -43,63 +49,75 @@ export default function SendMessage() {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <Group>
-                <Textarea
-                    name="text"
-                    placeholder="Type your message..."
-                    disabled={sendMutation.isPending}
-                    radius="md"
-                    size="md"
-                    className="flex-grow"
-                    minRows={1}
-                    maxRows={6}
-                    autosize
-                    styles={{ input: { backgroundColor: 'transparent', borderColor: 'lightgrey'} }}
-                    {...form.getInputProps('text')}
-                    onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            (e.target as HTMLTextAreaElement).form?.dispatchEvent(
-                                new Event('submit', { cancelable: true, bubbles: true })
-                            );
-                        }
-                    }}
-                />
+        <Affix
+            position={{ bottom: 0, left: 0, right: 0 }}
+            zIndex={50}
+            my='md'
+            ml={{ base: 0, md: 400 }}
+        >
+            <Card p='sm' mx='md' withBorder radius='lg' className="!backdrop-blur-lg !bg-gray-700/30">
+                <form onSubmit={handleSubmit}>
+                    <Group wrap="nowrap" gap='sm'>
+                        <Textarea
+                            ref={inputRef}
+                            name="text"
+                            placeholder="Type your message..."
+                            className="flex-grow"
+                            radius="md"
+                            size="md"
+                            minRows={editingMessage ? 3 : 1}
+                            maxRows={6}
+                            autosize
+                            disabled={sendMutation.isPending}
+                            styles={{ input: { backgroundColor: 'transparent', borderColor: 'lightgrey' } }}
+                            {...form.getInputProps('text')}
+                            onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    (e.target as HTMLTextAreaElement).form?.dispatchEvent(
+                                        new Event('submit', { cancelable: true, bubbles: true })
+                                    );
+                                }
+                            }}
+                        />
 
-                {editingMessage ? (<>
-                    <Button
-                        variant="gradient"
-                        type="button"
-                        radius='md'
-                        size='input-md'
-                        onClick={() => setEditingMessage(null)}
-                    >
-                        <Text>Cancel</Text>
-                    </Button>
-                    <Button
-                        variant="gradient"
-                        type="submit"
-                        radius='md'
-                        size='input-md'
-                        loading={editMutation.isPending}
-                        loaderProps={{ size: 'sm' }}
-                    >
-                        <FontAwesomeIcon icon={faFloppyDisk} />
-                        <Text ml='xs'>Save</Text>
-                    </Button>
-                </>) : (
-                    <ActionIcon
-                        variant="gradient"
-                        type="submit"
-                        radius='md'
-                        size='input-md'
-                        loading={sendMutation.isPending}
-                    >
-                        <FontAwesomeIcon icon={faPaperPlane} />
-                    </ActionIcon>
-                )}
-            </Group>
-        </form>
+                        {editingMessage ? (
+                            <Stack gap='sm'>
+                                <Button
+                                    variant="gradient"
+                                    type="submit"
+                                    radius='md'
+                                    size="sm"
+                                    loading={editMutation.isPending}
+                                    loaderProps={{ size: 'sm' }}
+                                >
+                                    <FontAwesomeIcon icon={faFloppyDisk} />
+                                    <Text ml='xs'>Save</Text>
+                                </Button>
+                                <Button
+                                    variant="gradient"
+                                    type="button"
+                                    radius='md'
+                                    size='sm'
+                                    onClick={() => setEditingMessage(null)}
+                                >
+                                    <Text>Cancel</Text>
+                                </Button>
+                            </Stack>
+                        ) : (
+                            <ActionIcon
+                                variant="gradient"
+                                type="submit"
+                                radius='md'
+                                size='input-md'
+                                loading={sendMutation.isPending}
+                            >
+                                <FontAwesomeIcon icon={faPaperPlane} />
+                            </ActionIcon>
+                        )}
+                    </Group>
+                </form>
+            </Card>
+        </Affix>
     );
 }

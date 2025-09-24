@@ -63,6 +63,7 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
                 <form onSubmit={handleSubmit}>
                     <Input
                         type="text"
+                        data-autofocus
                         placeholder="Group Name"
                         radius='md'
                         size="md"

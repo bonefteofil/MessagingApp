@@ -10,8 +10,8 @@ import { CurrentGroupContext } from '../contexts/CurrentGroupContext';
 export default function ChatPage() {
     const { currentGroup } = useContext(CurrentGroupContext);
     const { error, data, isLoading } = getMessages(currentGroup!.id!);
-    
-    // Instantly scroll to the bottom on first load, then use smooth scrolling on updates
+
+    // Instantly scroll to the bottom on first load, then, when adding new messages, use smooth scrolling on updates
     const instantScroll = useRef(true);
     useEffect(() => { instantScroll.current = true; }, [currentGroup]);
     useEffect(() => {
@@ -21,7 +21,7 @@ export default function ChatPage() {
         });
         if (!isLoading)
             instantScroll.current = false;
-    }, [data]);
+    }, [(data?.length > 0) ? data[data.length - 1].id : null]);
     
     if (error)
         return <ErrorPage message="Failed to load messages" />;

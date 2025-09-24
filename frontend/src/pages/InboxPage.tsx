@@ -7,10 +7,12 @@ import { Avatar, Divider, Group, Stack, Text, ScrollArea, Switch, Tooltip, Code,
 import { DeveloperModeContext } from "../contexts/DeveloperModeContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import GroupForm from "../components/GroupForm";
+import { EditingMessageContext } from "../contexts/EditingMessageContext";
 
 export default function InboxPage() {
     const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
     const { currentGroup, setCurrentGroup } = useContext(CurrentGroupContext);
+    const { setEditingMessage } = useContext(EditingMessageContext);
     const { error, data } = getGroups();
     
     if (error) {
@@ -37,7 +39,7 @@ export default function InboxPage() {
                 <div key={group.id}>
                     <Group gap="md" p="xs" align="top"
                         classNames={{ root: `${currentGroup?.id === group.id && 'bg-gray-700'} hover:bg-gray-700 cursor-pointer rounded-lg` }}
-                        onClick={() => { setCurrentGroup(group); }}
+                        onClick={() => { setEditingMessage(null); setCurrentGroup(group); }}
                     >
                         <Avatar size="lg" />
 
