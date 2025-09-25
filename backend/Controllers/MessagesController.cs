@@ -42,20 +42,30 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
 
         if (!await GroupExists(group_id))
             return NotFound(new { title = $"Group with id {group_id} not found." });
+        
+        if (message.Text?.Length > 100)
+            return BadRequest(new { title = "Message too long (max 100 characters)" });
+        
+        var count = await _supabase
+            .From<SupabaseMessage>()
+            .Where(m => m.GroupId == group_id)
+            .Count(Supabase.Postgrest.Constants.CountType.Exact);
+        if (count >= 100)
+            return BadRequest(new { title = "Message limit reached (max 100 messages per group)" });
 
-    var supabaseMessage = new SupabaseMessage
-    {
-        GroupId = message.GroupId,
-        Text = message.Text,
-        CreatedAt = DateTime.UtcNow,
-        Edited = false,
-    };
-    var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
-    var createdMessage = response.Models.FirstOrDefault();
-    if (createdMessage == null)
-        return BadRequest();
+        var supabaseMessage = new SupabaseMessage
+        {
+            GroupId = message.GroupId,
+            Text = message.Text,
+            CreatedAt = DateTime.UtcNow,
+            Edited = false,
+        };
+        var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
+        var createdMessage = response.Models.FirstOrDefault();
+        if (createdMessage == null)
+            return BadRequest();
 
-    return Ok(createdMessage.ToDTO());
+        return Ok(createdMessage.ToDTO());
     }
 
     [HttpPut("{id}")]
@@ -69,6 +79,9 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
 
         if (!await GroupExists(group_id))
             return NotFound(new { title = $"Group with id {group_id} not found." });
+
+        if (message.Text?.Length > 100)
+            return BadRequest(new { title = "Message too long (max 100 characters)" });
 
         var response = await _supabase
             .From<SupabaseMessage>()

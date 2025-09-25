@@ -27,6 +27,15 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         if (string.IsNullOrWhiteSpace(group.Name))
             return BadRequest(new { title = "Name is required" });
 
+        if (group.Name!.Length > 30)
+            return BadRequest(new { title = "Name too long (max 30 characters)" });
+
+        var count = await _supabase
+            .From<SupabaseGroup>()
+            .Count(Supabase.Postgrest.Constants.CountType.Exact);
+        if (count >= 30)
+            return BadRequest(new { title = "Group limit reached (max 30 groups)" });
+
         var response = await _supabase
             .From<SupabaseGroup>()
             .Insert(new SupabaseGroup{Name = group.Name, CreatedAt = DateTime.UtcNow});
@@ -46,6 +55,9 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 
         if (string.IsNullOrWhiteSpace(group.Name))
             return BadRequest(new { title = "Name is required" });
+
+        if (group.Name!.Length > 30)
+            return BadRequest(new { title = "Name too long (max 30 characters)" });
 
         var response = await _supabase
             .From<SupabaseGroup>()
