@@ -10,6 +10,8 @@ public class MessageDTO
     public int GroupId { get; set; }
     public DateTime? CreatedAt { get; set; }
     public bool? Edited { get; set; }
+    public int? UserId { get; set; }
+    public string? Username { get; set; }
 }
 
 [Table("Messages")]
@@ -19,12 +21,14 @@ public class SupabaseMessage : BaseModel
     public int Id { get; set; }
     [Column("text")]
     public string? Text { get; set; }
-    [Column("group_id")]
-    public int GroupId { get; set; }
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
     [Column("edited")]
-    public bool Edited { get; set; } 
+    public bool Edited { get; set; }
+    [Column("group_id")]
+    public int GroupId { get; set; }
+    [Column("user_id")]
+    public int UserId { get; set; }
 
     public MessageDTO ToDTO()
     {
@@ -32,9 +36,44 @@ public class SupabaseMessage : BaseModel
         {
             Id = this.Id,
             Text = this.Text,
-            GroupId = this.GroupId,
             CreatedAt = this.CreatedAt,
-            Edited = this.Edited
+            Edited = this.Edited,
+            GroupId = this.GroupId,
+            UserId = this.UserId
+        };
+    }
+}
+    
+
+[Table("Messages")]
+public class SupabaseMessageWithUsername : BaseModel
+{
+    [PrimaryKey("id")]
+    public int Id { get; set; }
+    [Column("text")]
+    public string? Text { get; set; }
+    [Column("created_at")]
+    public DateTime? CreatedAt { get; set; }
+    [Column("edited")]
+    public bool Edited { get; set; }
+    [Column("group_id")]
+    public int GroupId { get; set; }
+    [Column("user_id")] 
+    public int UserId { get; set; }
+    [Column("username")]
+    public SupabaseUser? User { get; set; }
+    
+    public MessageDTO ToDTO()
+    {
+        return new MessageDTO
+        {
+            Id = this.Id,
+            Text = this.Text,
+            CreatedAt = this.CreatedAt,
+            Edited = this.Edited,
+            GroupId = this.GroupId,
+            UserId = this.UserId,
+            Username = this.User?.Username
         };
     }
 }

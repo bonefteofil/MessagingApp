@@ -15,16 +15,18 @@ export default function MessageBubble({ message } : { message: MessageScheme }) 
     return (
         <Group justify='space-between'>
             <Card
+                padding='xs'
                 shadow="xl"
                 radius="md"
                 className="wrap-anywhere max-w-3/5 bg-gradient-to-tr from-blue-600 to-cyan-700"
             >
+                {message.username && <Text size="xs">{message.username}</Text>}
+
                 <Text>{message.text || "NULL"}</Text>
+
                 <Group gap='xs' justify='end'>
                     {message.edited && <Text size="xs">Edited</Text>}
-                    <Text size="xs">
-                        {message.createdTime!}
-                    </Text>
+                    <Text size="xs">{message.createdTime!}</Text>
                 </Group>
 
                 {developerMode && <Code block>{JSON.stringify(message, null, 2)}</Code>}

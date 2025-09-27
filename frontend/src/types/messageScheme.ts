@@ -5,4 +5,5 @@ export default interface MessageScheme {
   createdAt?: string;
   createdTime?: string;
   edited?: boolean;
+  username?: string;
 }

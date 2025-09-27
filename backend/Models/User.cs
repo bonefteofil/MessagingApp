@@ -5,7 +5,7 @@ namespace backend.Models;
 
 public class UserDTO
 {
-    public string? Id { get; set; }
+    public int Id { get; set; }
     public string? Username { get; set; }
 }
 
@@ -13,7 +13,7 @@ public class UserDTO
 public class SupabaseUser : BaseModel
 {
     [PrimaryKey("id")]
-    public string? Id { get; set; }
+    public int Id { get; set; }
     [Column("username")]
     public string? Username { get; set; }
 

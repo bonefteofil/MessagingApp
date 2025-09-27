@@ -26,7 +26,8 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             return NotFound(new { title = $"Group with id {group_id} not found." });
 
         var messages = await _supabase
-            .From<SupabaseMessage>()
+            .From<SupabaseMessageWithUsername>()
+            .Select("*, username:user_id(username)") 
             .Where(m => m.GroupId == group_id)
             .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Ascending)
             .Get();
@@ -59,6 +60,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             Text = message.Text,
             CreatedAt = DateTime.UtcNow,
             Edited = false,
+            UserId = 2
         };
         var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
         var createdMessage = response.Models.FirstOrDefault();
