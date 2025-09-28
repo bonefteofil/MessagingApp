@@ -9,6 +9,7 @@ import { MantineProvider } from '@mantine/core';
 import { GroupProvider } from './contexts/CurrentGroupContext';
 import { EditingMessageProvider } from './contexts/EditingMessageContext';
 import { DeveloperModeProvider } from './contexts/DeveloperModeContext';
+import { UserProvider } from './contexts/CurrentUserContext';
 
 const queryClient = new QueryClient();
 
@@ -16,13 +17,15 @@ createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<QueryClientProvider client={queryClient}>
 			<MantineProvider defaultColorScheme="dark">
-				<DeveloperModeProvider>
-					<GroupProvider>
-						<EditingMessageProvider>
-							<App />
-						</EditingMessageProvider>
-					</GroupProvider>
-				</DeveloperModeProvider>
+				<UserProvider>
+					<DeveloperModeProvider>
+						<GroupProvider>
+							<EditingMessageProvider>
+								<App />
+							</EditingMessageProvider>
+						</GroupProvider>
+					</DeveloperModeProvider>
+				</UserProvider>
 			</MantineProvider>
 		</QueryClientProvider>
 	</StrictMode>

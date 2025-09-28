@@ -10,7 +10,7 @@ public class MessageDTO
     public int GroupId { get; set; }
     public DateTime? CreatedAt { get; set; }
     public bool? Edited { get; set; }
-    public int? UserId { get; set; }
+    public int UserId { get; set; }
     public string? Username { get; set; }
 }
 

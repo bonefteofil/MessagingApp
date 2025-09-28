@@ -6,14 +6,14 @@ import Loading from "../components/Loading";
 import { Avatar, Divider, Group, Stack, Text, ScrollArea, Switch, Tooltip, Code, Box } from "@mantine/core";
 import { DeveloperModeContext } from "../contexts/DeveloperModeContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
-import GroupForm from "../components/GroupForm";
 import { EditingMessageContext } from "../contexts/EditingMessageContext";
+import GroupForm from "../components/GroupForm";
 
-export default function InboxPage() {
+export default function InboxPage({ setSelectUser }: { setSelectUser: (value: boolean) => void }) {
     const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
     const { currentGroup, setCurrentGroup } = useContext(CurrentGroupContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
-    const { error, data } = getGroups();
+    const { data, error } = getGroups();
     
     if (error) {
         setCurrentGroup(null);
@@ -30,7 +30,7 @@ export default function InboxPage() {
                 </Tooltip>
 
                 <GroupForm />
-                <Avatar size="md" />
+                <Avatar size="md" onClick={() => {setCurrentGroup(null); setSelectUser(true)}} />
             </Group>
 
             <Loading loading={!data} />
@@ -44,16 +44,16 @@ export default function InboxPage() {
                         <Avatar size="lg" />
 
                         <Stack gap="0" justify="start" className="overflow-hidden h-max flex-1">
-                            <Group className="w-full" justify="space-between">
-                                <Text size='lg' className="truncate max-w-[60%]">
+                            <Group className="w-full" justify="space-between" wrap="nowrap">
+                                <Text size='lg' truncate="end">
                                     {group.name}
                                 </Text>
-                                <Text size="sm" className="ml-auto whitespace-nowrap text-gray-400">
+                                <Text size="sm">
                                     {group.lastMessageAt!}
                                 </Text>
                             </Group>
 
-                            <Text size="sm" c="dimmed">    
+                            <Text size="sm" c="dimmed" truncate="end">
                                 {group.lastMessage === "" ? "Message null" : (group.lastMessage == null ? "No messages yet" : group.lastMessage)}
                             </Text>
                         </Stack>

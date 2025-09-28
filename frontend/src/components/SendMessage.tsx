@@ -6,8 +6,11 @@ import { ActionIcon, Button, Group, Textarea, Text, Affix, Card, Stack } from "@
 import { useForm } from "@mantine/form";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import { EditingMessageContext } from "../contexts/EditingMessageContext";
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import { ShowError } from "./ShowError";
 
 export default function SendMessage() {
+    const { currentUser } = useContext(CurrentUserContext);
     const { currentGroup } = useContext(CurrentGroupContext);
     const { editingMessage, setEditingMessage } = useContext(EditingMessageContext);
     const groupId = currentGroup!.id!;
@@ -41,10 +44,12 @@ export default function SendMessage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (editingMessage) {
+        if (!currentUser) {
+            ShowError("You must be logged in to send messages.");
+        } else if (editingMessage) {
             editMutation.mutate({ id: editingMessage.id, text: form.values.text, groupId: editingMessage.groupId });
         } else {
-            sendMutation.mutate({ text: form.values.text, groupId: groupId });
+            sendMutation.mutate({ text: form.values.text, groupId: groupId, userId: currentUser.id });
         }
     };
 

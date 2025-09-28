@@ -8,6 +8,16 @@ namespace backend.Controllers;
 public class MessagesController(Supabase.Client supabase) : ControllerBase
 {
     private readonly Supabase.Client _supabase = supabase;
+    
+    private async Task<bool> ValidateUser(int user_id)
+    {
+        var response = await _supabase
+            .From<SupabaseUser>()
+            .Where(u => u.Id == user_id)
+            .Get();
+
+        return response.Models.Count != 0;
+    }
 
     private async Task<bool> GroupExists(int group_id)
     {
@@ -15,7 +25,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             .From<SupabaseGroupWithLastMessage>()
             .Where(g => g.Id == group_id)
             .Get();
-            
+
         return response.Models.Count != 0;
     }
 
@@ -60,7 +70,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             Text = message.Text,
             CreatedAt = DateTime.UtcNow,
             Edited = false,
-            UserId = 2
+            UserId = message.UserId
         };
         var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
         var createdMessage = response.Models.FirstOrDefault();
@@ -73,11 +83,11 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateMessage(int group_id, int id, MessageDTO message)
     {
-        if (message.GroupId != group_id)
-            return BadRequest(new { title = $"Group ID in URL: {group_id} does not match Group ID in message: {message.GroupId}." });
-
         if (id != message.Id)
             return BadRequest(new { title = $"Message ID: {id} in URL does not match Message ID in body: {message.Id}." });
+
+        if (message.GroupId != group_id)
+            return BadRequest(new { title = $"Group ID in URL: {group_id} does not match Group ID in message: {message.GroupId}." });
 
         if (!await GroupExists(group_id))
             return NotFound(new { title = $"Group with id {group_id} not found." });

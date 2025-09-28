@@ -37,7 +37,7 @@ export function sendMessage() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (newMessage: any) => {
+        mutationFn: async (newMessage: MessageScheme) => {
             const response = await fetch(`${API_URL}/groups/${newMessage.groupId}/messages`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

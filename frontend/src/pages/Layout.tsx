@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import ChatPage from "./ChatPage"
 import InboxPage from "./InboxPage";
 import WelcomePage from "./WelcomePage";
@@ -9,6 +9,7 @@ import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 
 export default function Layout() {
 	const { currentGroup } = useContext(CurrentGroupContext);
+	const [selectUser, setSelectUser] = useState<boolean>(true);
 	const navbarSize = 400;
 
 	return (
@@ -17,7 +18,7 @@ export default function Layout() {
 			navbar={{
 				width: navbarSize,
 				breakpoint: 'md',
-				collapsed: { mobile: !!currentGroup, desktop: false },
+				collapsed: { mobile: (!!currentGroup || !!selectUser), desktop: false },
 			}}
 		>
 			{currentGroup && (
@@ -27,14 +28,14 @@ export default function Layout() {
 			)}
 
 			<AppShell.Navbar>
-				<InboxPage />
+				<InboxPage setSelectUser={setSelectUser} />
 			</AppShell.Navbar>
 
 			<AppShell.Main py={80}>
 				{currentGroup ? (
 					<ChatPage />
 				) : (
-					<WelcomePage />
+					<WelcomePage setSelectUser={setSelectUser} />
 				)}
 			</AppShell.Main>
 

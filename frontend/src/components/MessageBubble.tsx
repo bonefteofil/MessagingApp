@@ -32,7 +32,7 @@ export default function MessageBubble({ message } : { message: MessageScheme }) 
                 {developerMode && <Code block>{JSON.stringify(message, null, 2)}</Code>}
             </Card>
 
-            {developerMode && <Group gap='sm'>
+            <Group gap='sm'>
                 <ActionIcon
                     variant="light"
                     size='xl'
@@ -51,7 +51,7 @@ export default function MessageBubble({ message } : { message: MessageScheme }) 
                 >
                     <FontAwesomeIcon icon={faTrash} />
                 </ActionIcon>
-            </Group>}
+            </Group>
         </Group>
     );
 }
