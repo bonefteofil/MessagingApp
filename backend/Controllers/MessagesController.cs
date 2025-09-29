@@ -4,41 +4,24 @@ using backend.Models;
 namespace backend.Controllers;
 
 [ApiController]
-[Route("groups/{group_id}/messages")]
+[Route("groups/{groupId}/messages")]
 public class MessagesController(Supabase.Client supabase) : ControllerBase
 {
     private readonly Supabase.Client _supabase = supabase;
-    
-    private async Task<bool> ValidateUser(int user_id)
-    {
-        var response = await _supabase
-            .From<SupabaseUser>()
-            .Where(u => u.Id == user_id)
-            .Get();
-
-        return response.Models.Count != 0;
-    }
-
-    private async Task<bool> GroupExists(int group_id)
-    {
-        var response = await _supabase
-            .From<SupabaseGroupWithLastMessage>()
-            .Where(g => g.Id == group_id)
-            .Get();
-
-        return response.Models.Count != 0;
-    }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MessageDTO>>> GetMessages(int group_id)
+    public async Task<ActionResult<IEnumerable<MessageDTO>>> GetMessages(int groupId, [FromHeader(Name = "userId")] int userId)
     {
-        if (!await GroupExists(group_id))
-            return NotFound(new { title = $"Group with id {group_id} not found." });
+        if (!await Validations.ValidateUser(userId, _supabase))
+            return Unauthorized(new { title = "Unauthorized user." });
+
+        if (!await Validations.GroupExists(groupId, _supabase))
+            return NotFound(new { title = $"Group with id {groupId} not found." });
 
         var messages = await _supabase
             .From<SupabaseMessageWithUsername>()
             .Select("*, username:user_id(username)") 
-            .Where(m => m.GroupId == group_id)
+            .Where(m => m.GroupId == groupId)
             .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Ascending)
             .Get();
         
@@ -46,20 +29,23 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<MessageDTO>> CreateMessage(int group_id, MessageDTO message)
+    public async Task<ActionResult<MessageDTO>> CreateMessage(int groupId, MessageDTO message, [FromHeader(Name = "userId")] int userId)
     {
-        if (message.GroupId != group_id)
-            return BadRequest(new { title = $"Group ID in URL: {group_id} does not match Group ID in message: {message.GroupId}." });
+        if (!await Validations.ValidateUser(userId, _supabase))
+            return Unauthorized(new { title = "Unauthorized user." });
 
-        if (!await GroupExists(group_id))
-            return NotFound(new { title = $"Group with id {group_id} not found." });
+        if (message.GroupId != groupId)
+            return BadRequest(new { title = $"Group ID in URL: {groupId} does not match Group ID in message: {message.GroupId}." });
+
+        if (!await Validations.GroupExists(groupId, _supabase))
+            return NotFound(new { title = $"Group with id {groupId} not found." });
         
         if (message.Text?.Length > 100)
             return BadRequest(new { title = "Message too long (max 100 characters)" });
         
         var count = await _supabase
             .From<SupabaseMessage>()
-            .Where(m => m.GroupId == group_id)
+            .Where(m => m.GroupId == groupId)
             .Count(Supabase.Postgrest.Constants.CountType.Exact);
         if (count >= 100)
             return BadRequest(new { title = "Message limit reached (max 100 messages per group)" });
@@ -70,7 +56,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             Text = message.Text,
             CreatedAt = DateTime.UtcNow,
             Edited = false,
-            UserId = message.UserId
+            UserId = 2
         };
         var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
         var createdMessage = response.Models.FirstOrDefault();
@@ -81,16 +67,19 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateMessage(int group_id, int id, MessageDTO message)
+    public async Task<IActionResult> UpdateMessage(int groupId, int id, MessageDTO message, [FromHeader(Name = "userId")] int userId)
     {
+        if (!await Validations.ValidateUser(userId, _supabase))
+            return Unauthorized(new { title = "Unauthorized user." });
+
         if (id != message.Id)
             return BadRequest(new { title = $"Message ID: {id} in URL does not match Message ID in body: {message.Id}." });
 
-        if (message.GroupId != group_id)
-            return BadRequest(new { title = $"Group ID in URL: {group_id} does not match Group ID in message: {message.GroupId}." });
+        if (message.GroupId != groupId)
+            return BadRequest(new { title = $"Group ID in URL: {groupId} does not match Group ID in message: {message.GroupId}." });
 
-        if (!await GroupExists(group_id))
-            return NotFound(new { title = $"Group with id {group_id} not found." });
+        if (!await Validations.GroupExists(groupId, _supabase))
+            return NotFound(new { title = $"Group with id {groupId} not found." });
 
         if (message.Text?.Length > 100)
             return BadRequest(new { title = "Message too long (max 100 characters)" });
@@ -110,8 +99,11 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteMessage(int id)
+    public async Task<IActionResult> DeleteMessage(int id, [FromHeader(Name = "userId")] int userId)
     {
+        if (!await Validations.ValidateUser(userId, _supabase))
+            return Unauthorized(new { title = "Unauthorized user." });
+
         var response = await _supabase
             .From<SupabaseMessage>()
             .Where(x => x.Id == id)

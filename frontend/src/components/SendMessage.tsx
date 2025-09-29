@@ -7,7 +7,6 @@ import { useForm } from "@mantine/form";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import { EditingMessageContext } from "../contexts/EditingMessageContext";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
-import { ShowError } from "./ShowError";
 
 export default function SendMessage() {
     const { currentUser } = useContext(CurrentUserContext);
@@ -21,7 +20,7 @@ export default function SendMessage() {
     const form = useForm({
         initialValues: {
             text: ""
-        },
+        }
     });
     
     useEffect(() => {
@@ -44,12 +43,10 @@ export default function SendMessage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!currentUser) {
-            ShowError("You must be logged in to send messages.");
-        } else if (editingMessage) {
+        if (editingMessage) {
             editMutation.mutate({ id: editingMessage.id, text: form.values.text, groupId: editingMessage.groupId });
         } else {
-            sendMutation.mutate({ text: form.values.text, groupId: groupId, userId: currentUser.id });
+            sendMutation.mutate({ text: form.values.text, groupId: groupId });
         }
     };
 
@@ -66,13 +63,13 @@ export default function SendMessage() {
                         <Textarea
                             ref={inputRef}
                             name="text"
-                            placeholder="Type your message..."
                             className="flex-grow"
                             radius="md"
                             size="md"
                             minRows={editingMessage ? 3 : 1}
                             maxRows={6}
                             autosize
+                            placeholder="Type your message..."
                             disabled={sendMutation.isPending}
                             styles={{ input: { backgroundColor: 'transparent', borderColor: 'lightgrey' } }}
                             {...form.getInputProps('text')}

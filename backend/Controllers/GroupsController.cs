@@ -10,8 +10,11 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     private readonly Supabase.Client _supabase = supabase;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GroupDTO>>> GetGroups()
+    public async Task<ActionResult<IEnumerable<GroupDTO>>> GetGroups([FromHeader(Name = "userId")] int userId)
     {
+        if (!await Validations.ValidateUser(userId, _supabase))
+            return Unauthorized(new { title = "Unauthorized user." });
+
         var response = await _supabase
             .From<SupabaseGroupWithLastMessage>()
             .Select("*")
@@ -22,8 +25,11 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<GroupDTO>> CreateGroup(GroupDTO group)
+    public async Task<ActionResult<GroupDTO>> CreateGroup(GroupDTO group, [FromHeader(Name = "userId")] int userId)
     {
+        if (!await Validations.ValidateUser(userId, _supabase))
+            return Unauthorized(new { title = "Unauthorized user." });
+
         if (string.IsNullOrWhiteSpace(group.Name))
             return BadRequest(new { title = "Name is required" });
 
@@ -48,8 +54,11 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateGroup(int id, GroupDTO group)
+    public async Task<IActionResult> UpdateGroup(int id, GroupDTO group, [FromHeader(Name = "userId")] int userId)
     {
+        if (!await Validations.ValidateUser(userId, _supabase))
+            return Unauthorized(new { title = "Unauthorized user." });
+
         if (id != group.Id)
             return BadRequest(new { title = $"Group ID: {id} in URL does not match Group ID in body: {group.Id}." });
 
@@ -73,8 +82,11 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteGroup(int id)
+    public async Task<IActionResult> DeleteGroup(int id, [FromHeader(Name = "userId")] int userId)
     {
+        if (!await Validations.ValidateUser(userId, _supabase))
+            return Unauthorized(new { title = "Unauthorized user." });
+
         var response = await _supabase
             .From<SupabaseGroup>()
             .Where(x => x.Id == id)

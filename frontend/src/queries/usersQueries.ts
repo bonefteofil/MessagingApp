@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import type UserScheme from "../types/userScheme";
 import { ShowError } from "../components/ShowError";
 import { cleanNotifications } from "@mantine/notifications";
 
@@ -12,16 +11,11 @@ export function getUsers() {
             const response = await fetch(`${API_URL}/users`, {method: "GET"});
             const result = await response.json();
 
-            if (!response.ok) {
-                const error = new Error("Error getting users: " + result.title);
-                console.log(error.message);
-                ShowError(error.message);
-                throw error;
-            }
+            if (!response.ok) return ShowError("Error getting users: " + result.title);
 
             console.log("Fetched users:", result);
             cleanNotifications();
-            return result as UserScheme[];
+            return result;
         },
         retry: false,
     });

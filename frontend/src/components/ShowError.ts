@@ -26,4 +26,6 @@ export function ShowError(errorMessage: string) {
             },
         },
     });
+    console.error(errorMessage);
+    throw new Error(errorMessage);
 }

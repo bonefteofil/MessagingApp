@@ -6,8 +6,10 @@ import Header from "../components/Header";
 import SendMessage from "../components/SendMessage";
 import { AppShell } from "@mantine/core";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
 export default function Layout() {
+	const { currentUser } = useContext(CurrentUserContext);
 	const { currentGroup } = useContext(CurrentGroupContext);
 	const [selectUser, setSelectUser] = useState<boolean>(true);
 	const navbarSize = 400;
@@ -18,7 +20,7 @@ export default function Layout() {
 			navbar={{
 				width: navbarSize,
 				breakpoint: 'md',
-				collapsed: { mobile: (!!currentGroup || !!selectUser), desktop: false },
+				collapsed: { mobile: (!!currentGroup || !!selectUser), desktop: !currentUser },
 			}}
 		>
 			{currentGroup && (
@@ -27,9 +29,11 @@ export default function Layout() {
 				</AppShell.Header>
 			)}
 
-			<AppShell.Navbar>
-				<InboxPage setSelectUser={setSelectUser} />
-			</AppShell.Navbar>
+			{currentUser && (
+				<AppShell.Navbar>
+					<InboxPage setSelectUser={setSelectUser} />
+				</AppShell.Navbar>
+			)}
 
 			<AppShell.Main py={80}>
 				{currentGroup ? (

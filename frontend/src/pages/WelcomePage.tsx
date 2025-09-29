@@ -46,7 +46,7 @@ export default function WelcomePage({setSelectUser}: { setSelectUser: (value: bo
 
             <Group>
                 <Button disabled={!value} onClick={() => { setCurrentUser(value); setCurrentGroup(null); setSelectUser(false); }}>Log in</Button>
-                <Button variant="light" color="red" onClick={() => { setCurrentUser(null); setCurrentGroup(null); setSelectUser(false); }}>Log out</Button>
+                <Button disabled={!currentUser} variant="light" color="red" onClick={() => { setCurrentUser(null); setCurrentGroup(null); setSelectUser(false); setValue(null); }}>Log out</Button>
             </Group>
         </Stack>
     );
