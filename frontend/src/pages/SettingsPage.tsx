@@ -24,6 +24,9 @@ export default function SettingsPage() {
                 <Button mt='sm' radius='md' onClick={() => { navigate("/logout"); }}>
                     Logout
                 </Button>
+                <Button mt='sm' radius='md' color="red" onClick={() => { navigate("/delete-account"); }}>
+                    Delete Account
+                </Button>
             </Card>
 
             <Card radius='lg'>

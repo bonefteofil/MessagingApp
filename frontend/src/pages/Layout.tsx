@@ -9,6 +9,8 @@ import LoginPage from "./LoginPage";
 import LogoutPage from "./LogoutPage";
 import NotFoundPage from "./404Page";
 import SettingsPage from "./SettingsPage";
+import RegisterPage from "./RegisterPage";
+import DeleteUserPage from "./DeleteUserPage";
 
 export default function Layout() {
 	const { currentGroup } = useContext(CurrentGroupContext);
@@ -26,6 +28,8 @@ export default function Layout() {
 				<Routes>
 					<Route path="/login" element={<LoginPage />} />
 					<Route path="/logout" element={<LogoutPage />} />
+					<Route path="/register" element={<RegisterPage />} />
+					<Route path="/delete-account" element={<DeleteUserPage />} />
 					<Route path="*" element={<NotFoundPage />} />
 
 					<Route element={<InboxPage />}>

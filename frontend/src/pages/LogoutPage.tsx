@@ -5,16 +5,16 @@ import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import { EditingMessageContext } from "../contexts/EditingMessageContext";
 
 export default function LogoutRoute() {
-  const { setCurrentUser } = useContext(CurrentUserContext);
-  const { setCurrentGroup } = useContext(CurrentGroupContext);
-  const { setEditingMessage } = useContext(EditingMessageContext);
+    const { setCurrentUser } = useContext(CurrentUserContext);
+    const { setCurrentGroup } = useContext(CurrentGroupContext);
+    const { setEditingMessage } = useContext(EditingMessageContext);
 
-  useEffect(() => {
-    setCurrentUser(null);
-    setCurrentGroup(null);
-    setEditingMessage(null);
-    console.log("User logged out");
-  }, []);
+    useEffect(() => {
+        setCurrentUser(null);
+        setCurrentGroup(null);
+        setEditingMessage(null);
+        console.log("User logged out");
+    }, []);
 
-  return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />;
 }

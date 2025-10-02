@@ -1,7 +1,6 @@
 import { useContext, useState } from "react";
 import { Avatar, Button, Card, Group, Radio, Stack, Text } from "@mantine/core";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
-import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import { getUsers } from "../queries/usersQueries";
 import ErrorPage from "../components/ErrorPage";
 import Loading from "../components/Loading";
@@ -10,7 +9,6 @@ import { useNavigate, Navigate } from "react-router-dom";
 
 export default function WelcomePage() {
     const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
-    const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { data, error } = getUsers();
     const [value, setValue] = useState<UserScheme | null>(null);
     const navigate = useNavigate();
@@ -21,16 +19,16 @@ export default function WelcomePage() {
     return (
         <Radio.Group value={value?.id!.toString()}>
             <Card withBorder shadow="sm" p='xl' mx='auto' my='xl' radius='lg' style={{ maxWidth: 600 }}>
-                <Stack align="center">
+                <Stack align="stretch">
                     <Text size="xl">Login into your account</Text>
                     <Loading loading={!data} />
 
                     {data && data.map((user: UserScheme) => (
                         <Radio.Card
-                            withBorder={false}
-                            value={user.id!.toString()}
-                            radius='md'
-                            key={user.id}
+                        withBorder={false}
+                        value={user.id!.toString()}
+                        radius='md'
+                        key={user.id}
                         >
                             <Group
                                 p="sm"
@@ -44,8 +42,10 @@ export default function WelcomePage() {
                         </Radio.Card>
                     ))}
 
-                    <Group>
-                        <Button radius='md' disabled={!value} onClick={() => { setCurrentUser(value); setCurrentGroup(null); navigate("/", { replace: true }); }}>Log in</Button>
+                    <Group justify="center">
+                        <Button radius='md' disabled={!value} onClick={() => { setCurrentUser(value); }}>Log in</Button>
+                        <Text>or</Text>
+                        <Button radius='md' variant="outline" onClick={() => { navigate("/register", { replace: true }); }}>Go to register</Button>
                     </Group>
                 </Stack>
             </Card>
