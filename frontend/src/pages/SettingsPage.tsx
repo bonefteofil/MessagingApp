@@ -18,15 +18,15 @@ export default function SettingsPage() {
     return (
         <Stack m='lg'>
             <Text size="xl" mb='md'>Settings</Text>
-            <Card>
+            <Card radius='lg'>
                 <Text size="lg">Account</Text>
                 <Text size="md">Username: {currentUser?.username}</Text>
-                <Button mt='sm' onClick={() => { navigate("/logout"); }}>
+                <Button mt='sm' radius='md' onClick={() => { navigate("/logout"); }}>
                     Logout
                 </Button>
             </Card>
 
-            <Card>
+            <Card radius='lg'>
                 <Group>
                     <Text size="lg">Developer Mode</Text>
                     <Tooltip label="Development Mode"  refProp="rootRef">
@@ -36,7 +36,7 @@ export default function SettingsPage() {
             </Card>
 
             {developerMode && (
-                <Card>
+                <Card radius='lg'>
                     <Text size="lg">Current User data</Text>
                     <Code block>
                         {JSON.stringify(currentUser, null, 2)}

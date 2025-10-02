@@ -20,7 +20,7 @@ export default function WelcomePage() {
 
     return (
         <Radio.Group value={value?.id!.toString()}>
-            <Card withBorder shadow="sm" p='xl' mx='auto' my='xl' radius='md' style={{ maxWidth: 600 }}>
+            <Card withBorder shadow="sm" p='xl' mx='auto' my='xl' radius='lg' style={{ maxWidth: 600 }}>
                 <Stack align="center">
                     <Text size="xl">Login into your account</Text>
                     <Loading loading={!data} />
@@ -45,7 +45,7 @@ export default function WelcomePage() {
                     ))}
 
                     <Group>
-                        <Button disabled={!value} onClick={() => { setCurrentUser(value); setCurrentGroup(null); navigate("/", { replace: true }); }}>Log in</Button>
+                        <Button radius='md' disabled={!value} onClick={() => { setCurrentUser(value); setCurrentGroup(null); navigate("/", { replace: true }); }}>Log in</Button>
                     </Group>
                 </Stack>
             </Card>

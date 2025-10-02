@@ -69,9 +69,6 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateMessage(int groupId, int id, MessageDTO message, [FromHeader(Name = "userId")] int userId)
     {
-        if (!await Validations.ValidateUser(userId, _supabase))
-            return Unauthorized(new { title = "Unauthorized user." });
-
         if (id != message.Id)
             return BadRequest(new { title = $"Message ID: {id} in URL does not match Message ID in body: {message.Id}." });
 
@@ -87,23 +84,25 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
         var response = await _supabase
             .From<SupabaseMessage>()
             .Where(x => x.Id == id)
-            .Set(x => x.Text!, message.Text)
-            .Set(x => x.Edited, true)
-            .Update();
-            
-        var updatedMessage = response.Models.FirstOrDefault();
-        if (updatedMessage == null)
+            .Get();
+
+        var existingMessage = response.Models.FirstOrDefault();
+        if (existingMessage == null)
             return NotFound();
 
-        return Ok(updatedMessage.ToDTO());
+        if (existingMessage.UserId != userId)
+            return Unauthorized(new { title = "You can only edit your own messages." });
+            
+        existingMessage.Text = message.Text;
+        existingMessage.Edited = true;
+        await _supabase.From<SupabaseMessage>().Update(existingMessage);
+
+        return Ok(existingMessage.ToDTO());
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMessage(int id, [FromHeader(Name = "userId")] int userId)
     {
-        if (!await Validations.ValidateUser(userId, _supabase))
-            return Unauthorized(new { title = "Unauthorized user." });
-
         var response = await _supabase
             .From<SupabaseMessage>()
             .Where(x => x.Id == id)
@@ -112,11 +111,13 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
         var deletedMessage = response.Models.FirstOrDefault();
         if (deletedMessage == null)
             return NotFound();
+        
+        if (deletedMessage.UserId != userId)
+            return Unauthorized(new { title = "You can only delete your own messages." });
 
         await _supabase
             .From<SupabaseMessage>()
-            .Where(x => x.Id == id)
-            .Delete();
+            .Delete(deletedMessage);
 
         return Ok(deletedMessage.ToDTO());
     }

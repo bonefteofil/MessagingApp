@@ -21,9 +21,9 @@ export default function SendMessage() {
     });
     
     useEffect(() => {
-        // Focus the input when the current group changes
+        // Focus the input when the current group or editing message changes
         setTimeout(() => inputRef.current?.focus(), 100);
-    }, [groupId]);
+    }, [groupId, editingMessage]);
 
     useEffect(() => {
         form.setValues({

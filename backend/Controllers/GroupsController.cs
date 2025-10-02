@@ -59,14 +59,14 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         if (!await Validations.ValidateUser(userId, _supabase))
             return Unauthorized(new { title = "Unauthorized user." });
 
-        if (id != group.Id)
-            return BadRequest(new { title = $"Group ID: {id} in URL does not match Group ID in body: {group.Id}." });
-
         if (string.IsNullOrWhiteSpace(group.Name))
             return BadRequest(new { title = "Name is required" });
 
         if (group.Name!.Length > 30)
             return BadRequest(new { title = "Name too long (max 30 characters)" });
+
+        if (id != group.Id)
+            return BadRequest(new { title = $"Group ID: {id} in URL does not match Group ID in body: {group.Id}." });
 
         var response = await _supabase
             .From<SupabaseGroup>()
@@ -103,8 +103,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 
         await _supabase
             .From<SupabaseGroup>()
-            .Where(x => x.Id == id)
-            .Delete();
+            .Delete(deletedGroup);
 
         return Ok(deletedGroup.ToDTO());
     }
