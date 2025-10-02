@@ -1,49 +1,40 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
+import { HashRouter, Routes, Route } from "react-router-dom";
+import { AppShell } from "@mantine/core";
+import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import ChatPage from "./ChatPage"
 import InboxPage from "./InboxPage";
 import WelcomePage from "./WelcomePage";
-import Header from "../components/Header";
-import SendMessage from "../components/SendMessage";
-import { AppShell } from "@mantine/core";
-import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
-import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import LoginPage from "./LoginPage";
+import LogoutPage from "./LogoutPage";
+import NotFoundPage from "./404Page";
+import SettingsPage from "./SettingsPage";
 
 export default function Layout() {
-	const { currentUser } = useContext(CurrentUserContext);
 	const { currentGroup } = useContext(CurrentGroupContext);
-	const [selectUser, setSelectUser] = useState<boolean>(true);
-	const navbarSize = 400;
 
 	return (
 		<AppShell
 			withBorder={false}
 			navbar={{
-				width: navbarSize,
+				width: 400,
 				breakpoint: 'md',
-				collapsed: { mobile: (!!currentGroup || !!selectUser), desktop: !currentUser },
+				collapsed: { mobile: (!!currentGroup), desktop: false },
 			}}
 		>
-			{currentGroup && (
-				<AppShell.Header p='sm' ml={{ base: 0, md: navbarSize }} className="!backdrop-blur-lg !bg-gray-700/30" >
-					<Header />
-				</AppShell.Header>
-			)}
+			<HashRouter>
+				<Routes>
+					<Route path="/login" element={<LoginPage />} />
+					<Route path="/logout" element={<LogoutPage />} />
+					<Route path="*" element={<NotFoundPage />} />
 
-			{currentUser && (
-				<AppShell.Navbar>
-					<InboxPage setSelectUser={setSelectUser} />
-				</AppShell.Navbar>
-			)}
-
-			<AppShell.Main py={80}>
-				{currentGroup ? (
-					<ChatPage />
-				) : (
-					<WelcomePage setSelectUser={setSelectUser} />
-				)}
-			</AppShell.Main>
-
-			{currentGroup && <SendMessage />}
+					<Route element={<InboxPage />}>
+						<Route path="/" element={<WelcomePage />} />
+						<Route path="/settings" element={<SettingsPage />} />
+						<Route path="/groups/:groupId" element={<ChatPage />} />
+					</Route>
+				</Routes>
+			</HashRouter>
 		</AppShell>
   	);
 }

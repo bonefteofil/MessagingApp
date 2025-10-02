@@ -5,19 +5,21 @@ import { ShowError } from "../components/ShowError";
 import { cleanNotifications } from "@mantine/notifications";
 import { formatFullDate, formatMessageTime } from "../utils/FormatDate";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export function getMessages(groupId: number) {
+export function getMessages() {
     const { currentUser } = useContext(CurrentUserContext);
-    return useQuery({
-        queryKey: ["messages", groupId],
-        queryFn: async () => {
-            if (!currentUser) return ShowError("You must be logged in to view messages.");
+    const { currentGroup } = useContext(CurrentGroupContext);
 
-            const response = await fetch(`${API_URL}/groups/${groupId}/messages`, {
+    return useQuery({
+        queryKey: ["messages", currentGroup?.id],
+        queryFn: async () => {
+
+            const response = await fetch(`${API_URL}/groups/${currentGroup!.id}/messages`, {
                 method: "GET",
-                headers: { 'userId': currentUser.id!.toString() }
+                headers: { 'userId': currentUser!.id!.toString() }
             });
             const result = await response.json();
             if (!response.ok) return ShowError("Error getting messages: " + result.title);
@@ -32,6 +34,7 @@ export function getMessages(groupId: number) {
             return messagesWithLocalTime;
         },
         retry: false,
+        enabled: !!currentUser && !!currentGroup,
     });
 }
 

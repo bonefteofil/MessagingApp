@@ -8,6 +8,7 @@ import { Modal, Button, ActionIcon, Input } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { DeveloperModeContext } from "../contexts/DeveloperModeContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
+import { useNavigate } from "react-router-dom";
 
 export default function GroupForm({ editingGroup } : { editingGroup?: GroupScheme }) {
     const [opened, { open, close }] = useDisclosure(false);
@@ -15,6 +16,7 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
     const { setCurrentGroup } = useContext(CurrentGroupContext);
     const createMutation = createGroup();
     const editMutation = editGroup();
+    const navigate = useNavigate();
 
     const form = useForm({
         initialValues: { name: '' },
@@ -28,6 +30,7 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
             close();
             form.reset();
             setCurrentGroup(mutation.data);
+            navigate(`/groups/${mutation.data.id}`);
         }
     }, [createMutation.isSuccess, editMutation.isSuccess]);
 

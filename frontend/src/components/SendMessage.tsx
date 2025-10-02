@@ -4,15 +4,12 @@ import { faFloppyDisk, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ActionIcon, Button, Group, Textarea, Text, Affix, Card, Stack } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import { EditingMessageContext } from "../contexts/EditingMessageContext";
-import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import { useParams } from "react-router-dom";
 
 export default function SendMessage() {
-    const { currentUser } = useContext(CurrentUserContext);
-    const { currentGroup } = useContext(CurrentGroupContext);
     const { editingMessage, setEditingMessage } = useContext(EditingMessageContext);
-    const groupId = currentGroup!.id!;
+    const groupId = Number(useParams().groupId);
     const sendMutation = sendMessage();
     const editMutation = editMessage();
     const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -26,7 +23,7 @@ export default function SendMessage() {
     useEffect(() => {
         // Focus the input when the current group changes
         setTimeout(() => inputRef.current?.focus(), 100);
-    }, [currentGroup]);
+    }, [groupId]);
 
     useEffect(() => {
         form.setValues({
@@ -38,6 +35,7 @@ export default function SendMessage() {
         if (sendMutation.isSuccess || editMutation.isSuccess) {
             setEditingMessage(null);
             form.reset();
+            setTimeout(() => inputRef.current?.focus(), 100);
         }
     }, [sendMutation.isSuccess, editMutation.isSuccess]);
 

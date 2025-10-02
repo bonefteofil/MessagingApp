@@ -56,7 +56,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             Text = message.Text,
             CreatedAt = DateTime.UtcNow,
             Edited = false,
-            UserId = 2
+            UserId = userId
         };
         var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
         var createdMessage = response.Models.FirstOrDefault();

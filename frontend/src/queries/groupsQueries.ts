@@ -14,11 +14,10 @@ export function getGroups() {
     return useQuery({
         queryKey: ["groups"],
         queryFn: async () => {
-            if (!currentUser) return ShowError("You must be logged in to view groups.");
 
             const response = await fetch(`${API_URL}/groups`, {
                 method: "GET",
-                headers: { 'userId': currentUser.id!.toString() }
+                headers: { 'userId': currentUser!.id!.toString() }
             });
             const result = await response.json();
             if (!response.ok) return ShowError("Error getting groups: " + result.title);
@@ -33,6 +32,7 @@ export function getGroups() {
             return groupsWithLocalTime;
         },
         retry: false,
+        enabled: !!currentUser,
     });
 }
 
@@ -89,10 +89,10 @@ export function deleteGroup() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (group: GroupScheme) => {
+        mutationFn: async (groupId: number) => {
             if (!currentUser) return ShowError("You must be logged in to delete groups.");
 
-            const response = await fetch(`${API_URL}/groups/${group.id}`, {
+            const response = await fetch(`${API_URL}/groups/${groupId}`, {
                 method: 'DELETE',
                 headers: { 'userId': currentUser.id!.toString() },
             });
