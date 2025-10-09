@@ -1,21 +1,19 @@
 import { useContext, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
-import type MessageScheme from '../types/messageScheme';
+import { Stack, Text, Badge, Card } from "@mantine/core";
 import { getMessages } from '../queries/messagesQueries';
-import ErrorPage from '../components/ErrorPage';
 import Loading from '../components/Loading';
 import MessageBubble from '../components/MessageBubble';
-import { Stack, Text, Badge, Card, AppShell } from "@mantine/core";
-import { CurrentGroupContext } from '../contexts/CurrentGroupContext';
 import SendMessage from '../components/SendMessage';
-import Header from '../components/Header';
+import ErrorPage from '../errors/ErrorPage';
+import { CurrentGroupContext } from '../contexts/CurrentGroupContext';
+import type MessageScheme from '../types/messageScheme';
 
 export default function ChatPage() {
     const { currentGroup } = useContext(CurrentGroupContext);
     const { error, data, isLoading } = getMessages();
     const instantScroll = useRef(true);
     let lastDate: string | null = null;
-
     
     // Instantly scroll to the bottom on first load, then, when adding new messages, use smooth scrolling on updates
     useEffect(() => {
@@ -36,40 +34,36 @@ export default function ChatPage() {
     if (error) return <ErrorPage message="Failed to load messages" />;
     
     return (<>
-        <AppShell.Header p='sm' ml={{ base: 0, md: 400 }} className="!backdrop-blur-lg !bg-gray-700/30" >
-            <Header />
-        </AppShell.Header>
+        <Stack p='md'>
+            <Card mx='auto' radius='md' color='gray' mt='md' className='text-center'>
+                <Text size='md' c='dimmed'>
+                    The group "{currentGroup!.name}" was created on
+                    <br />
+                    {currentGroup!.createdAt}
+                </Text>
+            </Card>
 
-            <Stack p='md'>
-                <Card mx='auto' radius='md' color='gray' mt='md' className='text-center'>
-                    <Text size='md' c='dimmed'>
-                        The group "{currentGroup!.name}" was created on
-                        <br />
-                        {currentGroup!.createdAt}
-                    </Text>
-                </Card>
+            <Loading loading={isLoading || !data} />
 
-                <Loading loading={isLoading || !data} />
+            {data && !isLoading && data.map((message: MessageScheme) => {
+                const messageDate = message.createdAt!;
+                const showSeparator = messageDate !== lastDate;
+                lastDate = messageDate;
+                
+                return (
+                    <Stack key={message.id}>
+                        {showSeparator && (
+                            <Badge mx='auto' color='gray'>
+                                <Text size='xs' c='dimmed'>{messageDate}</Text>
+                            </Badge>
+                        )}
 
-                {data && !isLoading && data.map((message: MessageScheme) => {
-                    const messageDate = message.createdAt!;
-                    const showSeparator = messageDate !== lastDate;
-                    lastDate = messageDate;
-                    
-                    return (
-                        <Stack key={message.id}>
-                            {showSeparator && (
-                                <Badge mx='auto' color='gray'>
-                                    <Text size='xs' c='dimmed'>{messageDate}</Text>
-                                </Badge>
-                            )}
+                        <MessageBubble message={message} />
+                    </Stack>
+                );
+            })}
+        </Stack>
 
-                            <MessageBubble message={message} />
-                        </Stack>
-                    );
-                })}
-            </Stack>
-
-            <SendMessage />
+        <SendMessage />
     </>);
 }

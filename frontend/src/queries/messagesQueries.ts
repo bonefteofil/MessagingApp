@@ -1,11 +1,11 @@
 import { useContext } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type MessageScheme from "../types/messageScheme";
-import { ShowError } from "../components/ShowError";
 import { cleanNotifications } from "@mantine/notifications";
-import { formatFullDate, formatMessageTime } from "../utils/FormatDate";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ShowErrorNotification } from "../errors/ShowErrorNotification";
+import { transformMessageDate } from "../utils/FormatDate";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
+import type MessageScheme from "../types/messageScheme";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -22,13 +22,9 @@ export function getMessages() {
                 headers: { 'userId': currentUser!.id!.toString() }
             });
             const result = await response.json();
-            if (!response.ok) return ShowError("Error getting messages: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error getting messages: " + result.title);
 
-            const messagesWithLocalTime = result.map((message: MessageScheme) => ({
-                ...message, 
-                createdAt: formatFullDate(message.createdAt!),
-                createdTime: formatMessageTime(message.createdAt!)
-            }));
+            const messagesWithLocalTime = result.map((message: MessageScheme) => transformMessageDate(message));
             console.log("Fetched messages:", messagesWithLocalTime);
             cleanNotifications();
             return messagesWithLocalTime;
@@ -44,7 +40,7 @@ export function sendMessage() {
 
     return useMutation({
         mutationFn: async (newMessage: MessageScheme) => {
-            if (!currentUser) return ShowError("You must be logged in to send messages.");
+            if (!currentUser) return ShowErrorNotification("You must be logged in to send messages.");
 
             const response = await fetch(`${API_URL}/groups/${newMessage.groupId}/messages`, {
                 method: 'POST',
@@ -52,13 +48,13 @@ export function sendMessage() {
                 body: JSON.stringify(newMessage),
             });
             const result = await response.json();
-            if (!response.ok) return ShowError("Error sending message: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error sending message: " + result.title);
 
-            console.log("Message sent:", result);
+            console.log("Message sent:", transformMessageDate(result));
             queryClient.invalidateQueries({ queryKey: ['messages', newMessage.groupId] });
             queryClient.invalidateQueries({ queryKey: ['groups'] });
             cleanNotifications();
-            return result;
+            return transformMessageDate(result);
         }
     });
 }
@@ -69,7 +65,7 @@ export function editMessage() {
 
     return useMutation({
         mutationFn: async (updatedMessage: MessageScheme) => {
-            if (!currentUser) return ShowError("You must be logged in to edit messages.");
+            if (!currentUser) return ShowErrorNotification("You must be logged in to edit messages.");
 
             const response = await fetch(`${API_URL}/groups/${updatedMessage.groupId}/messages/${updatedMessage.id}`, {
                 method: 'PUT',
@@ -77,13 +73,13 @@ export function editMessage() {
                 body: JSON.stringify(updatedMessage),
             });
             const result = await response.json();
-            if (!response.ok) return ShowError("Error editing message: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error editing message: " + result.title);
 
-            console.log("Message edited:", result);
+            console.log("Message edited:", transformMessageDate(result));
             queryClient.invalidateQueries({ queryKey: ['messages', updatedMessage.groupId] });
             queryClient.invalidateQueries({ queryKey: ['groups'] });
             cleanNotifications();
-            return result;
+            return transformMessageDate(result);
         }
     });
 }
@@ -94,20 +90,20 @@ export function deleteMessage() {
 
     return useMutation({
         mutationFn: async (message: MessageScheme) => {
-            if (!currentUser) return ShowError("You must be logged in to delete messages.");
+            if (!currentUser) return ShowErrorNotification("You must be logged in to delete messages.");
 
             const response = await fetch(`${API_URL}/groups/${message.groupId}/messages/${message.id}`, {
                 method: 'DELETE',
                 headers: { 'userId': currentUser.id!.toString() }
             });
             const result = await response.json();
-            if (!response.ok) return ShowError("Error deleting message: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error deleting message: " + result.title);
 
-            console.log("Deleted message:", result);
+            console.log("Deleted message:", transformMessageDate(result));
             queryClient.invalidateQueries({ queryKey: ['messages', message.groupId] });
             queryClient.invalidateQueries({ queryKey: ['groups'] });
             cleanNotifications();
-            return result;
+            return transformMessageDate(result);
         },
     });
 }

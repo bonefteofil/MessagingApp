@@ -8,5 +8,8 @@ export default defineConfig({
     react(), 
     tailwindcss(),
   ],
-  base: '/MessagingApp/'
+  base: '/MessagingApp/',
+  build: {
+    chunkSizeWarningLimit: 1000,
+  }
 })

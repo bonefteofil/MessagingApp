@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Group, Input, Stack, Text } from "@mantine/core";
+import { Button, Group, Input, Stack, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { createUser } from "../queries/usersQueries";
-import { useEffect } from "react";
+import ResponsiveCard from "../components/ResponsiveCard";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -25,10 +26,9 @@ export default function RegisterPage() {
     }
 
     return (
-        <Card withBorder shadow="sm" p='xl' mx='auto' my='xl' radius='lg' maw='600'>
+        <ResponsiveCard title="Create new account">
             <form onSubmit={handleSubmit} >
                 <Stack align="stretch">
-                    <Text size='lg'>Create account</Text>
                     <Input
                         type="text"
                         data-autofocus
@@ -39,12 +39,16 @@ export default function RegisterPage() {
                         {...form.getInputProps('username')}
                     />
                     <Group justify="center">
-                        <Button radius='md' type="submit" loading={createMutation.isPending}>Create new account</Button>
+                        <Button radius='md' type="submit" disabled={!form.getValues().username} loading={createMutation.isPending}>
+                            Register
+                        </Button>
                         <Text>or</Text>
-                        <Button disabled={createMutation.isPending} variant="outline" radius='md' onClick={() => { navigate("/login", { replace: true }); }}>Go to login</Button>
+                        <Button disabled={createMutation.isPending} variant="outline" radius='md' onClick={() => { navigate("/login", { replace: true }); }}>
+                            Go to login
+                        </Button>
                     </Group>
                 </Stack>
             </form>
-        </Card>
+        </ResponsiveCard>
     )
 }

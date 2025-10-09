@@ -1,9 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShowError } from "../components/ShowError";
-import { cleanNotifications } from "@mantine/notifications";
-import type UserScheme from "../types/userScheme";
 import { useContext } from "react";
+import { cleanNotifications } from "@mantine/notifications";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ShowErrorNotification } from "../errors/ShowErrorNotification";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import type UserScheme from "../types/userScheme";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -11,10 +11,11 @@ export function getUsers() {
     return useQuery({
         queryKey: ["users"],
         queryFn: async () => {
+            console.log("Fetching users...");
             const response = await fetch(`${API_URL}/users`, {method: "GET"});
             const result = await response.json();
 
-            if (!response.ok) return ShowError("Error getting users: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error getting users: " + result.title);
 
             console.log("Fetched users:", result);
             cleanNotifications();
@@ -33,7 +34,7 @@ export function createUser() {
                 body: JSON.stringify(newUser),
             });
             const result = await response.json();
-            if (!response.ok) return ShowError("Error creating user: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error creating user: " + result.title);
             
             console.log("User created:", result);
             cleanNotifications();
@@ -50,7 +51,7 @@ export function deleteUser() {
         mutationFn: async (id: number) => {
             const response = await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
             const result = await response.json();
-            if (!response.ok) return ShowError("Error deleting user: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error deleting user: " + result.title);
 
             console.log("User deleted:", result);
             queryClient.invalidateQueries({ queryKey: ['messages'] });

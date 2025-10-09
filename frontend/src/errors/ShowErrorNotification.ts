@@ -1,7 +1,7 @@
 import { notifications } from "@mantine/notifications";
 import { DEFAULT_THEME } from '@mantine/core';
 
-export function ShowError(errorMessage: string) {
+export function ShowErrorNotification(errorMessage: string) {
     const theme = DEFAULT_THEME;
 
     notifications.show({

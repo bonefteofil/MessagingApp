@@ -1,17 +1,18 @@
 import { useContext } from "react";
-import type GroupScheme from "../types/groupScheme";
-import { getGroups } from "../queries/groupsQueries";
-import ErrorPage from "../components/ErrorPage";
-import Loading from "../components/Loading";
+import { Navigate, Outlet, useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { Avatar, Divider, Group, Stack, Text, ScrollArea, Code, Box, AppShell, ActionIcon } from "@mantine/core";
+import { getGroups } from "../queries/groupsQueries";
+import Loading from "../components/Loading";
+import GroupForm from "../components/GroupForm";
+import ErrorPage from "../errors/ErrorPage";
+import ServerDownPage from "../errors/ServerDownPage";
 import { DeveloperModeContext } from "../contexts/DeveloperModeContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import { EditingMessageContext } from "../contexts/EditingMessageContext";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
-import GroupForm from "../components/GroupForm";
-import { Navigate, Outlet, useNavigate } from "react-router-dom";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type GroupScheme from "../types/groupScheme";
 
 export default function InboxPage() {
     const { developerMode } = useContext(DeveloperModeContext);
@@ -22,16 +23,14 @@ export default function InboxPage() {
     const navigate = useNavigate();
 
     if (!currentUser) return <Navigate to="/login" replace />;
-
-    if (error) {
-        return <ErrorPage message="Failed to load chats" />;
-    }
+    if (error && error.name == "TypeError") return <ServerDownPage />;
+    else if (error) return <ErrorPage message={error.message} />;
 
     return (<>
-        <AppShell.Navbar>
+        <AppShell.Navbar withBorder>
             <ScrollArea type="scroll" px='sm'>
                 <Group p='md'>
-                    <Text flex={1} size="xl">Chats</Text>
+                    <Text flex={1} size="xl" variant="gradient" fw={700}>Chats</Text>
                     <GroupForm />
                     <ActionIcon
                         p="md"

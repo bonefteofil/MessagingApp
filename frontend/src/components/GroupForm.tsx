@@ -1,14 +1,14 @@
 import { useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { useDisclosure } from '@mantine/hooks';
-import { createGroup, editGroup } from "../queries/groupsQueries";
-import type GroupScheme from "../types/groupScheme";
 import { Modal, Button, ActionIcon, Input } from "@mantine/core";
+import { useDisclosure } from '@mantine/hooks';
 import { useForm } from "@mantine/form";
+import { createGroup, editGroup } from "../queries/groupsQueries";
 import { DeveloperModeContext } from "../contexts/DeveloperModeContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
-import { useNavigate } from "react-router-dom";
+import type GroupScheme from "../types/groupScheme";
 
 export default function GroupForm({ editingGroup } : { editingGroup?: GroupScheme }) {
     const [opened, { open, close }] = useDisclosure(false);
@@ -26,7 +26,7 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
 
     useEffect(() => {
         const mutation = editingGroup ? editMutation : createMutation;
-        if (mutation.isSuccess) {
+        if (mutation.isSuccess && mutation.data) {
             close();
             form.reset();
             setCurrentGroup(mutation.data);
@@ -79,6 +79,7 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
                         radius='md'
                         size='input-md'
                         fullWidth
+                        disabled={form.values.name.trim() === '' && !developerMode}
                         loading={createMutation.isPending || editMutation.isPending}
                         loaderProps={{ size: 'sm' }}
                     >

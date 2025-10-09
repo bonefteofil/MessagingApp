@@ -1,10 +1,10 @@
 import { useContext } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type GroupScheme from "../types/groupScheme";
-import { ShowError } from "../components/ShowError";
 import { cleanNotifications } from "@mantine/notifications";
-import { formatLastMessageDate, formatFullDate } from "../utils/FormatDate";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ShowErrorNotification } from "../errors/ShowErrorNotification";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import { transformGroupDate } from "../utils/FormatDate";
+import type GroupScheme from "../types/groupScheme";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -20,13 +20,9 @@ export function getGroups() {
                 headers: { 'userId': currentUser!.id!.toString() }
             });
             const result = await response.json();
-            if (!response.ok) return ShowError("Error getting groups: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error getting groups: " + result.title);
 
-            const groupsWithLocalTime = result.map((group: GroupScheme) => ({
-                ...group,
-                lastMessageAt: formatLastMessageDate(group.lastMessageAt!),
-                createdAt: formatFullDate(group.createdAt!)
-            }));
+            const groupsWithLocalTime = result.map((group: GroupScheme) => transformGroupDate(group));
             console.log("Fetched groups:", groupsWithLocalTime);
             cleanNotifications();
             return groupsWithLocalTime;
@@ -42,7 +38,7 @@ export function createGroup() {
 
     return useMutation({
         mutationFn: async (newGroup: GroupScheme) => {
-            if (!currentUser) return ShowError("You must be logged in to create groups.");
+            if (!currentUser) return ShowErrorNotification("You must be logged in to create groups.");
 
             const response = await fetch(`${API_URL}/groups`, {
                 method: 'POST',
@@ -50,12 +46,12 @@ export function createGroup() {
                 body: JSON.stringify(newGroup),
             });
             const result = await response.json();
-            if (!response.ok) return ShowError("Error creating group: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error creating group: " + result.title);
 
-            console.log("Group created:", result);
+            console.log("Group created:", transformGroupDate(result));
             queryClient.invalidateQueries({ queryKey: ['groups'] });
             cleanNotifications();
-            return result;
+            return transformGroupDate(result);
         }
     });
 }
@@ -66,7 +62,7 @@ export function editGroup() {
 
     return useMutation({
         mutationFn: async (updatedGroup: GroupScheme) => {
-            if (!currentUser) return ShowError("You must be logged in to edit groups.");
+            if (!currentUser) return ShowErrorNotification("You must be logged in to edit groups.");
 
             const response = await fetch(`${API_URL}/groups/${updatedGroup.id}`, {
                 method: 'PUT',
@@ -74,12 +70,12 @@ export function editGroup() {
                 body: JSON.stringify(updatedGroup),
             });
             const result = await response.json();
-            if (!response.ok) return ShowError("Error updating group: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error updating group: " + result.title);
 
-            console.log("Group updated:", result);
+            console.log("Group updated:", transformGroupDate(result));
             queryClient.invalidateQueries({ queryKey: ['groups'] });
             cleanNotifications();
-            return result;
+            return transformGroupDate(result);
         }
     });
 }
@@ -90,19 +86,19 @@ export function deleteGroup() {
 
     return useMutation({
         mutationFn: async (groupId: number) => {
-            if (!currentUser) return ShowError("You must be logged in to delete groups.");
+            if (!currentUser) return ShowErrorNotification("You must be logged in to delete groups.");
 
             const response = await fetch(`${API_URL}/groups/${groupId}`, {
                 method: 'DELETE',
                 headers: { 'userId': currentUser.id!.toString() },
             });
             const result = await response.json();
-            if (!response.ok) return ShowError("Error deleting group: " + result.title);
+            if (!response.ok) return ShowErrorNotification("Error deleting group: " + result.title);
 
-            console.log("Group deleted:", result);
+            console.log("Group deleted:", transformGroupDate(result));
             queryClient.invalidateQueries({ queryKey: ['groups'] });
             cleanNotifications();
-            return result;
+            return transformGroupDate(result);
         }
     });
 }
