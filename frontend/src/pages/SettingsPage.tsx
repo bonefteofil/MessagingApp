@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Switch, Text, Button, Code } from "@mantine/core";
+import { Switch, Text, Button, Code, Avatar, Group, Center } from "@mantine/core";
 import { DeveloperModeContext } from "../contexts/DeveloperModeContext";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
@@ -18,8 +18,13 @@ export default function SettingsPage() {
 
     return (<>
         <ResponsiveCard title="Account settings">
-            <Text size="md">Username: {currentUser?.username}</Text>
-            <Text size="md">Id: {currentUser?.id}</Text>
+            <Center><Avatar size='xl' /></Center>
+            <Text>Username: {currentUser?.username}</Text>
+
+            <Group>
+                <Text>Developer mode:</Text>
+                <Switch size="lg" onLabel="On" offLabel="Off" checked={developerMode} onChange={() => {setDeveloperMode(!developerMode)}}/>
+            </Group>
 
             <Button mt='sm' radius='md' onClick={() => { navigate("/logout"); }}>
                 Logout
@@ -27,10 +32,6 @@ export default function SettingsPage() {
             <Button mt='sm' radius='md' color="red" onClick={() => { navigate("/delete-account"); }}>
                 Delete Account
             </Button>
-        </ResponsiveCard>
-
-        <ResponsiveCard title="Developer Mode">
-            <Switch size="lg" onLabel="Developer" offLabel="Production" checked={developerMode} onChange={() => {setDeveloperMode(!developerMode)}}/>
         </ResponsiveCard>
 
         {developerMode && (

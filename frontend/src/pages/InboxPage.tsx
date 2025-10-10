@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Navigate, Outlet, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { Avatar, Divider, Group, Stack, Text, ScrollArea, Code, Box, AppShell, ActionIcon } from "@mantine/core";
@@ -7,7 +7,6 @@ import { getGroups } from "../queries/groupsQueries";
 import Loading from "../components/Loading";
 import GroupForm from "../components/GroupForm";
 import ErrorPage from "../errors/ErrorPage";
-import ServerDownPage from "../errors/ServerDownPage";
 import { DeveloperModeContext } from "../contexts/DeveloperModeContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import { EditingMessageContext } from "../contexts/EditingMessageContext";
@@ -16,17 +15,17 @@ import type GroupScheme from "../types/groupScheme";
 
 export default function InboxPage() {
     const { developerMode } = useContext(DeveloperModeContext);
-    const { currentGroup, setCurrentGroup } = useContext(CurrentGroupContext);
+    const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { currentUser } = useContext(CurrentUserContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
     const { data, error } = getGroups();
     const navigate = useNavigate();
+    const { groupId } = useParams();
 
     if (!currentUser) return <Navigate to="/login" replace />;
-    if (error && error.name == "TypeError") return <ServerDownPage />;
-    else if (error) return <ErrorPage message={error.message} />;
+    if (error) return <ErrorPage message={error.message} />;
 
-    return (<>
+    return (
         <AppShell.Navbar withBorder>
             <ScrollArea type="scroll" px='sm'>
                 <Group p='md'>
@@ -47,7 +46,7 @@ export default function InboxPage() {
                 {data && data.map((group: GroupScheme) => (
                     <div key={group.id}>
                         <Group gap="md" p="xs" align="top"
-                            classNames={{ root: `${currentGroup === group && 'bg-gray-700'} hover:bg-gray-700 cursor-pointer rounded-lg` }}
+                            classNames={{ root: `${groupId == group.id && 'bg-gray-700'} hover:bg-gray-700 cursor-pointer rounded-lg` }}
                             onClick={() => {
                                 setEditingMessage(null);
                                 setCurrentGroup(group);
@@ -80,9 +79,5 @@ export default function InboxPage() {
                 <Box h='md' />
             </ScrollArea>
         </AppShell.Navbar>
-
-        <AppShell.Main py={80}>
-            <Outlet />
-        </AppShell.Main>
-    </>);
+    );
 }

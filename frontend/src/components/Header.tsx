@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { faAngleLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { deleteGroup } from "../queries/groupsQueries";
@@ -13,6 +13,7 @@ export default function Header() {
     const { currentGroup, setCurrentGroup } = useContext(CurrentGroupContext);
     const { developerMode } = useContext(DeveloperModeContext);
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         if (deleteMutation.isSuccess) {
@@ -21,11 +22,11 @@ export default function Header() {
         }
     }, [deleteMutation.isSuccess]);
 
-    return (<>
-        <AppShell.Header p='sm' ml={{ base: 0, md: 400 }} className="!backdrop-blur-lg !bg-gray-700/30" >
+    return (
+        <AppShell.Header display={location.pathname === "/" ? "none" : "inherit"} p='sm' ml={{ base: 0, md: 400 }} className="!backdrop-blur-lg !bg-gray-700/30" >
             <Group gap='5'>
 
-                <Button px='5' variant="subtle" onClick={() => { setCurrentGroup(null); navigate('/'); }}>
+                <Button px='5' variant="subtle" onClick={() => { navigate('/'); }}>
                     <FontAwesomeIcon icon={faAngleLeft} />
                     <Text size="lg">Back</Text>
                 </Button>
@@ -47,12 +48,11 @@ export default function Header() {
                     >
                         <FontAwesomeIcon icon={faTrash} />
                     </ActionIcon>
-                </>) : (
+                </>) : location.pathname === "/settings" && (
                     <Text ml="md" size="xl">Settings</Text>
                 )}
                 
             </Group>
         </AppShell.Header>
-        <Outlet />
-    </>);
+    );
 }

@@ -17,9 +17,6 @@ export function transformGroupDate(group: GroupScheme) {
     } as GroupScheme;
 }
 
-function formatLocalDate(date: Date) {
-    return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-}
 
 function formatLastMessageDate(date: string) {
     const localDate = formatLocalDate(new Date(date));
@@ -36,18 +33,13 @@ function formatLastMessageDate(date: string) {
     });
 };
 
-function formatMessageTime(date: string) {
-    return formatLocalDate(new Date(date)).toTimeString().substring(0, 5);
-}
-
 function formatFullDate(date: string) {
     const localDate = formatLocalDate(new Date(date));
-    if (localDate.toDateString() === new Date().toDateString()) {
-        return "Today";
-    }
-    if (localDate.toDateString() === new Date(Date.now() - 86400000).toDateString()) {
-        return "Yesterday";
-    }
+
+    if (isToday(localDate)) return "Today";
+
+    if (isYesterday(localDate)) return "Yesterday";
+
     return localDate.toLocaleDateString([], {
         weekday: 'long',
         day: "2-digit",
@@ -55,3 +47,19 @@ function formatFullDate(date: string) {
         year: 'numeric',
     });
 };
+
+function formatMessageTime(date: string) {
+    return formatLocalDate(new Date(date)).toTimeString().substring(0, 5);
+}
+
+function formatLocalDate(date: Date) {
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+}
+
+function isToday(date: Date) {
+    return date.toDateString() === new Date().toDateString();
+}
+
+function isYesterday(date: Date) {
+    return date.toDateString() === new Date(Date.now() - 86400000).toDateString();
+}

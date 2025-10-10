@@ -13,7 +13,8 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
     {
-        try {
+        try
+        {
             var response = await _supabase
                 .From<SupabaseUser>()
                 .Select("*")
@@ -21,7 +22,8 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
 
             return Ok(response.Models.Select(x => x.ToDTO()));
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex) {
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
             return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
         }   
     }
@@ -53,7 +55,8 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
 
             return Ok(createdUser.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex) {
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
             return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
         }
     }
@@ -61,7 +64,8 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(int id)
     {
-            try {
+        try
+        {
             var response = await _supabase
                 .From<SupabaseUser>()
                 .Where(x => x.Id == id)
@@ -82,7 +86,8 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
 
             return Ok(deletedUser.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex) {
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
             return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
         }
     }

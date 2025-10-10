@@ -29,7 +29,7 @@ export default function ChatPage() {
             instantScroll.current = false;
     }, [(data?.length > 0) ? data[data.length - 1].id : null]);
 
-    
+
     if (!currentGroup) return <Navigate to="/" replace />;
     if (error) return <ErrorPage message="Failed to load messages" />;
     

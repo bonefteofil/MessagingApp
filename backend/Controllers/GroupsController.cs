@@ -26,7 +26,8 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 
             return Ok(response.Models.Select(x => x.ToDTO()));
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex) {
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
             return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
         }
     }
@@ -34,7 +35,8 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<GroupDTO>> CreateGroup(GroupDTO group, [FromHeader(Name = "userId")] int userId)
     {
-        try {
+        try
+        {
             if (!await Validations.ValidateUser(userId, _supabase))
                 return Unauthorized(new { title = "Unauthorized user." });
 
@@ -52,15 +54,16 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 
             var response = await _supabase
                 .From<SupabaseGroup>()
-                .Insert(new SupabaseGroup{Name = group.Name, CreatedAt = DateTime.UtcNow});
-            
+                .Insert(new SupabaseGroup { Name = group.Name, CreatedAt = DateTime.UtcNow });
+
             var createdGroup = response.Models.FirstOrDefault();
             if (createdGroup == null)
                 return BadRequest();
 
             return Ok(createdGroup.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex) {
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
             return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
         }
     }
@@ -68,7 +71,8 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateGroup(int id, GroupDTO group, [FromHeader(Name = "userId")] int userId)
     {
-        try {
+        try
+        {
             if (!await Validations.ValidateUser(userId, _supabase))
                 return Unauthorized(new { title = "Unauthorized user." });
 
@@ -93,7 +97,8 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 
             return Ok(updatedGroup.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex) {
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
             return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
         }
     }
@@ -126,7 +131,8 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 
             return Ok(deletedGroup.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex) {
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
             return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
         }
     }

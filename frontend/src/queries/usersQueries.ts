@@ -11,7 +11,7 @@ export function getUsers() {
     return useQuery({
         queryKey: ["users"],
         queryFn: async () => {
-            console.log("Fetching users...");
+
             const response = await fetch(`${API_URL}/users`, {method: "GET"});
             const result = await response.json();
 

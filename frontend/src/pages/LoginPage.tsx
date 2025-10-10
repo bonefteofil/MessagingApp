@@ -5,7 +5,6 @@ import { getUsers } from "../queries/usersQueries";
 import Loading from "../components/Loading";
 import ResponsiveCard from "../components/ResponsiveCard";
 import ErrorPage from "../errors/ErrorPage";
-import ServerDownPage from "../errors/ServerDownPage";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import type UserScheme from "../types/userScheme";
 
@@ -16,8 +15,7 @@ export default function WelcomePage() {
     const navigate = useNavigate();
 
     if (currentUser) return <Navigate to="/" replace />;
-    if (error && error.name == "TypeError") return <ServerDownPage />;
-    else if (error) return <ErrorPage message={error.message} />;
+    if (error) return <ErrorPage message={error.message} />;
 
     return (
         <Radio.Group value={value?.id!.toString()}>
