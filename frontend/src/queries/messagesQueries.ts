@@ -7,8 +7,6 @@ import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import { CurrentGroupContext } from "../contexts/CurrentGroupContext";
 import type MessageScheme from "../types/messageScheme";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export function getMessages() {
     const { currentUser } = useContext(CurrentUserContext);
     const { currentGroup } = useContext(CurrentGroupContext);
@@ -17,12 +15,12 @@ export function getMessages() {
         queryKey: ["messages", currentGroup?.id],
         queryFn: async () => {
 
-            const response = await fetch(`${API_URL}/groups/${currentGroup!.id}/messages`, {
+            const response = await fetch(`/api/groups/${currentGroup!.id}/messages`, {
                 method: "GET",
-                headers: { 'userId': currentUser!.id!.toString() }
+                credentials: 'include',
             });
             const result = await response.json();
-            if (!response.ok) return ShowErrorNotification("Error getting messages: " + result.title);
+            if (!response.ok) return ShowErrorNotification(`Error getting messages: ${response.status} ${result.title}`);
 
             const messagesWithLocalTime = result.map((message: MessageScheme) => transformMessageDate(message));
             console.log("Fetched messages:", messagesWithLocalTime);
@@ -42,13 +40,14 @@ export function sendMessage() {
         mutationFn: async (newMessage: MessageScheme) => {
             if (!currentUser) return ShowErrorNotification("You must be logged in to send messages.");
 
-            const response = await fetch(`${API_URL}/groups/${newMessage.groupId}/messages`, {
+            const response = await fetch(`/api/groups/${newMessage.groupId}/messages`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'userId': currentUser.id!.toString() },
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(newMessage),
             });
             const result = await response.json();
-            if (!response.ok) return ShowErrorNotification("Error sending message: " + result.title);
+            if (!response.ok) return ShowErrorNotification(`Error sending message: ${response.status} ${result.title}`);
 
             console.log("Message sent:", transformMessageDate(result));
             queryClient.invalidateQueries({ queryKey: ['messages', newMessage.groupId] });
@@ -67,13 +66,14 @@ export function editMessage() {
         mutationFn: async (updatedMessage: MessageScheme) => {
             if (!currentUser) return ShowErrorNotification("You must be logged in to edit messages.");
 
-            const response = await fetch(`${API_URL}/groups/${updatedMessage.groupId}/messages/${updatedMessage.id}`, {
+            const response = await fetch(`/api/groups/${updatedMessage.groupId}/messages/${updatedMessage.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'userId': currentUser.id!.toString() },
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(updatedMessage),
             });
             const result = await response.json();
-            if (!response.ok) return ShowErrorNotification("Error editing message: " + result.title);
+            if (!response.ok) return ShowErrorNotification(`Error editing message: ${response.status} ${result.title}`);
 
             console.log("Message edited:", transformMessageDate(result));
             queryClient.invalidateQueries({ queryKey: ['messages', updatedMessage.groupId] });
@@ -92,12 +92,12 @@ export function deleteMessage() {
         mutationFn: async (message: MessageScheme) => {
             if (!currentUser) return ShowErrorNotification("You must be logged in to delete messages.");
 
-            const response = await fetch(`${API_URL}/groups/${message.groupId}/messages/${message.id}`, {
+            const response = await fetch(`/api/groups/${message.groupId}/messages/${message.id}`, {
                 method: 'DELETE',
-                headers: { 'userId': currentUser.id!.toString() }
+                credentials: 'include',
             });
             const result = await response.json();
-            if (!response.ok) return ShowErrorNotification("Error deleting message: " + result.title);
+            if (!response.ok) return ShowErrorNotification(`Error deleting message: ${response.status} ${result.title}`);
 
             console.log("Deleted message:", transformMessageDate(result));
             queryClient.invalidateQueries({ queryKey: ['messages', message.groupId] });

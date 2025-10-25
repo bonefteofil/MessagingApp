@@ -9,6 +9,11 @@ public class UserDTO
     public string? Username { get; set; }
 }
 
+public class LoginModel
+{
+    public string? Username { get; set; }
+}
+
 [Table("Users")]
 public class SupabaseUser : BaseModel
 {

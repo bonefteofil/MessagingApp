@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("groups")]
 public class GroupsController(Supabase.Client supabase) : ControllerBase
@@ -11,13 +13,10 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     private readonly Supabase.Client _supabase = supabase;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GroupDTO>>> GetGroups([FromHeader(Name = "userId")] int userId)
+    public async Task<ActionResult<IEnumerable<GroupDTO>>> GetGroups()
     {
         try
         {
-            if (!await Validations.ValidateUser(userId, _supabase))
-                return Unauthorized(new { title = "Unauthorized user." });
-
             var response = await _supabase
                 .From<SupabaseGroupWithLastMessage>()
                 .Select("*")
@@ -33,13 +32,10 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<GroupDTO>> CreateGroup(GroupDTO group, [FromHeader(Name = "userId")] int userId)
+    public async Task<ActionResult<GroupDTO>> CreateGroup(GroupDTO group)
     {
         try
         {
-            if (!await Validations.ValidateUser(userId, _supabase))
-                return Unauthorized(new { title = "Unauthorized user." });
-
             if (string.IsNullOrWhiteSpace(group.Name))
                 return BadRequest(new { title = "Name is required" });
 
@@ -69,13 +65,10 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateGroup(int id, GroupDTO group, [FromHeader(Name = "userId")] int userId)
+    public async Task<IActionResult> UpdateGroup(int id, GroupDTO group)
     {
         try
         {
-            if (!await Validations.ValidateUser(userId, _supabase))
-                return Unauthorized(new { title = "Unauthorized user." });
-
             if (string.IsNullOrWhiteSpace(group.Name))
                 return BadRequest(new { title = "Name is required" });
 
@@ -104,13 +97,10 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteGroup(int id, [FromHeader(Name = "userId")] int userId)
+    public async Task<IActionResult> DeleteGroup(int id)
     {
         try
         {
-            if (!await Validations.ValidateUser(userId, _supabase))
-                return Unauthorized(new { title = "Unauthorized user." });
-
             var response = await _supabase
                 .From<SupabaseGroup>()
                 .Where(x => x.Id == id)

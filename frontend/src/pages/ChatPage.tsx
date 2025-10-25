@@ -31,7 +31,7 @@ export default function ChatPage() {
 
 
     if (!currentGroup) return <Navigate to="/" replace />;
-    if (error) return <ErrorPage message="Failed to load messages" />;
+    if (error) return <ErrorPage message={error.message} />;
     
     return (<>
         <Stack p='md'>

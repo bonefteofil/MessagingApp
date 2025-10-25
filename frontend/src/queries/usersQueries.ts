@@ -5,14 +5,12 @@ import { ShowErrorNotification } from "../errors/ShowErrorNotification";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import type UserScheme from "../types/userScheme";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export function getUsers() {
     return useQuery({
         queryKey: ["users"],
         queryFn: async () => {
 
-            const response = await fetch(`${API_URL}/users`, {method: "GET"});
+            const response = await fetch(`/api/users`, {method: "GET"});
             const result = await response.json();
 
             if (!response.ok) return ShowErrorNotification("Error getting users: " + result.title);
@@ -28,7 +26,7 @@ export function getUsers() {
 export function createUser() {
     return useMutation({
         mutationFn: async (newUser: UserScheme) => {
-            const response = await fetch(`${API_URL}/users`, {
+            const response = await fetch(`/api/users`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newUser),
@@ -49,7 +47,7 @@ export function deleteUser() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const response = await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/users/${id}`, { method: 'DELETE' });
             const result = await response.json();
             if (!response.ok) return ShowErrorNotification("Error deleting user: " + result.title);
 

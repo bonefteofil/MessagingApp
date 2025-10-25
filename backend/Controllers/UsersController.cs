@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using backend.Models;
 using Newtonsoft.Json;
+using backend.Models;
 
 namespace backend.Controllers;
 
@@ -17,7 +17,6 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
         {
             var response = await _supabase
                 .From<SupabaseUser>()
-                .Select("*")
                 .Get();
 
             return Ok(response.Models.Select(x => x.ToDTO()));

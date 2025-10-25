@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization;
+using backend.Services;
 
 namespace backend.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("groups/{groupId}/messages")]
 public class MessagesController(Supabase.Client supabase) : ControllerBase
@@ -11,13 +14,10 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     private readonly Supabase.Client _supabase = supabase;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MessageDTO>>> GetMessages(int groupId, [FromHeader(Name = "userId")] int userId)
+    public async Task<ActionResult<IEnumerable<MessageDTO>>> GetMessages(int groupId)
     {
         try
         {
-            if (!await Validations.ValidateUser(userId, _supabase))
-                return Unauthorized(new { title = "Unauthorized user." });
-
             if (!await Validations.GroupExists(groupId, _supabase))
                 return NotFound(new { title = $"Group with id {groupId} not found." });
 
@@ -37,13 +37,10 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<MessageDTO>> CreateMessage(int groupId, MessageDTO message, [FromHeader(Name = "userId")] int userId)
+    public async Task<ActionResult<MessageDTO>> CreateMessage(int groupId, MessageDTO message)
     {
         try
         {
-            if (!await Validations.ValidateUser(userId, _supabase))
-            return Unauthorized(new { title = "Unauthorized user." });
-
             if (message.GroupId != groupId)
                 return BadRequest(new { title = $"Group ID in URL: {groupId} does not match Group ID in message: {message.GroupId}." });
 
@@ -66,8 +63,9 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
                 Text = message.Text,
                 CreatedAt = DateTime.UtcNow,
                 Edited = false,
-                UserId = userId
+                UserId = int.Parse(TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!))
             };
+
             var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
             var createdMessage = response.Models.FirstOrDefault();
             if (createdMessage == null)
@@ -82,7 +80,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateMessage(int groupId, int id, MessageDTO message, [FromHeader(Name = "userId")] int userId)
+    public async Task<IActionResult> UpdateMessage(int groupId, int id, MessageDTO message)
     {
         try
         {
@@ -107,7 +105,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             if (existingMessage == null)
                 return NotFound();
 
-            if (existingMessage.UserId != userId)
+            if (existingMessage.UserId.ToString() != TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!))
                 return Unauthorized(new { title = "You can only edit your own messages." });
 
             existingMessage.Text = message.Text;
@@ -123,7 +121,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteMessage(int id, [FromHeader(Name = "userId")] int userId)
+    public async Task<IActionResult> DeleteMessage(int id)
     {
         try
         {
@@ -136,7 +134,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             if (deletedMessage == null)
                 return NotFound();
 
-            if (deletedMessage.UserId != userId)
+            if (deletedMessage.UserId.ToString() != TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!))
                 return Unauthorized(new { title = "You can only delete your own messages." });
 
             await _supabase
