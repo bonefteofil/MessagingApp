@@ -6,10 +6,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MantineProvider } from '@mantine/core';
-import { GroupProvider } from './contexts/CurrentGroupContext';
-import { EditingMessageProvider } from './contexts/EditingMessageContext';
-import { DeveloperModeProvider } from './contexts/DeveloperModeContext';
-import { UserProvider } from './contexts/CurrentUserContext';
+import { GroupProvider } from './groups/Context';
+import { EditingMessageProvider } from './messages/Context';
+import { DeveloperModeProvider } from './shared/components/DeveloperModeContext';
+import { UserProvider } from './user/Context';
 
 const queryClient = new QueryClient();
 

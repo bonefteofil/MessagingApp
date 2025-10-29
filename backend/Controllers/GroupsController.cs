@@ -64,8 +64,8 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateGroup(int id, GroupDTO group)
+    [HttpPut]
+    public async Task<IActionResult> UpdateGroup(GroupDTO group)
     {
         try
         {
@@ -75,12 +75,9 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             if (group.Name!.Length > 30)
                 return BadRequest(new { title = "Name too long (max 30 characters)" });
 
-            if (id != group.Id)
-                return BadRequest(new { title = $"Group ID: {id} in URL does not match Group ID in body: {group.Id}." });
-
             var response = await _supabase
                 .From<SupabaseGroup>()
-                .Where(x => x.Id == id)
+                .Where(x => x.Id == group.Id)
                 .Set(x => x.Name!, group.Name)
                 .Update();
             
@@ -96,14 +93,14 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteGroup(int id)
+    [HttpDelete]
+    public async Task<IActionResult> DeleteGroup(GroupDTO group)
     {
         try
         {
             var response = await _supabase
                 .From<SupabaseGroup>()
-                .Where(x => x.Id == id)
+                .Where(x => x.Id == group.Id)
                 .Get();
 
             var deletedGroup = response.Models.FirstOrDefault();
@@ -112,7 +109,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 
             await _supabase
                 .From<SupabaseMessage>()
-                .Where(x => x.GroupId == id)
+                .Where(x => x.GroupId == group.Id)
                 .Delete();
 
             await _supabase

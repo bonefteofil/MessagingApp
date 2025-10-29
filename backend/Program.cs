@@ -55,22 +55,6 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Override default 401 and 403 responses to return JSON body
-app.Use(async (context, next) =>
-{
-    await next();
-
-    if (context.Response.StatusCode == (int)HttpStatusCode.Unauthorized)
-    {
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsync("{\"title\":\"Unauthorized: Invalid or missing token.\"}");
-    }
-    else if (context.Response.StatusCode == (int)HttpStatusCode.Forbidden)
-    {
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsync("{\"title\":\"Forbidden: You do not have access to this resource.\"}");
-    }
-});
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

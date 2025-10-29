@@ -79,14 +79,11 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateMessage(int groupId, int id, MessageDTO message)
+    [HttpPut]
+    public async Task<IActionResult> UpdateMessage(int groupId, MessageDTO message)
     {
         try
         {
-            if (id != message.Id)
-            return BadRequest(new { title = $"Message ID: {id} in URL does not match Message ID in body: {message.Id}." });
-
             if (message.GroupId != groupId)
                 return BadRequest(new { title = $"Group ID in URL: {groupId} does not match Group ID in message: {message.GroupId}." });
 
@@ -98,7 +95,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
 
             var response = await _supabase
                 .From<SupabaseMessage>()
-                .Where(x => x.Id == id)
+                .Where(x => x.Id == message.Id)
                 .Get();
 
             var existingMessage = response.Models.FirstOrDefault();
@@ -120,14 +117,14 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteMessage(int id)
+    [HttpDelete]
+    public async Task<IActionResult> DeleteMessage(MessageDTO message)
     {
         try
         {
             var response = await _supabase
                 .From<SupabaseMessage>()
-                .Where(x => x.Id == id)
+                .Where(x => x.Id == message.Id)
                 .Get();
 
             var deletedMessage = response.Models.FirstOrDefault();
