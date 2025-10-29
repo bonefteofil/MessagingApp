@@ -1,9 +1,14 @@
 import { useContext } from "react";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cleanNotifications } from "@mantine/notifications";
-import { CurrentUserContext } from "./Context";
-import { ShowErrorNotification } from "../shared/utils/showErrorNotification";
+
+import { ShowErrorNotification } from "@utils/showErrorNotification";
+
+import CurrentUserContext from "./Context";
+
 import type { LoginScheme, UserScheme } from "./schema";
+
 
 export function loginUser() {
     return useMutation({

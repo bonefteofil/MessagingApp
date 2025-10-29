@@ -1,12 +1,17 @@
 import { useContext, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+
 import { faAngleLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Group, Button, Text, Avatar, ActionIcon, AppShell } from "@mantine/core";
-import { deleteGroup } from "../../groups/api";
-import { CurrentGroupContext } from "../../groups/Context";
-import { DeveloperModeContext } from "../../shared/components/DeveloperModeContext";
-import GroupForm from "../../groups/components/GroupForm";
+
+import { deleteGroup } from "@groups/api";
+
+import CurrentGroupContext from "@groups/Context";
+import DeveloperModeContext from "@components/DeveloperModeContext";
+
+import GroupForm from "@groups/components/GroupForm";
+
 
 export default function Header() {
     const deleteMutation = deleteGroup();

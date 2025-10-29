@@ -1,6 +1,9 @@
-import { Button } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-import ResponsiveCard from "../components/ResponsiveCard";
+
+import { Button } from "@mantine/core";
+
+import ResponsiveCard from "@components/ResponsiveCard";
+
 
 export default function NotFoundPage() {
     const navigate = useNavigate();

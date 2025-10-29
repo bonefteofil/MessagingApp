@@ -1,5 +1,7 @@
 import { cleanNotifications } from "@mantine/notifications";
-import { ShowErrorNotification } from "../utils/showErrorNotification";
+
+import { ShowErrorNotification } from "@utils/showErrorNotification";
+
 
 export async function authFetch({method, route, errorText, body} : {method: string, route: string, errorText: string, body?: any}) {
 

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
+
 export function GetStatus() {
     return useQuery({
         queryKey: ["status"],

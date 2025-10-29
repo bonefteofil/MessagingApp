@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 
-export const DeveloperModeContext = createContext<{
+
+const DeveloperModeContext = createContext<{
     developerMode: boolean;
     setDeveloperMode: (mode: boolean) => void;
 }>({ developerMode: false, setDeveloperMode: () => {} });
@@ -21,3 +22,5 @@ export const DeveloperModeProvider = ({ children }: { children: React.ReactNode 
         </DeveloperModeContext.Provider>
     );
 }
+
+export default DeveloperModeContext;

@@ -1,5 +1,5 @@
-import type GroupScheme from "../../groups/schema";
-import type MessageScheme from "../../messages/schema";
+import type GroupScheme from "@groups/schema";
+import type MessageScheme from "@messages/schema";
 
 
 export function transformMessageDate(message: MessageScheme) {

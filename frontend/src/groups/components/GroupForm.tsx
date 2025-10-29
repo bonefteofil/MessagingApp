@@ -1,14 +1,19 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Modal, Button, ActionIcon, Input } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from "@mantine/form";
-import { createGroup, editGroup } from "../api";
-import { CurrentGroupContext } from "../Context";
-import { DeveloperModeContext } from "../../shared/components/DeveloperModeContext";
-import type GroupScheme from "../schema";
+
+import { createGroup, editGroup } from "@groups/api";
+
+import CurrentGroupContext from "@groups/Context";
+import DeveloperModeContext from '@components/DeveloperModeContext';
+
+import type GroupScheme from "@groups/schema";
+
 
 export default function GroupForm({ editingGroup } : { editingGroup?: GroupScheme }) {
     const [opened, { open, close }] = useDisclosure(false);

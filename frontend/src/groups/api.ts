@@ -1,9 +1,13 @@
 import { useContext } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CurrentUserContext } from "../user/Context";
-import { transformGroupDate } from "../shared/utils/formatDate";
-import { authFetch } from "../shared/utils/authFetch";
+
+import { transformGroupDate } from "@utils/formatDate";
+import { authFetch } from "@utils/authFetch";
+
+import CurrentUserContext from "@user/Context";
+
 import type GroupScheme from "./schema";
+
 
 export function getGroups() {
     const { currentUser } = useContext(CurrentUserContext);

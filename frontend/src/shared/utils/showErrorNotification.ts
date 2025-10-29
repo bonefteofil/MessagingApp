@@ -1,6 +1,7 @@
 import { DEFAULT_THEME } from '@mantine/core';
 import { notifications } from "@mantine/notifications";
 
+
 export function ShowErrorNotification(errorMessage: string) {
     const theme = DEFAULT_THEME;
 

@@ -1,11 +1,15 @@
 import { useEffect, useContext, useRef } from "react";
+import { useParams } from "react-router-dom";
+
 import { faFloppyDisk, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ActionIcon, Button, Group, Textarea, Text, Affix, Card, Stack } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { editMessage, sendMessage } from "../api";
-import { EditingMessageContext } from "../Context";
-import { useParams } from "react-router-dom";
+
+import { editMessage, sendMessage } from "@messages/api";
+
+import EditingMessageContext from "@messages/Context";
+
 
 export default function SendMessage() {
     const { editingMessage, setEditingMessage } = useContext(EditingMessageContext);

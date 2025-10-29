@@ -1,8 +1,12 @@
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { Button, Text } from "@mantine/core";
-import { CurrentUserContext } from "../../user/Context";
-import ResponsiveCard from "../components/ResponsiveCard";
+
+import CurrentUserContext from "@user/Context";
+
+import ResponsiveCard from "@components/ResponsiveCard";
+
 
 export default function ErrorPage({ message }: { message: string }) {
     const { currentUser } = useContext(CurrentUserContext);

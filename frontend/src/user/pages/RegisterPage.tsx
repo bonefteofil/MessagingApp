@@ -1,11 +1,17 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { Button, Group, Input, Stack, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { register } from "../api";
-import ResponsiveCard from "../../shared/components/ResponsiveCard";
-import { CurrentUserContext } from "../Context";
-import type { LoginScheme } from "../schema";
+
+import { register } from "@user/api";
+
+import CurrentUserContext from "@user/Context";
+
+import ResponsiveCard from "@components/ResponsiveCard";
+
+import type { LoginScheme } from "@user/schema";
+
 
 export default function RegisterPage() {
     const navigate = useNavigate();

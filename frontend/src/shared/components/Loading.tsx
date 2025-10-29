@@ -1,5 +1,6 @@
 import { Skeleton, Stack } from "@mantine/core";
 
+
 export default function Loading({loading} : {loading: boolean}) {
     if (!loading) return null;
     return (

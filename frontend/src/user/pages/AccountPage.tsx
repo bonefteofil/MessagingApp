@@ -1,10 +1,14 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { Switch, Text, Button, Code, Avatar, Group, Center } from "@mantine/core";
-import { CurrentUserContext } from "../Context";
-import { CurrentGroupContext } from "../../groups/Context";
-import { DeveloperModeContext } from "../../shared/components/DeveloperModeContext";
-import ResponsiveCard from "../../shared/components/ResponsiveCard";
+
+import CurrentUserContext from "@user/Context";
+import CurrentGroupContext from "@groups/Context";
+import DeveloperModeContext from "@components/DeveloperModeContext";
+
+import ResponsiveCard from "@components/ResponsiveCard";
+
 
 export default function AccountPage() {
     const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);

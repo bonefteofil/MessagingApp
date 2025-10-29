@@ -1,26 +1,33 @@
 import { useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 import { Avatar, Divider, Group, Stack, Text, ScrollArea, Code, Box, AppShell, ActionIcon } from "@mantine/core";
-import { getGroups } from "../api";
-import GroupForm from "../components/GroupForm";
-import Loading from "../../shared/components/Loading";
-import ErrorPage from "../../shared/errors/ErrorPage";
-import { CurrentGroupContext } from "../Context";
-import { EditingMessageContext } from "../../messages/Context";
-import { CurrentUserContext } from "../../user/Context";
-import { DeveloperModeContext } from "../../shared/components/DeveloperModeContext";
-import type GroupScheme from "../schema";
+
+import { getGroups } from "@groups/api";
+
+import CurrentGroupContext from "@groups/Context";
+import EditingMessageContext from "@messages/Context";
+import CurrentUserContext from "@user/Context";
+import DeveloperModeContext from "@components/DeveloperModeContext";
+
+import GroupForm from "@groups/components/GroupForm";
+import Loading from "@components/Loading";
+import ErrorPage from "@errors/ErrorPage";
+
+import type GroupScheme from "@groups/schema";
+
 
 export default function InboxPage() {
-    const { developerMode } = useContext(DeveloperModeContext);
     const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
     const { currentUser } = useContext(CurrentUserContext);
+    const { developerMode } = useContext(DeveloperModeContext);
+
     const { data, error, isLoading } = getGroups();
-    const navigate = useNavigate();
     const { groupId } = useParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (currentUser == null) {

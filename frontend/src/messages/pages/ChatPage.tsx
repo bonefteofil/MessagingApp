@@ -1,13 +1,19 @@
 import { useContext, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
+
 import { Stack, Text, Badge, Card } from "@mantine/core";
-import { getMessages } from '../api';
-import MessageBubble from '../components/MessageBubble';
-import SendMessage from '../components/SendMessage';
-import Loading from '../../shared/components/Loading';
-import ErrorPage from '../../shared/errors/ErrorPage';
-import { CurrentGroupContext } from '../../groups/Context';
-import type MessageScheme from '../schema';
+
+import { getMessages } from '@messages/api';
+
+import CurrentGroupContext from '@groups/Context';
+
+import MessageBubble from '@messages/components/MessageBubble';
+import SendMessage from '@messages/components/SendMessage';
+import Loading from '@components/Loading';
+import ErrorPage from '@errors/ErrorPage';
+
+import type MessageScheme from '@messages/schema';
+
 
 export default function ChatPage() {
     const { currentGroup } = useContext(CurrentGroupContext);

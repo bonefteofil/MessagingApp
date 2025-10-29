@@ -1,12 +1,18 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { Avatar, Button, Group, Radio, Stack, Text } from "@mantine/core";
-import Loading from "../../shared/components/Loading";
-import ResponsiveCard from "../../shared/components/ResponsiveCard";
-import ErrorPage from "../../shared/errors/ErrorPage";
+
 import { loginUser, getUsers } from "../api";
-import { CurrentUserContext } from "../Context";
-import type { LoginScheme, UserScheme } from "../schema";
+
+import CurrentUserContext from "../Context";
+
+import ErrorPage from "@errors/ErrorPage";
+import Loading from "@components/Loading";
+import ResponsiveCard from "@components/ResponsiveCard";
+
+import type { LoginScheme, UserScheme } from "@user/schema";
+
 
 export default function LoginPage() {
     const { currentUser, setCurrentUser } = useContext(CurrentUserContext);

@@ -1,9 +1,14 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { Button, Text } from "@mantine/core";
-import { deleteAccount } from "../api";
-import { CurrentUserContext } from "../Context";
-import ResponsiveCard from "../../shared/components/ResponsiveCard";
+
+import { deleteAccount } from "@user/api";
+
+import CurrentUserContext from "@user/Context";
+
+import ResponsiveCard from "@components/ResponsiveCard";
+
 
 export default function DeleteAccountPage() {
     const { currentUser } = useContext(CurrentUserContext);

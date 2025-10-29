@@ -1,7 +1,9 @@
 import { createContext, useState } from "react";
+
 import type { UserScheme } from "./schema";
 
-export const CurrentUserContext = createContext<{
+
+const CurrentUserContext = createContext<{
     currentUser: UserScheme | null;
     setCurrentUser: (user: UserScheme | null) => void;
 }>({ currentUser: null, setCurrentUser: () => {} });
@@ -15,3 +17,5 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         </CurrentUserContext.Provider>
     );
 }
+
+export default CurrentUserContext;

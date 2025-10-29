@@ -1,12 +1,17 @@
 import { useContext } from 'react';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { Group, ActionIcon, Text, Card, Code } from "@mantine/core"
-import { deleteMessage } from '../api';
-import { EditingMessageContext } from '../Context';
-import { CurrentUserContext } from '../../user/Context';
-import { DeveloperModeContext } from '../../shared/components/DeveloperModeContext';
-import type MessageScheme from '../schema';
+
+import { deleteMessage } from '@messages/api';
+
+import EditingMessageContext from '@messages/Context';
+import CurrentUserContext from '@user/Context';
+import DeveloperModeContext from '@components/DeveloperModeContext';
+
+import type MessageScheme from '@messages/schema';
+
 
 export default function MessageBubble({ message } : { message: MessageScheme }) {
     const { developerMode } = useContext(DeveloperModeContext);

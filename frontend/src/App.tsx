@@ -1,15 +1,21 @@
 import { HashRouter, Routes, Route } from "react-router-dom";
+
 import { Notifications } from '@mantine/notifications';
-import Layout from "./shared/components/Layout";
-import LoginPage from "./user/pages/LoginPage";
-import LogoutPage from "./user/pages/LogoutPage";
-import RegisterPage from "./user/pages/RegisterPage";
-import DeleteAccountPage from "./user/pages/DeleteAccountPage";
-import ChatPage from "./messages/pages/ChatPage"
-import AccountPage from "./user/pages/AccountPage";
-import ResponsiveCard from "./shared/components/ResponsiveCard";
-import NotFoundPage from "./shared/errors/404Page";
-import ServerDownPage from "./shared/errors/ServerDownPage";
+
+import Layout from "@components/Layout";
+import ResponsiveCard from "@components/ResponsiveCard";
+
+import NotFoundPage from "@errors/404Page";
+import ServerDownPage from "@errors/ServerDownPage";
+
+import ChatPage from "@messages/pages/ChatPage"
+
+import AccountPage from "@user/pages/AccountPage";
+import LoginPage from "@user/pages/LoginPage";
+import LogoutPage from "@user/pages/LogoutPage";
+import RegisterPage from "@user/pages/RegisterPage";
+import DeleteAccountPage from "@user/pages/DeleteAccountPage";
+
 
 export default function App() {
   	return (

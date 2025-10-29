@@ -1,7 +1,9 @@
 import { createContext, useState } from "react";
+
 import type MessageScheme from "./schema";
 
-export const EditingMessageContext = createContext<{
+
+const EditingMessageContext = createContext<{
     editingMessage: MessageScheme | null;
     setEditingMessage: (message: MessageScheme | null) => void;
 }>({ editingMessage: null, setEditingMessage: () => {} });
@@ -15,3 +17,5 @@ export const EditingMessageProvider = ({ children }: { children: React.ReactNode
         </EditingMessageContext.Provider>
     );
 }
+
+export default EditingMessageContext;

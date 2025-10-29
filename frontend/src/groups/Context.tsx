@@ -1,7 +1,9 @@
 import { createContext, useState } from "react";
+
 import type GroupScheme from "./schema";
 
-export const CurrentGroupContext = createContext<{
+
+const CurrentGroupContext = createContext<{
     currentGroup: GroupScheme | null;
     setCurrentGroup: (group: GroupScheme | null) => void;
 }>({ currentGroup: null, setCurrentGroup: () => {} });
@@ -15,3 +17,5 @@ export const GroupProvider = ({ children }: { children: React.ReactNode }) => {
         </CurrentGroupContext>
     );
 }
+
+export default CurrentGroupContext;

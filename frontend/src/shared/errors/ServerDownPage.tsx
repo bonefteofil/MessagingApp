@@ -1,9 +1,14 @@
 import { useContext } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
+
 import { Button, Text } from "@mantine/core";
-import { CurrentUserContext } from "../../user/Context";
-import { GetStatus } from "../utils/statusQuery";
-import ResponsiveCard from "../components/ResponsiveCard";
+
+import { GetStatus } from "@utils/statusQuery";
+
+import CurrentUserContext from "@user/Context";
+
+import ResponsiveCard from "@components/ResponsiveCard";
+
 
 export default function ServerDownPage() {
     const { error, isLoading } = GetStatus();

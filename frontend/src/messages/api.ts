@@ -1,9 +1,13 @@
 import { useContext } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CurrentGroupContext } from "../groups/Context";
-import { transformMessageDate } from "../shared/utils/formatDate";
-import { authFetch } from "../shared/utils/authFetch";
+
+import { transformMessageDate } from "@utils/formatDate";
+import { authFetch } from "@utils/authFetch";
+
+import CurrentGroupContext from "@groups/Context";
+
 import type MessageScheme from "./schema";
+
 
 export function getMessages() {
     const { currentGroup } = useContext(CurrentGroupContext);

@@ -1,10 +1,14 @@
 import { useContext, useEffect } from "react";
-import { CurrentUserContext } from "../Context";
-import { CurrentGroupContext } from "../../groups/Context";
-import { EditingMessageContext } from "../../messages/Context";
-import { logoutUser } from "../api";
-import ResponsiveCard from "../../shared/components/ResponsiveCard";
 import { useNavigate } from "react-router-dom";
+
+import { logoutUser } from "@user/api";
+
+import CurrentUserContext from "@user/Context";
+import CurrentGroupContext from "@groups/Context";
+import EditingMessageContext from "@messages/Context";
+
+import ResponsiveCard from "@components/ResponsiveCard";
+
 
 export default function LogoutRoute() {
     const { setCurrentUser } = useContext(CurrentUserContext);
