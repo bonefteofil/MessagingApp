@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using backend.Models;
-using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
+using backend.Models;
 
 namespace backend.Controllers;
 

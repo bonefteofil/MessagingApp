@@ -7,43 +7,53 @@ import { ShowErrorNotification } from "@utils/showErrorNotification";
 
 import CurrentUserContext from "./Context";
 
-import type { LoginScheme, UserScheme } from "./schema";
+import type { LoginScheme } from "./schema";
 
 
 export function loginUser() {
     return useMutation({
         mutationFn: async (credentials: LoginScheme) => {
-            const response = await fetch(`/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(credentials),
-                credentials: 'include'
-            });
-            const result = await response.json();
-            if (!response.ok) return ShowErrorNotification("Error logging in: " + result);
+            try {
+                credentials.deviceName = navigator.platform;
+                const response = await fetch(`/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(credentials),
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                if (!response.ok) return ShowErrorNotification("Error logging in: " + result);
+                console.log("User logged in:", result);
+                cleanNotifications();
+                return result;
+            } catch (error) {
+                return ShowErrorNotification("Network error logging in: " + error);
+            }
             
-            console.log("User logged in:", result);
-            cleanNotifications();
-            return result;
         }
     });
 }
 
 export function register() {
     return useMutation({
-        mutationFn: async (newUser: UserScheme) => {
-            const response = await fetch(`/api/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newUser),
-                credentials: 'include'
-            });
-            const result = await response.json();
-            if (!response.ok) return ShowErrorNotification("Error creating user: " + result.title);
-            
-            console.log("User created:", result);
-            cleanNotifications();
-            return result;
+        mutationFn: async (newUser: LoginScheme) => {
+            try {
+                newUser.deviceName = navigator.platform;
+                const response = await fetch(`/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newUser),
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                if (!response.ok) return ShowErrorNotification("Error creating user: " + result.title);
+                
+                console.log("User created:", result);
+                cleanNotifications();
+                return result;
+            } catch (error) {
+                return ShowErrorNotification("Network error creating user: " + error);
+            }
         }
     });
 }
@@ -51,8 +61,12 @@ export function register() {
 export function logoutUser() {
     return useMutation({
         mutationFn: async () => {
-            const response = await fetch(`/api/auth/logout`, { method: 'POST', credentials: 'include' });
-            if (!response.ok) return ShowErrorNotification("Error logging out");
+            try {
+                const response = await fetch(`/api/auth/logout`, { method: 'POST', credentials: 'include' });
+                if (!response.ok) return ShowErrorNotification("Error logging out");
+            } catch (error) {
+                return ShowErrorNotification("Network error logging out: " + error);
+            }
 
             cleanNotifications();
             return;

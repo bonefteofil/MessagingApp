@@ -12,6 +12,7 @@ public class UserDTO
 public class LoginModel
 {
     public string? Username { get; set; }
+    public string? DeviceName { get; set; }
 }
 
 [Table("Users")]

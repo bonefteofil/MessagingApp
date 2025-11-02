@@ -11,11 +11,41 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
 {
     private readonly Supabase.Client _supabase = supabase;
 
+    private void SetAccessTokenCookie(string accessToken)
+    {
+        Response.Cookies.Append("accessToken", accessToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            Path = "/",
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(10)
+        });
+    }
+
+    private void SetRefreshTokenCookie(string refreshToken)
+    {
+        Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            Path = "/",
+            SameSite = SameSiteMode.None,
+            Expires = DateTime.UtcNow.AddDays(7)
+        });
+    }
+
+
     [HttpPost("login")]
     public async Task<ActionResult<UserDTO>> Login(LoginModel login)
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(login.Username))
+                return BadRequest(new { title = "Username is required" });
+            if (string.IsNullOrWhiteSpace(login.DeviceName))
+                return BadRequest(new { title = "Device name is required" });
+
             var response = await _supabase
                 .From<SupabaseUser>()
                 .Where(x => x.Username == login.Username)
@@ -25,16 +55,11 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
             if (user == null)
                 return BadRequest(new { title = "Invalid username or password." });
 
-            string accessToken = TokenService.GenerateAccessToken(user.Id.ToString(), user.Username!);
+            string accessToken = TokenService.GenerateAccessToken(user.Id.ToString());
+            string refreshToken = await TokenService.GenerateRefreshToken(user.Id.ToString(), login.DeviceName, _supabase);
 
-            Response.Cookies.Append("accessToken", accessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                Path = "/",
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(10)
-            });
+            SetAccessTokenCookie(accessToken);
+            SetRefreshTokenCookie(refreshToken);
             return Ok(user.ToDTO());
         }
         catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
@@ -44,15 +69,18 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<UserDTO>> Register(UserDTO user)
+    public async Task<ActionResult<UserDTO>> Register(LoginModel newUser)
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(user.Username))
+            if (string.IsNullOrWhiteSpace(newUser.Username))
                 return BadRequest(new { title = "Username is required" });
 
-            if (user.Username!.Length > 20)
+            if (newUser.Username!.Length > 20)
                 return BadRequest(new { title = "Username too long (max 20 characters)" });
+
+            if (string.IsNullOrWhiteSpace(newUser.DeviceName))
+                return BadRequest(new { title = "Device name is required" });
 
             var count = await _supabase
                 .From<SupabaseUser>()
@@ -62,23 +90,16 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
 
             var response = await _supabase
                 .From<SupabaseUser>()
-                .Insert(new SupabaseUser { Username = user.Username });
+                .Insert(new SupabaseUser { Username = newUser.Username });
 
             var createdUser = response.Models.FirstOrDefault();
             if (createdUser == null)
                 return BadRequest();
 
-            string accessToken = TokenService.GenerateAccessToken(createdUser.Id.ToString(), user.Username);
-            
-            Response.Cookies.Append("accessToken", accessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                Path = "/",
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(10)
-            });
-
+            string accessToken = TokenService.GenerateAccessToken(createdUser.Id.ToString());
+            string refreshToken = await TokenService.GenerateRefreshToken(createdUser.Id.ToString(), newUser.DeviceName, _supabase);
+            SetAccessTokenCookie(accessToken);
+            SetRefreshTokenCookie(refreshToken);
             return Ok(createdUser.ToDTO());
         }
         catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
@@ -88,9 +109,15 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPost("logout")]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
+        string refreshTokenHash = Request.Cookies["refreshToken"] ?? string.Empty;
         Response.Cookies.Delete("accessToken");
+        Response.Cookies.Delete("refreshToken");
+
+        if (!string.IsNullOrWhiteSpace(refreshTokenHash))
+            await TokenService.RevokeToken(refreshTokenHash, _supabase);
+
         return Ok();
     }
 
@@ -99,6 +126,9 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
     {
         try
         {
+            Response.Cookies.Delete("accessToken");
+            Response.Cookies.Delete("refreshToken");
+
             int userId = int.Parse(TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!));
             var response = await _supabase
                 .From<SupabaseUser>()
@@ -115,6 +145,11 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
                 .Delete();
 
             await _supabase
+                .From<SupabaseRefreshToken>()
+                .Where(x => x.UserId == userId)
+                .Delete();
+
+            await _supabase
                 .From<SupabaseUser>()
                 .Delete(deletedUser);
 
@@ -123,6 +158,28 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
         catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
         {
             return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+        }
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken()
+    {
+        try
+        {
+            string refreshToken = Request.Cookies["refreshToken"]!;
+            if (string.IsNullOrWhiteSpace(refreshToken))
+                return BadRequest(new { title = "Refresh token is missing" });
+
+            string newAccessToken = await TokenService.RegenerateToken(refreshToken, _supabase);
+            if (string.IsNullOrWhiteSpace(newAccessToken))
+                return Unauthorized(new { title = "Invalid refresh token" });
+
+            SetAccessTokenCookie(newAccessToken);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { title = "Error refreshing token: " + ex.Message });
         }
     }
 }
