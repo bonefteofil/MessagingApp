@@ -5,10 +5,9 @@ import { Notifications } from '@mantine/notifications';
 import Layout from "@components/Layout";
 import ResponsiveCard from "@components/ResponsiveCard";
 
-import NotFoundPage from "@errors/404Page";
-import ServerDownPage from "@errors/ServerDownPage";
-
+import Status from "@components/Status";
 import ChatPage from "@messages/pages/ChatPage"
+import NotFoundPage from "@errors/404Page";
 
 import AccountPage from "@user/pages/AccountPage";
 import LoginPage from "@user/pages/LoginPage";
@@ -23,7 +22,7 @@ export default function App() {
 			<Notifications />
 
 			<Routes>
-				<Route element={<ServerDownPage />}>
+				<Route element={<Status />}>
 					<Route path="*" element={<NotFoundPage />} />
 					<Route path="/login" element={<LoginPage />} />
 					<Route path="/register" element={<RegisterPage />} />

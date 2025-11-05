@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 
 
-export function GetStatus() {
+export function FetchServerStatus() {
     return useQuery({
-        queryKey: ["status"],
+        queryKey: ["serverStatus"],
         queryFn: async () => {
             try {
                 const response = await fetch(`/api/status`, { method: "GET" });
                 if (!response.ok) throw new Error("Network response was not ok");
-                return response;
+                return response.status;
             } catch (error: any) {
                 throw error;
             }

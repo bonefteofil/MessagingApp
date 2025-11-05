@@ -168,14 +168,14 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
         {
             string refreshToken = Request.Cookies["refreshToken"]!;
             if (string.IsNullOrWhiteSpace(refreshToken))
-                return BadRequest(new { title = "Refresh token is missing" });
+                return Unauthorized(new { title = "Refresh token is missing" });
 
             string newAccessToken = await TokenService.RegenerateToken(refreshToken, _supabase);
             if (string.IsNullOrWhiteSpace(newAccessToken))
                 return Unauthorized(new { title = "Invalid refresh token" });
 
             SetAccessTokenCookie(newAccessToken);
-            return Ok();
+            return Ok(TokenService.GetUserIdFromToken(newAccessToken));
         }
         catch (Exception ex)
         {

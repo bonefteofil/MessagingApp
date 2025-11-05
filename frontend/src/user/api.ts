@@ -112,3 +112,26 @@ export function getUsers() {
         retry: false,
     });
 }
+
+
+export function FetchUserStatus() {
+    return useQuery({
+        queryKey: ["userStatus"],
+        queryFn: async () => {
+            try {
+                const response = await fetch(`/api/auth/refresh`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                });
+                if (response.status === 401) return response.statusText;
+                if (!response.ok) throw new Error(`Error fetching user status: ${response.status} ${response.statusText}`);
+                return await response.json();
+            } catch (error: any) {
+                throw error;
+            }
+        },
+        retry: false,
+        refetchOnWindowFocus: false,
+    })
+}
