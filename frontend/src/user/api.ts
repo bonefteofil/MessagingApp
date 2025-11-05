@@ -5,7 +5,7 @@ import { cleanNotifications } from "@mantine/notifications";
 
 import { ShowErrorNotification } from "@utils/showErrorNotification";
 
-import CurrentUserContext from "./Context";
+import CurrentUserIdContext from "./Context";
 
 import type { LoginScheme } from "./schema";
 
@@ -77,7 +77,7 @@ export function logoutUser() {
 
 export function deleteAccount() {
     const queryClient = useQueryClient();
-    const { setCurrentUser } = useContext(CurrentUserContext);
+    const { setCurrentUserId } = useContext(CurrentUserIdContext);
 
     return useMutation({
         mutationFn: async () => {
@@ -88,7 +88,7 @@ export function deleteAccount() {
             console.log("User deleted:", result);
             queryClient.invalidateQueries({ queryKey: ['messages'] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
-            setCurrentUser(null);
+            setCurrentUserId(null);
             cleanNotifications();
             return result;
         }

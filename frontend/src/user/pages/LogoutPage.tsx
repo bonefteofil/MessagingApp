@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { logoutUser } from "@user/api";
 
-import CurrentUserContext from "@user/Context";
+import CurrentUserIdContext from "@user/Context";
 import CurrentGroupContext from "@groups/Context";
 import EditingMessageContext from "@messages/Context";
 
@@ -11,14 +11,14 @@ import ResponsiveCard from "@components/ResponsiveCard";
 
 
 export default function LogoutRoute() {
-    const { setCurrentUser } = useContext(CurrentUserContext);
+    const { setCurrentUserId } = useContext(CurrentUserIdContext);
     const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
     const navigate = useNavigate();
     const logoutMutation = logoutUser();
 
     useEffect(() => {
-        setCurrentUser(null);
+        setCurrentUserId(null);
         setCurrentGroup(null);
         setEditingMessage(null);
         logoutMutation.mutate();

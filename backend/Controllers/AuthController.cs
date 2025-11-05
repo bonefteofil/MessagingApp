@@ -60,7 +60,7 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
 
             SetAccessTokenCookie(accessToken);
             SetRefreshTokenCookie(refreshToken);
-            return Ok(user.ToDTO());
+            return Ok(user.ToDTO().Id);
         }
         catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
         {
@@ -100,7 +100,7 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
             string refreshToken = await TokenService.GenerateRefreshToken(createdUser.Id.ToString(), newUser.DeviceName, _supabase);
             SetAccessTokenCookie(accessToken);
             SetRefreshTokenCookie(refreshToken);
-            return Ok(createdUser.ToDTO());
+            return Ok(createdUser.ToDTO().Id);
         }
         catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
         {

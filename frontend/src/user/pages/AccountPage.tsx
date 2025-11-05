@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { Switch, Text, Button, Code, Avatar, Group, Center } from "@mantine/core";
 
-import CurrentUserContext from "@user/Context";
+import CurrentUserIdContext from "@user/Context";
 import CurrentGroupContext from "@groups/Context";
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
@@ -12,7 +12,7 @@ import ResponsiveCard from "@components/ResponsiveCard";
 
 export default function AccountPage() {
     const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
-    const { currentUser } = useContext(CurrentUserContext);
+    const { currentUserId } = useContext(CurrentUserIdContext);
     const { setCurrentGroup } = useContext(CurrentGroupContext);
     const navigate = useNavigate();
 
@@ -23,7 +23,7 @@ export default function AccountPage() {
     return (<>
         <ResponsiveCard title="Account settings">
             <Center><Avatar size='xl' /></Center>
-            <Text>Username: {currentUser?.username}</Text>
+            <Text>User ID: {currentUserId}</Text>
 
             <Group>
                 <Text>Developer mode:</Text>
@@ -41,7 +41,7 @@ export default function AccountPage() {
         {developerMode && (
             <ResponsiveCard title="Current User Data">
                 <Code block>
-                    {JSON.stringify(currentUser, null, 2)}
+                    {JSON.stringify(currentUserId, null, 2)}
                 </Code>
             </ResponsiveCard>
         )}

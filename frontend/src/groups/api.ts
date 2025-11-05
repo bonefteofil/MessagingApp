@@ -4,13 +4,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { transformGroupDate } from "@utils/formatDate";
 import { authFetch } from "@utils/authFetch";
 
-import CurrentUserContext from "@user/Context";
+import CurrentUserIdContext from "@user/Context";
 
 import type GroupScheme from "./schema";
 
 
 export function getGroups() {
-    const { currentUser } = useContext(CurrentUserContext);
+    const { currentUserId } = useContext(CurrentUserIdContext);
 
     return useQuery({
         queryKey: ["groups"],
@@ -22,7 +22,7 @@ export function getGroups() {
             return groupsWithLocalTime;
         },
         retry: false,
-        enabled: !!currentUser,
+        enabled: !!currentUserId,
         refetchInterval: 3000
     });
 }

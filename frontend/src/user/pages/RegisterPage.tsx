@@ -6,17 +6,15 @@ import { useForm } from "@mantine/form";
 
 import { register } from "@user/api";
 
-import CurrentUserContext from "@user/Context";
+import CurrentUserIdContext from "@user/Context";
 
 import ResponsiveCard from "@components/ResponsiveCard";
-
-import type { LoginScheme } from "@user/schema";
 
 
 export default function RegisterPage() {
     const navigate = useNavigate();
     const createMutation = register();
-    const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
+    const { currentUserId, setCurrentUserId } = useContext(CurrentUserIdContext);
 
     const form = useForm({
         initialValues: { username: '' },
@@ -28,15 +26,15 @@ export default function RegisterPage() {
     }
 
     useEffect(() => {
-        if (currentUser) {
+        if (currentUserId) {
             navigate("/", { replace: true });
         }
-    }, [currentUser]);
+    }, [currentUserId]);
 
     useEffect(() => {
         if (createMutation.isSuccess) {
             form.reset();
-            setCurrentUser(createMutation.data as LoginScheme);
+            setCurrentUserId(createMutation.data);
             navigate("/", { replace: true });
         }
     }, [createMutation.isSuccess]);

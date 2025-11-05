@@ -5,31 +5,31 @@ import { Avatar, Button, Group, Radio, Stack, Text } from "@mantine/core";
 
 import { loginUser, getUsers } from "../api";
 
-import CurrentUserContext from "../Context";
+import CurrentUserIdContext from "../Context";
 
 import ErrorPage from "@errors/ErrorPage";
 import Loading from "@components/Loading";
 import ResponsiveCard from "@components/ResponsiveCard";
 
-import type { LoginScheme, UserScheme } from "@user/schema";
+import type { UserScheme } from "@user/schema";
 
 
 export default function LoginPage() {
-    const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
+    const { currentUserId, setCurrentUserId } = useContext(CurrentUserIdContext);
     const { data, error } = getUsers();
     const [value, setValue] = useState<UserScheme | null>(null);
     const navigate = useNavigate();
     const loginMutation = loginUser();
 
     useEffect(() => {
-        if (currentUser) {
+        if (currentUserId) {
             navigate("/", { replace: true });
         }
-    }, [currentUser]);
+    }, [currentUserId]);
     
     useEffect(() => {
         if (loginMutation.isSuccess) {
-            setCurrentUser(loginMutation.data as LoginScheme);
+            setCurrentUserId(loginMutation.data);
             navigate("/", { replace: true });
         }
     }, [loginMutation.isSuccess]);

@@ -1,21 +1,19 @@
 import { createContext, useState } from "react";
 
-import type { UserScheme } from "./schema";
 
-
-const CurrentUserContext = createContext<{
-    currentUser: UserScheme | null;
-    setCurrentUser: (user: UserScheme | null) => void;
-}>({ currentUser: null, setCurrentUser: () => {} });
+const CurrentUserIdContext = createContext<{
+    currentUserId: number | null;
+    setCurrentUserId: (userId: number | null) => void;
+}>({ currentUserId: null, setCurrentUserId: () => {} });
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const [currentUser, setCurrentUser] = useState<UserScheme | null>(null);
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
     return (
-        <CurrentUserContext.Provider value={{ currentUser, setCurrentUser }}>
+        <CurrentUserIdContext.Provider value={{ currentUserId, setCurrentUserId }}>
             {children}
-        </CurrentUserContext.Provider>
+        </CurrentUserIdContext.Provider>
     );
 }
 
-export default CurrentUserContext;
+export default CurrentUserIdContext;

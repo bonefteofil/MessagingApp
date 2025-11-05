@@ -7,7 +7,7 @@ import { Group, ActionIcon, Text, Card, Code } from "@mantine/core"
 import { deleteMessage } from '@messages/api';
 
 import EditingMessageContext from '@messages/Context';
-import CurrentUserContext from '@user/Context';
+import CurrentUserIdContext from '@user/Context';
 import DeveloperModeContext from '@components/DeveloperModeContext';
 
 import type MessageScheme from '@messages/schema';
@@ -16,9 +16,9 @@ import type MessageScheme from '@messages/schema';
 export default function MessageBubble({ message } : { message: MessageScheme }) {
     const { developerMode } = useContext(DeveloperModeContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
-    const { currentUser } = useContext(CurrentUserContext);
+    const { currentUserId } = useContext(CurrentUserIdContext);
     const deleteMutation = deleteMessage();
-    const isOwnMessage = message.userId == currentUser?.id;
+    const isOwnMessage = message.userId == currentUserId;
 
     return (
         <Group justify='space-between'>

@@ -9,7 +9,7 @@ import { getGroups } from "@groups/api";
 
 import CurrentGroupContext from "@groups/Context";
 import EditingMessageContext from "@messages/Context";
-import CurrentUserContext from "@user/Context";
+import CurrentUserIdContext from "@user/Context";
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
 import GroupForm from "@groups/components/GroupForm";
@@ -22,7 +22,7 @@ import type GroupScheme from "@groups/schema";
 export default function InboxPage() {
     const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
-    const { currentUser } = useContext(CurrentUserContext);
+    const { currentUserId } = useContext(CurrentUserIdContext);
     const { developerMode } = useContext(DeveloperModeContext);
 
     const { data, error, isLoading } = getGroups();
@@ -30,11 +30,11 @@ export default function InboxPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (currentUser == null) {
+        if (currentUserId == null) {
             console.log("No current user, redirecting to login");
             navigate("/login");
         }
-    }, [currentUser]);
+    }, [currentUserId]);
 
     if (error) return (<AppShell.Navbar withBorder><ErrorPage message={error.message} /></AppShell.Navbar>);
 
