@@ -1,11 +1,10 @@
-import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 import { Avatar, Button, Group, Radio, Stack, Text } from "@mantine/core";
 
-import { loginUser, getUsers } from "../api";
-
-import CurrentUserIdContext from "../Context";
+import { loginUser, getUsers } from "@user/api";
 
 import ErrorPage from "@errors/ErrorPage";
 import Loading from "@components/Loading";
@@ -15,25 +14,13 @@ import type { UserScheme } from "@user/schema";
 
 
 export default function LoginPage() {
-    const { currentUserId, setCurrentUserId } = useContext(CurrentUserIdContext);
     const { data, error } = getUsers();
+    const loginMutation = loginUser();
+    const [cookies] = useCookies(['userId']);
     const [value, setValue] = useState<UserScheme | null>(null);
     const navigate = useNavigate();
-    const loginMutation = loginUser();
 
-    useEffect(() => {
-        if (currentUserId) {
-            navigate("/", { replace: true });
-        }
-    }, [currentUserId]);
-    
-    useEffect(() => {
-        if (loginMutation.isSuccess) {
-            setCurrentUserId(loginMutation.data);
-            navigate("/", { replace: true });
-        }
-    }, [loginMutation.isSuccess]);
-
+    if (cookies.userId) return <Navigate to="/" replace />;
     if (error) return <ErrorPage message={error.message} />;
 
     return (

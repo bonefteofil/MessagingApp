@@ -30,14 +30,26 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
             HttpOnly = true,
             Secure = true,
             Path = "/",
-            SameSite = SameSiteMode.None,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(7)
+        });
+    }
+
+    private void SetUserIdCookie(int userId)
+    {
+        Response.Cookies.Append("userId", userId.ToString(), new CookieOptions
+        {
+            HttpOnly = false,
+            Secure = true,
+            Path = "/",
+            SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddDays(7)
         });
     }
 
 
     [HttpPost("login")]
-    public async Task<ActionResult<UserDTO>> Login(LoginModel login)
+    public async Task<IActionResult> Login(LoginModel login)
     {
         try
         {
@@ -60,7 +72,8 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
 
             SetAccessTokenCookie(accessToken);
             SetRefreshTokenCookie(refreshToken);
-            return Ok(user.ToDTO().Id);
+            SetUserIdCookie(user.Id);
+            return Ok();
         }
         catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
         {
@@ -100,7 +113,8 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
             string refreshToken = await TokenService.GenerateRefreshToken(createdUser.Id.ToString(), newUser.DeviceName, _supabase);
             SetAccessTokenCookie(accessToken);
             SetRefreshTokenCookie(refreshToken);
-            return Ok(createdUser.ToDTO().Id);
+            SetUserIdCookie(createdUser.Id);
+            return Ok();
         }
         catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
         {
@@ -114,6 +128,7 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
         string refreshTokenHash = Request.Cookies["refreshToken"] ?? string.Empty;
         Response.Cookies.Delete("accessToken");
         Response.Cookies.Delete("refreshToken");
+        Response.Cookies.Delete("userId");
 
         if (!string.IsNullOrWhiteSpace(refreshTokenHash))
             await TokenService.RevokeToken(refreshTokenHash, _supabase);
@@ -175,7 +190,8 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
                 return Unauthorized(new { title = "Invalid refresh token" });
 
             SetAccessTokenCookie(newAccessToken);
-            return Ok(TokenService.GetUserIdFromToken(newAccessToken));
+            SetUserIdCookie(int.Parse(TokenService.GetUserIdFromToken(newAccessToken)));
+            return Ok();
         }
         catch (Exception ex)
         {

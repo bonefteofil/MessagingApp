@@ -1,9 +1,9 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 import { Switch, Text, Button, Code, Avatar, Group, Center } from "@mantine/core";
 
-import CurrentUserIdContext from "@user/Context";
 import CurrentGroupContext from "@groups/Context";
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
@@ -12,8 +12,9 @@ import ResponsiveCard from "@components/ResponsiveCard";
 
 export default function AccountPage() {
     const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
-    const { currentUserId } = useContext(CurrentUserIdContext);
     const { setCurrentGroup } = useContext(CurrentGroupContext);
+
+    const [cookie] = useCookies(['userId']);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -23,7 +24,7 @@ export default function AccountPage() {
     return (<>
         <ResponsiveCard title="Account settings">
             <Center><Avatar size='xl' /></Center>
-            <Text>User ID: {currentUserId}</Text>
+            <Text>User ID: {cookie.userId}</Text>
 
             <Group>
                 <Text>Developer mode:</Text>
@@ -41,7 +42,7 @@ export default function AccountPage() {
         {developerMode && (
             <ResponsiveCard title="Current User Data">
                 <Code block>
-                    {JSON.stringify(currentUserId, null, 2)}
+                    {JSON.stringify(cookie.userId, null, 2)}
                 </Code>
             </ResponsiveCard>
         )}

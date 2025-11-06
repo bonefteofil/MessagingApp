@@ -1,16 +1,14 @@
-import { useContext } from "react";
+import { useCookies } from "react-cookie";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { transformGroupDate } from "@utils/formatDate";
 import { authFetch } from "@utils/authFetch";
 
-import CurrentUserIdContext from "@user/Context";
-
 import type GroupScheme from "./schema";
 
 
 export function getGroups() {
-    const { currentUserId } = useContext(CurrentUserIdContext);
+    const [cookies] = useCookies(['userId']);
 
     return useQuery({
         queryKey: ["groups"],
@@ -22,7 +20,7 @@ export function getGroups() {
             return groupsWithLocalTime;
         },
         retry: false,
-        enabled: !!currentUserId,
+        enabled: !!cookies.userId,
         refetchInterval: 3000
     });
 }

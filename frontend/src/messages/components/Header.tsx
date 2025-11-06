@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { faAngleLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -38,7 +38,7 @@ export default function Header() {
 
                 {currentGroup ? (<>
                     <Avatar />
-                    <Text size="sm" className="truncate max-w-[38%]">{currentGroup?.name} {developerMode && `ID: ${Number(useParams().groupId)}`}</Text>
+                    <Text size="sm" className="truncate max-w-[38%]">{currentGroup?.name} {developerMode && ` ID: ${currentGroup.id}`}</Text>
                     <div style={{ flexGrow: 1 }} />
 
                     <GroupForm editingGroup={currentGroup!} />

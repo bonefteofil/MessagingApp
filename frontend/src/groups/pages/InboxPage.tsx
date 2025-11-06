@@ -1,5 +1,6 @@
-import { useContext, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useContext } from "react";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
@@ -9,7 +10,6 @@ import { getGroups } from "@groups/api";
 
 import CurrentGroupContext from "@groups/Context";
 import EditingMessageContext from "@messages/Context";
-import CurrentUserIdContext from "@user/Context";
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
 import GroupForm from "@groups/components/GroupForm";
@@ -22,20 +22,14 @@ import type GroupScheme from "@groups/schema";
 export default function InboxPage() {
     const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
-    const { currentUserId } = useContext(CurrentUserIdContext);
     const { developerMode } = useContext(DeveloperModeContext);
+    const [cookies] = useCookies(['userId']);
 
     const { data, error, isLoading } = getGroups();
     const { groupId } = useParams();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (currentUserId == null) {
-            console.log("No current user, redirecting to login");
-            navigate("/login");
-        }
-    }, [currentUserId]);
-
+    if (!cookies.userId) return <Navigate to="/login" replace />;
     if (error) return (<AppShell.Navbar withBorder><ErrorPage message={error.message} /></AppShell.Navbar>);
 
     return (

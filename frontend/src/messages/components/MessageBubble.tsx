@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import { useCookies } from 'react-cookie';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
@@ -7,7 +8,6 @@ import { Group, ActionIcon, Text, Card, Code } from "@mantine/core"
 import { deleteMessage } from '@messages/api';
 
 import EditingMessageContext from '@messages/Context';
-import CurrentUserIdContext from '@user/Context';
 import DeveloperModeContext from '@components/DeveloperModeContext';
 
 import type MessageScheme from '@messages/schema';
@@ -16,9 +16,10 @@ import type MessageScheme from '@messages/schema';
 export default function MessageBubble({ message } : { message: MessageScheme }) {
     const { developerMode } = useContext(DeveloperModeContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
-    const { currentUserId } = useContext(CurrentUserIdContext);
+    const [cookies] = useCookies(['userId']);
+
+    const isOwnMessage = message.userId == cookies.userId;
     const deleteMutation = deleteMessage();
-    const isOwnMessage = message.userId == currentUserId;
 
     return (
         <Group justify='space-between'>

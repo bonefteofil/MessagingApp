@@ -1,20 +1,18 @@
-import { useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 import { Button, Group, Input, Stack, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 
 import { register } from "@user/api";
 
-import CurrentUserIdContext from "@user/Context";
-
 import ResponsiveCard from "@components/ResponsiveCard";
 
 
 export default function RegisterPage() {
-    const navigate = useNavigate();
     const createMutation = register();
-    const { currentUserId, setCurrentUserId } = useContext(CurrentUserIdContext);
+    const [cookies] = useCookies(['userId']);
+    const navigate = useNavigate();
 
     const form = useForm({
         initialValues: { username: '' },
@@ -24,20 +22,7 @@ export default function RegisterPage() {
         e.preventDefault();
         createMutation.mutate({ username: form.values.username });
     }
-
-    useEffect(() => {
-        if (currentUserId) {
-            navigate("/", { replace: true });
-        }
-    }, [currentUserId]);
-
-    useEffect(() => {
-        if (createMutation.isSuccess) {
-            form.reset();
-            setCurrentUserId(createMutation.data);
-            navigate("/", { replace: true });
-        }
-    }, [createMutation.isSuccess]);
+    if (cookies.userId) return <Navigate to="/" replace />;
 
     return (
         <ResponsiveCard title="sfsdfs">

@@ -1,9 +1,9 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 import { logoutUser } from "@user/api";
 
-import CurrentUserIdContext from "@user/Context";
 import CurrentGroupContext from "@groups/Context";
 import EditingMessageContext from "@messages/Context";
 
@@ -11,24 +11,24 @@ import ResponsiveCard from "@components/ResponsiveCard";
 
 
 export default function LogoutRoute() {
-    const { setCurrentUserId } = useContext(CurrentUserIdContext);
     const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
-    const navigate = useNavigate();
+
+    const [cookies] = useCookies(['userId']);
     const logoutMutation = logoutUser();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        setCurrentUserId(null);
         setCurrentGroup(null);
         setEditingMessage(null);
         logoutMutation.mutate();
     }, []);
 
     useEffect(() => {
-        if (logoutMutation.isSuccess) {
-            navigate("/login");
-        }
-    }, [logoutMutation.isSuccess]);
+        if (!cookies.userId)
+            navigate("/login", { replace: true });
+
+    }, [cookies.userId]);
 
     return <ResponsiveCard title="Logging out..."/>;
 }
