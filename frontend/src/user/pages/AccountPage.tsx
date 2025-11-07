@@ -1,30 +1,40 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCookies } from "react-cookie";
 
 import { Switch, Text, Button, Code, Avatar, Group, Center } from "@mantine/core";
+
+import { getAccountData } from "../api";
 
 import CurrentGroupContext from "@groups/Context";
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
+import LoginHistory from "@user/components/LoginHistory";
 import ResponsiveCard from "@components/ResponsiveCard";
+import Loading from "@components/Loading";
 
 
 export default function AccountPage() {
     const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
     const { setCurrentGroup } = useContext(CurrentGroupContext);
-
-    const [cookie] = useCookies(['userId']);
+    const { data, isLoading } = getAccountData();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        console.log("Account data:", data);
+    }, [data]);
 
     useEffect(() => {
         setCurrentGroup(null);
     }, []);
 
     return (<>
-        <ResponsiveCard title="Account settings">
-            <Center><Avatar size='xl' /></Center>
-            <Text>User ID: {cookie.userId}</Text>
+        <ResponsiveCard title="Account">
+            <Loading loading={isLoading} />
+
+            {data && <>
+                <Center><Avatar size='xl' /></Center>
+                <Text>Username: <Text component="span" fw={700}>{data.user.username}</Text> </Text>
+            </>}
 
             <Group>
                 <Text>Developer mode:</Text>
@@ -39,10 +49,12 @@ export default function AccountPage() {
             </Button>
         </ResponsiveCard>
 
+        <LoginHistory data={data?.sessions} />
+
         {developerMode && (
             <ResponsiveCard title="Current User Data">
                 <Code block>
-                    {JSON.stringify(cookie.userId, null, 2)}
+                    {JSON.stringify(data, null, 2)}
                 </Code>
             </ResponsiveCard>
         )}

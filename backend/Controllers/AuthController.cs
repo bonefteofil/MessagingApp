@@ -11,43 +11,6 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
 {
     private readonly Supabase.Client _supabase = supabase;
 
-    private void SetAccessTokenCookie(string accessToken)
-    {
-        Response.Cookies.Append("accessToken", accessToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            Path = "/",
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddMinutes(10)
-        });
-    }
-
-    private void SetRefreshTokenCookie(string refreshToken)
-    {
-        Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            Path = "/",
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(7)
-        });
-    }
-
-    private void SetUserIdCookie(int userId)
-    {
-        Response.Cookies.Append("userId", userId.ToString(), new CookieOptions
-        {
-            HttpOnly = false,
-            Secure = true,
-            Path = "/",
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(7)
-        });
-    }
-
-
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginModel login)
     {
@@ -197,5 +160,42 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
         {
             return BadRequest(new { title = "Error refreshing token: " + ex.Message });
         }
+    }
+
+
+    private void SetAccessTokenCookie(string accessToken)
+    {
+        Response.Cookies.Append("accessToken", accessToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            Path = "/",
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(10)
+        });
+    }
+
+    private void SetRefreshTokenCookie(string refreshToken)
+    {
+        Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            Path = "/",
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(7)
+        });
+    }
+
+    private void SetUserIdCookie(int userId)
+    {
+        Response.Cookies.Append("userId", userId.ToString(), new CookieOptions
+        {
+            HttpOnly = false,
+            Secure = true,
+            Path = "/",
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(7)
+        });
     }
 }

@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cleanNotifications } from "@mantine/notifications";
 
+import { transformSessionDate } from "@utils/formatDate";
 import { ShowErrorNotification } from "@utils/showErrorNotification";
 
-import type { LoginScheme } from "./schema";
+import type { LoginScheme, UserScheme, SessionDetails } from "./schema";
 
 
 export function loginUser() {
@@ -17,7 +18,7 @@ export function loginUser() {
                     body: JSON.stringify(credentials),
                     credentials: 'include'
                 });
-                if (!response.ok) return ShowErrorNotification(`Error logging in: ${response.status} ${response.statusText}`);
+                if (!response.ok) throw new Error(`Error logging in: ${response.status} ${response.statusText}`);
 
                 cleanNotifications();
                 window.location.href = "/#/";
@@ -41,7 +42,7 @@ export function register() {
                     body: JSON.stringify(newUser),
                     credentials: 'include'
                 });
-                if (!response.ok) return ShowErrorNotification(`Error creating user: ${response.status} ${response.statusText}`);
+                if (!response.ok) throw new Error(`Error creating user: ${response.status} ${response.statusText}`);
                 
                 cleanNotifications();
                 window.location.href = "/#/";
@@ -58,7 +59,7 @@ export function logoutUser() {
         mutationFn: async () => {
             try {
                 const response = await fetch(`/api/auth/logout`, { method: 'POST', credentials: 'include' });
-                if (!response.ok) return ShowErrorNotification("Error logging out");
+                if (!response.ok) throw new Error("Error logging out");
 
             } catch (error) {
                 return ShowErrorNotification("Network error logging out: " + error);
@@ -86,6 +87,28 @@ export function deleteAccount() {
             cleanNotifications();
             return result;
         }
+    });
+}
+
+export function getAccountData() {
+    return useQuery({
+        queryKey: ["userData"],
+        queryFn: async () => {
+            try {
+                const response = await fetch(`/api/account`, {method: "GET", credentials: 'include'});
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.title);
+
+                const user: UserScheme = result.user;
+                const sessions: SessionDetails[] = result.sessions.map((session: SessionDetails) => (transformSessionDate(session)));
+                cleanNotifications();
+                return { user, sessions };
+            } catch (error) {
+                ShowErrorNotification("Network error getting user data: " + error);
+                return null;
+            }
+        },
+        retry: false,
     });
 }
 

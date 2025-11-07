@@ -29,7 +29,7 @@ export default function Header() {
 
     return (
         <AppShell.Header display={location.pathname === "/" ? "none" : "inherit"} p='sm' ml={{ base: 0, md: 400 }} className="!backdrop-blur-lg !bg-gray-700/30" >
-            <Group gap='5'>
+            <Group gap='5' wrap="nowrap">
 
                 <Button px='5' variant="subtle" onClick={() => { navigate('/'); }}>
                     <FontAwesomeIcon icon={faAngleLeft} />
@@ -38,7 +38,7 @@ export default function Header() {
 
                 {currentGroup ? (<>
                     <Avatar />
-                    <Text size="sm" className="truncate max-w-[38%]">{currentGroup?.name} {developerMode && ` ID: ${currentGroup.id}`}</Text>
+                    <Text size="sm" truncate="end">{currentGroup?.name} {developerMode && ` ID: ${currentGroup.id}`}</Text>
                     <div style={{ flexGrow: 1 }} />
 
                     <GroupForm editingGroup={currentGroup!} />

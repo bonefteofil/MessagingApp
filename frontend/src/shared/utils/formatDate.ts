@@ -18,6 +18,13 @@ export function transformGroupDate(group: GroupScheme) {
     } as GroupScheme;
 }
 
+export function transformSessionDate(session: { createdAt: string }) {
+    return {
+        ...session,
+        createdAt: formatLastMessageDate(session.createdAt)
+    };
+}
+
 
 function formatLastMessageDate(date: string) {
     const localDate = formatLocalDate(new Date(date));
@@ -27,7 +34,7 @@ function formatLastMessageDate(date: string) {
     if (localDate.toDateString() === new Date(Date.now() - 86400000).toDateString()) {
         return "Yesterday";
     }
-    return localDate.toLocaleDateString([], {
+    return localDate.toLocaleDateString('ro-RO', {
         day: "2-digit",
         month: '2-digit',
         year: 'numeric',

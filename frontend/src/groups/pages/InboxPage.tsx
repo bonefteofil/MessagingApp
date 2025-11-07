@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { Avatar, Divider, Group, Stack, Text, ScrollArea, Code, Box, AppShell, ActionIcon } from "@mantine/core";
 
 import { getGroups } from "@groups/api";
@@ -42,9 +42,9 @@ export default function InboxPage() {
                         p="md"
                         variant="light"
                         radius='xl'
-                        onClick={() => { navigate("/settings"); }}
+                        onClick={() => { navigate("/account"); }}
                     >
-                        <FontAwesomeIcon icon={faGear} />
+                        <FontAwesomeIcon icon={faUser} />
                     </ActionIcon>
                 </Group>
 

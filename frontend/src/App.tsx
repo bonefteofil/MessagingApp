@@ -32,7 +32,7 @@ export default function App() {
 					<Route element={<Layout />}>
 						<Route path="/" element={<ResponsiveCard title="Welcome to Messaging App!" />} />
 						<Route path="/groups/:groupId" element={<ChatPage />} />
-						<Route path="/settings" element={<AccountPage />} />
+						<Route path="/account" element={<AccountPage />} />
 					</Route>
 				</Route>
 			</Routes>
