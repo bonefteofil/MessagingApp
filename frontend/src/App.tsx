@@ -24,15 +24,16 @@ export default function App() {
 			<Routes>
 				<Route element={<Status />}>
 					<Route path="*" element={<NotFoundPage />} />
-					<Route path="/login" element={<LoginPage />} />
-					<Route path="/register" element={<RegisterPage />} />
-					<Route path="/logout" element={<LogoutPage />} />
-					<Route path="/delete-account" element={<DeleteAccountPage />} />
+					<Route path="login" element={<LoginPage />} />
+					<Route path="register" element={<RegisterPage />} />
+					<Route path="logout" element={<LogoutPage />} />
 
 					<Route element={<Layout />}>
-						<Route path="/" element={<ResponsiveCard title="Welcome to Messaging App!" />} />
-						<Route path="/groups/:groupId" element={<ChatPage />} />
-						<Route path="/account" element={<AccountPage />} />
+						<Route path="" element={<ResponsiveCard title="Welcome to Messaging App!" />} />
+						<Route path="groups/:groupId" element={<ChatPage />} />
+						<Route path="account" element={<AccountPage />} >
+							<Route path="delete" element={<DeleteAccountPage />} /> 
+						</Route>
 					</Route>
 				</Route>
 			</Routes>

@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 import { Switch, Text, Button, Code, Avatar, Group, Center } from "@mantine/core";
 
@@ -28,6 +28,7 @@ export default function AccountPage() {
     }, []);
 
     return (<>
+        <Outlet />
         <ResponsiveCard title="Account">
             <Loading loading={isLoading} />
 
@@ -44,7 +45,7 @@ export default function AccountPage() {
             <Button mt='sm' radius='md' onClick={() => { navigate("/logout"); }}>
                 Logout
             </Button>
-            <Button mt='sm' radius='md' color="red" onClick={() => { navigate("/delete-account"); }}>
+            <Button mt='sm' radius='md' color="red" onClick={() => { navigate("/account/delete"); }}>
                 Delete Account
             </Button>
         </ResponsiveCard>
