@@ -48,16 +48,13 @@ export default function AccountPage() {
             <Button mt='sm' radius='md' color="red" onClick={() => { navigate("/account/delete"); }}>
                 Delete Account
             </Button>
+            {developerMode && (
+                <Code block>
+                    {JSON.stringify(data?.user, null, 2)}
+                </Code>
+            )}
         </ResponsiveCard>
 
         <LoginHistory data={data?.sessions} />
-
-        {developerMode && (
-            <ResponsiveCard title="Current User Data">
-                <Code block>
-                    {JSON.stringify(data, null, 2)}
-                </Code>
-            </ResponsiveCard>
-        )}
     </>);
 }

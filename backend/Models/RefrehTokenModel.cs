@@ -5,6 +5,7 @@ namespace backend.Models;
 
 public class RefreshTokenDTO
 {
+    public int Id { get; set; }
     public DateTime CreatedAt { get; set; }
     public bool Expired { get; set; }
     public bool Revoked { get; set; }
@@ -33,6 +34,7 @@ public class SupabaseRefreshToken : BaseModel
     {
         return new RefreshTokenDTO
         {
+            Id = this.Id,
             CreatedAt = this.CreatedAt,
             Expired = this.ExpiresAt < DateTime.UtcNow,
             Revoked = this.Revoked,

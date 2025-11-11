@@ -9,6 +9,7 @@ export interface LoginScheme {
 }
 
 export interface SessionDetails {
+    id: number;
     createdAt: string;
     expired: boolean;
     revoked: boolean;

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using backend.Services;
 using backend.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers;
 
@@ -99,6 +100,7 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
         return Ok();
     }
 
+    [Authorize]
     [HttpDelete]
     public async Task<IActionResult> DeleteAccount()
     {
@@ -158,10 +160,41 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { title = "Error refreshing token: " + ex.Message });
+            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() } );
         }
     }
 
+    [Authorize]
+    [HttpPost("revoke/{id}")]
+    public async Task<IActionResult> RevokeToken(int id)
+    {
+        try
+        {
+            int userId = int.Parse(TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!));
+
+            var response = await _supabase
+                .From<SupabaseRefreshToken>()
+                .Where(x => x.Id == id)
+                .Get();
+
+            var token = response.Models.FirstOrDefault();
+            if (token == null)
+                return NotFound(new { title = "Refresh token not found" });
+            if (token.UserId != userId)
+                return Forbid();
+
+            token.Revoked = true;
+            await _supabase
+                .From<SupabaseRefreshToken>()
+                .Update(token);
+
+            return Ok();
+        }
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
+            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+        }
+    }
 
     private void SetAccessTokenCookie(string accessToken)
     {

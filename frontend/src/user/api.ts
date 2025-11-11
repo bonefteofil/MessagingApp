@@ -112,6 +112,25 @@ export function getAccountData() {
     });
 }
 
+export function revokeSession() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (sessionId: number) => {
+            try {
+                const response = await fetch(`/api/auth/revoke/${sessionId}`, { method: 'POST', credentials: 'include' });
+                if (!response.ok) return ShowErrorNotification("Error revoking session: " + response.statusText + response.status);
+
+                console.log("Session revoked");
+                queryClient.invalidateQueries({ queryKey: ['userData'] });
+                cleanNotifications();
+                return response.ok;
+            } catch (error) {
+                return ShowErrorNotification("Network error revoking session: " + error);
+            }
+        }
+    });
+}
+
 export function getUsers() {
     return useQuery({
         queryKey: ["users"],
