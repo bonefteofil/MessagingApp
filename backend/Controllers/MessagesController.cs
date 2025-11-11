@@ -1,119 +1,148 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using backend.Services;
 using backend.Models;
 
 namespace backend.Controllers;
 
+[Authorize]
 [ApiController]
-[Route("groups/{group_id}/messages")]
+[Route("groups/{groupId}/messages")]
 public class MessagesController(Supabase.Client supabase) : ControllerBase
 {
     private readonly Supabase.Client _supabase = supabase;
 
-    private async Task<bool> GroupExists(int group_id)
-    {
-        var response = await _supabase
-            .From<SupabaseGroupWithLastMessage>()
-            .Where(g => g.Id == group_id)
-            .Get();
-            
-        return response.Models.Count != 0;
-    }
-
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MessageDTO>>> GetMessages(int group_id)
+    public async Task<ActionResult<IEnumerable<MessageDTO>>> GetMessages(int groupId)
     {
-        if (!await GroupExists(group_id))
-            return NotFound(new { title = $"Group with id {group_id} not found." });
+        try
+        {
+            if (!await Validations.GroupExists(groupId, _supabase))
+                return NotFound(new { title = $"Group with id {groupId} not found." });
 
-        var messages = await _supabase
-            .From<SupabaseMessage>()
-            .Where(m => m.GroupId == group_id)
-            .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Ascending)
-            .Get();
-        
-        return Ok(messages.Models.Select(x => x.ToDTO()));
+            var messages = await _supabase
+                .From<SupabaseMessageWithUsername>()
+                .Select("*, username:user_id(username)")
+                .Where(m => m.GroupId == groupId)
+                .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Ascending)
+                .Get();
+
+            return Ok(messages.Models.Select(x => x.ToDTO()));
+        }
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
+            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+        }
     }
 
     [HttpPost]
-    public async Task<ActionResult<MessageDTO>> CreateMessage(int group_id, MessageDTO message)
+    public async Task<ActionResult<MessageDTO>> CreateMessage(int groupId, MessageDTO message)
     {
-        if (message.GroupId != group_id)
-            return BadRequest(new { title = $"Group ID in URL: {group_id} does not match Group ID in message: {message.GroupId}." });
-
-        if (!await GroupExists(group_id))
-            return NotFound(new { title = $"Group with id {group_id} not found." });
-        
-        if (message.Text?.Length > 100)
-            return BadRequest(new { title = "Message too long (max 100 characters)" });
-        
-        var count = await _supabase
-            .From<SupabaseMessage>()
-            .Where(m => m.GroupId == group_id)
-            .Count(Supabase.Postgrest.Constants.CountType.Exact);
-        if (count >= 100)
-            return BadRequest(new { title = "Message limit reached (max 100 messages per group)" });
-
-        var supabaseMessage = new SupabaseMessage
+        try
         {
-            GroupId = message.GroupId,
-            Text = message.Text,
-            CreatedAt = DateTime.UtcNow,
-            Edited = false,
-        };
-        var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
-        var createdMessage = response.Models.FirstOrDefault();
-        if (createdMessage == null)
-            return BadRequest();
+            if (message.GroupId != groupId)
+                return BadRequest(new { title = $"Group ID in URL: {groupId} does not match Group ID in message: {message.GroupId}." });
 
-        return Ok(createdMessage.ToDTO());
+            if (!await Validations.GroupExists(groupId, _supabase))
+                return NotFound(new { title = $"Group with id {groupId} not found." });
+
+            if (message.Text?.Length > 100)
+                return BadRequest(new { title = "Message too long (max 100 characters)" });
+
+            var count = await _supabase
+                .From<SupabaseMessage>()
+                .Where(m => m.GroupId == groupId)
+                .Count(Supabase.Postgrest.Constants.CountType.Exact);
+            if (count >= 100)
+                return BadRequest(new { title = "Message limit reached (max 100 messages per group)" });
+
+            var supabaseMessage = new SupabaseMessage
+            {
+                GroupId = message.GroupId,
+                Text = message.Text,
+                CreatedAt = DateTime.UtcNow,
+                Edited = false,
+                UserId = int.Parse(TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!))
+            };
+
+            var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
+            var createdMessage = response.Models.FirstOrDefault();
+            if (createdMessage == null)
+                return BadRequest();
+
+            return Ok(createdMessage.ToDTO());
+        }
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
+            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+        }
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateMessage(int group_id, int id, MessageDTO message)
+    [HttpPut]
+    public async Task<IActionResult> UpdateMessage(int groupId, MessageDTO message)
     {
-        if (message.GroupId != group_id)
-            return BadRequest(new { title = $"Group ID in URL: {group_id} does not match Group ID in message: {message.GroupId}." });
+        try
+        {
+            if (message.GroupId != groupId)
+                return BadRequest(new { title = $"Group ID in URL: {groupId} does not match Group ID in message: {message.GroupId}." });
 
-        if (id != message.Id)
-            return BadRequest(new { title = $"Message ID: {id} in URL does not match Message ID in body: {message.Id}." });
+            if (!await Validations.GroupExists(groupId, _supabase))
+                return NotFound(new { title = $"Group with id {groupId} not found." });
 
-        if (!await GroupExists(group_id))
-            return NotFound(new { title = $"Group with id {group_id} not found." });
+            if (message.Text?.Length > 100)
+                return BadRequest(new { title = "Message too long (max 100 characters)" });
 
-        if (message.Text?.Length > 100)
-            return BadRequest(new { title = "Message too long (max 100 characters)" });
+            var response = await _supabase
+                .From<SupabaseMessage>()
+                .Where(x => x.Id == message.Id)
+                .Get();
 
-        var response = await _supabase
-            .From<SupabaseMessage>()
-            .Where(x => x.Id == id)
-            .Set(x => x.Text!, message.Text)
-            .Set(x => x.Edited, true)
-            .Update();
-            
-        var updatedMessage = response.Models.FirstOrDefault();
-        if (updatedMessage == null)
-            return NotFound();
+            var existingMessage = response.Models.FirstOrDefault();
+            if (existingMessage == null)
+                return NotFound();
 
-        return Ok(updatedMessage.ToDTO());
+            if (existingMessage.UserId.ToString() != TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!))
+                return Unauthorized(new { title = "You can only edit your own messages." });
+
+            existingMessage.Text = message.Text;
+            existingMessage.Edited = true;
+            await _supabase.From<SupabaseMessage>().Update(existingMessage);
+
+            return Ok(existingMessage.ToDTO());
+        }
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
+            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+        }
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteMessage(int id)
+    [HttpDelete]
+    public async Task<IActionResult> DeleteMessage(MessageDTO message)
     {
-        var response = await _supabase
-            .From<SupabaseMessage>()
-            .Where(x => x.Id == id)
-            .Get();
+        try
+        {
+            var response = await _supabase
+                .From<SupabaseMessage>()
+                .Where(x => x.Id == message.Id)
+                .Get();
 
-        var deletedMessage = response.Models.FirstOrDefault();
-        if (deletedMessage == null)
-            return NotFound();
+            var deletedMessage = response.Models.FirstOrDefault();
+            if (deletedMessage == null)
+                return NotFound();
 
-        await _supabase
-            .From<SupabaseMessage>()
-            .Where(x => x.Id == id)
-            .Delete();
+            if (deletedMessage.UserId.ToString() != TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!))
+                return Unauthorized(new { title = "You can only delete your own messages." });
 
-        return Ok(deletedMessage.ToDTO());
+            await _supabase
+                .From<SupabaseMessage>()
+                .Delete(deletedMessage);
+
+            return Ok(deletedMessage.ToDTO());
+        }
+        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        {
+            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+        }
     }
 }
