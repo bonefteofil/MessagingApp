@@ -33,6 +33,10 @@ export async function authFetch({method, route, errorText, body} : {method: stri
             return null;
         }
     }
+    // Handle rate limiting
+    if (response.status === 429) {
+        throw new Error("Request rate limit exceeded. Please wait!");
+    }
     const result = await response.json();
     if (!response.ok) return ShowErrorNotification(`${errorText}: ${response.status} ${result.title}`);
     cleanNotifications();

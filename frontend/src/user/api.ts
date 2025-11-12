@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cleanNotifications } from "@mantine/notifications";
 
+import { authFetch } from "@utils/authFetch";
 import { transformSessionDate } from "@utils/formatDate";
 import { ShowErrorNotification } from "@utils/showErrorNotification";
 
@@ -94,19 +95,11 @@ export function getAccountData() {
     return useQuery({
         queryKey: ["userData"],
         queryFn: async () => {
-            try {
-                const response = await fetch(`/api/account`, {method: "GET", credentials: 'include'});
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.title);
+            const result = await authFetch({method: 'GET', route: '/account', errorText: "Error getting user data"});
 
-                const user: UserScheme = result.user;
-                const sessions: SessionDetails[] = result.sessions.map((session: SessionDetails) => (transformSessionDate(session)));
-                cleanNotifications();
-                return { user, sessions };
-            } catch (error) {
-                ShowErrorNotification("Network error getting user data: " + error);
-                return null;
-            }
+            const user: UserScheme = result.user;
+            const sessions: SessionDetails[] = result.sessions.map((session: SessionDetails) => (transformSessionDate(session)));
+            return { user, sessions };
         },
         retry: false,
     });

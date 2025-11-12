@@ -32,7 +32,7 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
                 return BadRequest(new { title = "Invalid username or password." });
 
             string accessToken = TokenService.GenerateAccessToken(user.Id.ToString());
-            string refreshToken = await TokenService.GenerateRefreshToken(user.Id.ToString(), login.DeviceName, _supabase);
+            string refreshToken = await TokenService.GenerateRefreshToken(user.Id, login.DeviceName, _supabase);
 
             SetAccessTokenCookie(accessToken);
             SetRefreshTokenCookie(refreshToken);
@@ -74,7 +74,7 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
                 return BadRequest();
 
             string accessToken = TokenService.GenerateAccessToken(createdUser.Id.ToString());
-            string refreshToken = await TokenService.GenerateRefreshToken(createdUser.Id.ToString(), newUser.DeviceName, _supabase);
+            string refreshToken = await TokenService.GenerateRefreshToken(createdUser.Id, newUser.DeviceName, _supabase);
             SetAccessTokenCookie(accessToken);
             SetRefreshTokenCookie(refreshToken);
             SetUserIdCookie(createdUser.Id);

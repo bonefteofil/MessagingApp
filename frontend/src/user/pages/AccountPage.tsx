@@ -11,12 +11,13 @@ import DeveloperModeContext from "@components/DeveloperModeContext";
 import LoginHistory from "@user/components/LoginHistory";
 import ResponsiveCard from "@components/ResponsiveCard";
 import Loading from "@components/Loading";
+import ErrorPage from "@/shared/errors/ErrorPage";
 
 
 export default function AccountPage() {
     const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
     const { setCurrentGroup } = useContext(CurrentGroupContext);
-    const { data, isLoading } = getAccountData();
+    const { data, isLoading, error } = getAccountData();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -26,6 +27,8 @@ export default function AccountPage() {
     useEffect(() => {
         setCurrentGroup(null);
     }, []);
+
+    if (error) return <ErrorPage message={error.message} />;
 
     return (<>
         <Outlet />

@@ -54,12 +54,23 @@ public static class TokenService
         throw new SecurityTokenException("Invalid token");
     }
 
-    public static async Task<string> GenerateRefreshToken(string UserId, string DeviceName, Supabase.Client _supabase)
+    public static async Task<string> GenerateRefreshToken(int UserId, string DeviceName, Supabase.Client _supabase)
     {
         if (string.IsNullOrWhiteSpace(DeviceName))
             throw new ArgumentException("Device name is required", nameof(DeviceName));
-        if (DeviceName.Length > 100)
-            throw new ArgumentException("Device name too long (max 100 characters)", nameof(DeviceName));
+        if (DeviceName.Length > 50)
+            throw new ArgumentException("Device name too long (max 50 characters)", nameof(DeviceName));
+
+        // delete oldest token if user has more than 50 tokens
+        var response = await _supabase
+            .From<SupabaseRefreshToken>()
+            .Where(r => r.UserId == UserId)
+            .Order(x => x.CreatedAt, Supabase.Postgrest.Constants.Ordering.Ascending)
+            .Get();
+        if (response.Models.Count >= 50)
+            await _supabase
+                .From<SupabaseRefreshToken>()
+                .Delete(response.Models.FirstOrDefault()!);
 
         // generate secure random token
         string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
@@ -67,7 +78,7 @@ public static class TokenService
         // save token to database
         SupabaseRefreshToken newRefreshToken = new()
         {
-            UserId = int.Parse(UserId),
+            UserId = UserId,
             TokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(token))),
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddDays(7),
