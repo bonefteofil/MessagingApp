@@ -1,3 +1,5 @@
+import { useCookies } from "react-cookie";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cleanNotifications } from "@mantine/notifications";
 
@@ -92,6 +94,8 @@ export function deleteAccount() {
 }
 
 export function getAccountData() {
+    const [cookies] = useCookies(['userId']);
+
     return useQuery({
         queryKey: ["userData"],
         queryFn: async () => {
@@ -102,6 +106,8 @@ export function getAccountData() {
             return { user, sessions };
         },
         retry: false,
+        enabled: !!cookies.userId,
+        refetchInterval: (query) => { return query.state.status === 'error' ? false : 3000 }
     });
 }
 
@@ -139,5 +145,6 @@ export function getUsers() {
             return result;
         },
         retry: false,
+        refetchInterval: (query) => { return query.state.status === 'error' ? false : 3000 }
     });
 }

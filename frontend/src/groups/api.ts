@@ -21,7 +21,7 @@ export function getGroups() {
         },
         retry: false,
         enabled: !!cookies.userId,
-        refetchInterval: 3000
+        refetchInterval: (query) => { return query.state.status === 'error' ? false : 3000 }
     });
 }
 

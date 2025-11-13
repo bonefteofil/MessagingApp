@@ -33,18 +33,20 @@ public class SupabaseGroup : BaseModel
     }
 }
 
-[Table("groups_with_last_message")]
-public class SupabaseGroupWithLastMessage : BaseModel
+[Table("Inbox_Groups")]
+public class SupabaseInboxGroup : BaseModel
 {
     [PrimaryKey("id")]
     public int Id { get; set; }
     [Column("name")]
     public string? Name { get; set; }
-    [Column("group_created_at")]
+    [Column("user_id")]
+    public int UserId { get; set; }
+    [Column("created_at")]
     public DateTime CreatedAt { get; set; }
-    [Column("last_message_sent")]
-    public string? LastMessageSent { get; set; }
-    [Column("last_message_sent_at")]
+    [Column("last_message")]
+    public string? LastMessage { get; set; }
+    [Column("last_message_at")]
     public DateTime? LastMessageTime { get; set; }
 
     public GroupDTO ToDTO()
@@ -54,7 +56,7 @@ public class SupabaseGroupWithLastMessage : BaseModel
             Id = this.Id,
             Name = this.Name,
             CreatedAt = this.CreatedAt,
-            LastMessage = this.LastMessageSent,
+            LastMessage = this.LastMessage,
             LastMessageAt = this.LastMessageTime
         };
     }

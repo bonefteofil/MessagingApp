@@ -23,7 +23,7 @@ export function getMessages() {
         },
         retry: false,
         enabled: !!currentGroup,
-        refetchInterval: 3000
+        refetchInterval: (query) => { return query.state.status === 'error' ? false : 3000 }
     });
 }
 

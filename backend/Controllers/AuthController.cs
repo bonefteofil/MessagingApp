@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 using Newtonsoft.Json;
 using backend.Services;
 using backend.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers;
 
@@ -39,9 +41,9 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
             SetUserIdCookie(user.Id);
             return Ok();
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 
@@ -80,9 +82,9 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
             SetUserIdCookie(createdUser.Id);
             return Ok();
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 
@@ -109,7 +111,7 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
             Response.Cookies.Delete("accessToken");
             Response.Cookies.Delete("refreshToken");
 
-            int userId = int.Parse(TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!));
+            int userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
             var response = await _supabase
                 .From<SupabaseUser>()
                 .Where(x => x.Id == userId)
@@ -135,9 +137,9 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
 
             return Ok(deletedUser.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 
@@ -155,12 +157,12 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
                 return Unauthorized(new { title = "Invalid refresh token" });
 
             SetAccessTokenCookie(newAccessToken);
-            SetUserIdCookie(int.Parse(TokenService.GetUserIdFromToken(newAccessToken)));
+            SetUserIdCookie(int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!));
             return Ok();
         }
         catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() } );
+            return Conflict(new { title = ex.Message } );
         }
     }
 
@@ -170,7 +172,7 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
     {
         try
         {
-            int userId = int.Parse(TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!));
+            int userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
 
             var response = await _supabase
                 .From<SupabaseRefreshToken>()
@@ -190,9 +192,9 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
 
             return Ok();
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message } );
         }
     }
 

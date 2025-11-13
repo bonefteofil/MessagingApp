@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 using Newtonsoft.Json;
 using backend.Models;
-using backend.Services;
-using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers;
 
@@ -22,9 +23,9 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
 
             return Ok(response.Models.Select(x => x.ToDTO()));
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 
@@ -34,7 +35,7 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
     {
         try
         {
-            var userId = int.Parse(TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!));
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
             var userResponse = await _supabase
                 .From<SupabaseUser>()
                 .Where(x => x.Id == userId)
@@ -58,9 +59,9 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
                 Sessions = refreshTokensResponse.Models.Select(x => x.ToDTO()).ToList()
             });
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 }

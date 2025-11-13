@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 using Newtonsoft.Json;
-using backend.Services;
 using backend.Models;
 
 namespace backend.Controllers;
@@ -14,13 +15,13 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     private readonly Supabase.Client _supabase = supabase;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MessageDTO>>> GetMessages(int groupId)
+    public async Task<ActionResult<IEnumerable<MessageDTO>>> GetGroupMessages(int groupId)
     {
         try
         {
-            if (!await Validations.GroupExists(groupId, _supabase))
-                return NotFound(new { title = $"Group with id {groupId} not found." });
-
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            await Validations.ValidateGroupMembership(groupId, userId, _supabase);
+            
             var messages = await _supabase
                 .From<SupabaseMessageWithUsername>()
                 .Select("*, username:user_id(username)")
@@ -30,9 +31,9 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
 
             return Ok(messages.Models.Select(x => x.ToDTO()));
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 
@@ -44,8 +45,8 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             if (message.GroupId != groupId)
                 return BadRequest(new { title = $"Group ID in URL: {groupId} does not match Group ID in message: {message.GroupId}." });
 
-            if (!await Validations.GroupExists(groupId, _supabase))
-                return NotFound(new { title = $"Group with id {groupId} not found." });
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            await Validations.ValidateGroupMembership(groupId, userId, _supabase);
 
             if (message.Text?.Length > 100)
                 return BadRequest(new { title = "Message too long (max 100 characters)" });
@@ -63,7 +64,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
                 Text = message.Text,
                 CreatedAt = DateTime.UtcNow,
                 Edited = false,
-                UserId = int.Parse(TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!))
+                UserId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!)
             };
 
             var response = await _supabase.From<SupabaseMessage>().Insert(supabaseMessage);
@@ -73,9 +74,9 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
 
             return Ok(createdMessage.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 
@@ -87,8 +88,8 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             if (message.GroupId != groupId)
                 return BadRequest(new { title = $"Group ID in URL: {groupId} does not match Group ID in message: {message.GroupId}." });
 
-            if (!await Validations.GroupExists(groupId, _supabase))
-                return NotFound(new { title = $"Group with id {groupId} not found." });
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            await Validations.ValidateGroupMembership(groupId, userId, _supabase);
 
             if (message.Text?.Length > 100)
                 return BadRequest(new { title = "Message too long (max 100 characters)" });
@@ -102,7 +103,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             if (existingMessage == null)
                 return NotFound();
 
-            if (existingMessage.UserId.ToString() != TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!))
+            if (existingMessage.UserId != userId)
                 return Unauthorized(new { title = "You can only edit your own messages." });
 
             existingMessage.Text = message.Text;
@@ -111,9 +112,9 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
 
             return Ok(existingMessage.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 
@@ -131,7 +132,8 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
             if (deletedMessage == null)
                 return NotFound();
 
-            if (deletedMessage.UserId.ToString() != TokenService.GetUserIdFromToken(Request.Cookies["accessToken"]!))
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            if (deletedMessage.UserId != userId)
                 return Unauthorized(new { title = "You can only delete your own messages." });
 
             await _supabase
@@ -140,9 +142,9 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
 
             return Ok(deletedMessage.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 }

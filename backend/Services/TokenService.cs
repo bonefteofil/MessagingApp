@@ -1,8 +1,8 @@
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 using backend.Models;
 
 namespace backend.Services;
@@ -43,15 +43,6 @@ public static class TokenService
             ClockSkew = TimeSpan.Zero,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(security_key))
         };
-    }
-
-    public static string GetUserIdFromToken(string token)
-    {
-        var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-        var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti);
-        if (userIdClaim != null)
-            return userIdClaim.Value.ToString();
-        throw new SecurityTokenException("Invalid token");
     }
 
     public static async Task<string> GenerateRefreshToken(int UserId, string DeviceName, Supabase.Client _supabase)

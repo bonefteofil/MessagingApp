@@ -13,6 +13,7 @@ import EditingMessageContext from "@messages/Context";
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
 import GroupForm from "@groups/components/GroupForm";
+import ResponsiveCard from "@components/ResponsiveCard";
 import Loading from "@components/Loading";
 import ErrorPage from "@errors/ErrorPage";
 
@@ -50,6 +51,13 @@ export default function InboxPage() {
 
                 <Loading loading={isLoading} />
 
+                {(!data || data.length === 0) && !isLoading &&
+                    <ResponsiveCard title="You are not in any groups yet">
+                        <Text size="md" c="dimmed">
+                            Create a new group or ask someone to add you to a group.
+                        </Text>
+                    </ResponsiveCard>
+                }
                 {data && data.map((group: GroupScheme) => (
                     <div key={group.id}>
                         <Group gap="md" p="xs" align="top"

@@ -4,12 +4,13 @@ namespace backend.Controllers;
 
 public static class Validations
 {
-    public static async Task<bool> GroupExists(int groupId, Supabase.Client _supabase)
+    public static async Task ValidateGroupMembership(int groupId, int userId, Supabase.Client _supabase)
     {
         var response = await _supabase
-            .From<SupabaseGroupWithLastMessage>()
-            .Where(g => g.Id == groupId)
+            .From<SupabaseInboxGroup>()
+            .Where(g => g.Id == groupId && g.UserId == userId)
             .Get();
-        return response.Models.Count != 0;
+        if(response.Models.Count == 0)
+            throw new UnauthorizedAccessException("You are not a member of this group.");
     }
 }

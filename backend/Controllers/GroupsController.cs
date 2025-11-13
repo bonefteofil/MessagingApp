@@ -1,5 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 using Newtonsoft.Json;
 using backend.Models;
 
@@ -13,21 +15,23 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     private readonly Supabase.Client _supabase = supabase;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GroupDTO>>> GetGroups()
+    public async Task<ActionResult<IEnumerable<GroupDTO>>> GetInboxGroups()
     {
         try
         {
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+
             var response = await _supabase
-                .From<SupabaseGroupWithLastMessage>()
-                .Select("*")
-                .Order("last_message_sent_at", Supabase.Postgrest.Constants.Ordering.Descending)
+                .From<SupabaseInboxGroup>()
+                .Where(x => x.UserId == userId)
+                .Order("last_message_at", Supabase.Postgrest.Constants.Ordering.Descending)
                 .Get();
 
             return Ok(response.Models.Select(x => x.ToDTO()));
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 
@@ -58,9 +62,9 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 
             return Ok(createdGroup.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 
@@ -87,9 +91,9 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 
             return Ok(updatedGroup.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 
@@ -108,19 +112,14 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
                 return NotFound();
 
             await _supabase
-                .From<SupabaseMessage>()
-                .Where(x => x.GroupId == group.Id)
-                .Delete();
-
-            await _supabase
                 .From<SupabaseGroup>()
                 .Delete(deletedGroup);
 
             return Ok(deletedGroup.ToDTO());
         }
-        catch (Supabase.Postgrest.Exceptions.PostgrestException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { title = JsonConvert.DeserializeObject<dynamic>(ex.Message)?.message.ToString() });
+            return Conflict(new { title = ex.Message });
         }
     }
 }
