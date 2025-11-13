@@ -10,7 +10,7 @@ export default function NotFoundPage() {
 
     return (
         <ResponsiveCard title="404 - Page Not Found :(">
-            <Button radius="md" onClick={() => { navigate("/") }}>Go to Home Page</Button>
+            <Button radius="md" onClick={() => { navigate("/", { replace: true }) }}>Go to Home Page</Button>
         </ResponsiveCard>
     );
 }

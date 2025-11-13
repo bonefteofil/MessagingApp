@@ -3,20 +3,19 @@ import { Outlet, useNavigate } from "react-router-dom";
 
 import { Switch, Text, Button, Code, Avatar, Group, Center } from "@mantine/core";
 
-import { getAccountData } from "../api";
+import { getAccountData } from "@user/api";
 
-import CurrentGroupContext from "@groups/Context";
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
 import LoginHistory from "@user/components/LoginHistory";
+import Header from "@/messages/components/Header";
 import ResponsiveCard from "@components/ResponsiveCard";
 import Loading from "@components/Loading";
-import ErrorPage from "@/shared/errors/ErrorPage";
+import ErrorPage from "@errors/ErrorPage";
 
 
 export default function AccountPage() {
     const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
-    const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { data, isLoading, error } = getAccountData();
     const navigate = useNavigate();
 
@@ -24,14 +23,14 @@ export default function AccountPage() {
         console.log("Account data:", data);
     }, [data]);
 
-    useEffect(() => {
-        setCurrentGroup(null);
-    }, []);
-
     if (error) return <ErrorPage message={error.message} />;
 
     return (<>
+        <Header element={
+            <Text ml="md" size="xl" truncate="end">Account Info</Text>
+        } />
         <Outlet />
+
         <ResponsiveCard title="Account">
             <Loading loading={isLoading} />
 

@@ -1,27 +1,43 @@
 import { useCookies } from "react-cookie";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { transformGroupDate } from "@utils/formatDate";
+import { transformGroupDate, transformInboxGroupDate } from "@utils/formatDate";
 import { authFetch } from "@utils/authFetch";
 
-import type GroupScheme from "./schema";
+import type { GroupScheme, InboxGroupScheme } from "./schema";
 
 
-export function getGroups() {
+export function getInboxGroups() {
     const [cookies] = useCookies(['userId']);
 
     return useQuery({
-        queryKey: ["groups"],
+        queryKey: ["inboxGroups"],
         queryFn: async () => {
             const result = await authFetch({method: 'GET', route: '/groups', errorText: "Error fetching groups"});
 
-            const groupsWithLocalTime = result.map((group: GroupScheme) => transformGroupDate(group));
+            const groupsWithLocalTime = result.map((group: InboxGroupScheme) => transformInboxGroupDate(group));
             console.log("Fetched groups:", groupsWithLocalTime);
             return groupsWithLocalTime;
         },
         retry: false,
         enabled: !!cookies.userId,
         refetchInterval: (query) => { return query.state.status === 'error' ? false : 3000 }
+    });
+}
+
+export function getGroupById(groupId: number) {
+    const [cookies] = useCookies(['userId']);
+
+    return useQuery({
+        queryKey: ["group", groupId],
+        queryFn: async () => {
+            const result = await authFetch({method: 'GET', route: `/groups/${groupId}`, errorText: "Error fetching group by id"});
+
+            const groupWithLocalTime = transformGroupDate(result);
+            return groupWithLocalTime;
+        },
+        retry: false,
+        enabled: !!cookies.userId,
     });
 }
 
@@ -44,9 +60,9 @@ function groupMutation({method, consoleMessage, errorText} : {method: string, co
         mutationFn: async (groupBody: GroupScheme) => {
             const result = await authFetch({method: method, route: '/groups', errorText: errorText, body: groupBody});
 
-            console.log(consoleMessage, transformGroupDate(result));
-            queryClient.invalidateQueries({ queryKey: ['groups'] });
-            return transformGroupDate(result);
+            console.log(consoleMessage, transformInboxGroupDate(result));
+            queryClient.invalidateQueries({ queryKey: ['inboxGroups'] });
+            return transformInboxGroupDate(result);
         }
     })
 }

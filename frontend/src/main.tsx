@@ -12,7 +12,6 @@ import './index.css';
 import App from '@/App';
 
 import { DeveloperModeProvider } from '@components/DeveloperModeContext';
-import { GroupProvider } from '@groups/Context';
 import { EditingMessageProvider } from '@messages/Context';
 
 const queryClient = new QueryClient();
@@ -23,11 +22,9 @@ createRoot(document.getElementById('root')!).render(
 			<QueryClientProvider client={queryClient}>
 				<MantineProvider defaultColorScheme="dark">
 						<DeveloperModeProvider>
-							<GroupProvider>
-								<EditingMessageProvider>
-									<App />
-								</EditingMessageProvider>
-							</GroupProvider>
+							<EditingMessageProvider>
+								<App />
+							</EditingMessageProvider>
 						</DeveloperModeProvider>
 				</MantineProvider>
 			</QueryClientProvider>

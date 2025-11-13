@@ -6,9 +6,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { Avatar, Divider, Group, Stack, Text, ScrollArea, Code, Box, AppShell, ActionIcon } from "@mantine/core";
 
-import { getGroups } from "@groups/api";
+import { getInboxGroups } from "@groups/api";
 
-import CurrentGroupContext from "@groups/Context";
 import EditingMessageContext from "@messages/Context";
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
@@ -17,16 +16,15 @@ import ResponsiveCard from "@components/ResponsiveCard";
 import Loading from "@components/Loading";
 import ErrorPage from "@errors/ErrorPage";
 
-import type GroupScheme from "@groups/schema";
+import type { InboxGroupScheme } from "@groups/schema";
 
 
 export default function InboxPage() {
-    const { setCurrentGroup } = useContext(CurrentGroupContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
     const { developerMode } = useContext(DeveloperModeContext);
     const [cookies] = useCookies(['userId']);
 
-    const { data, error, isLoading } = getGroups();
+    const { data, error, isLoading } = getInboxGroups();
     const { groupId } = useParams();
     const navigate = useNavigate();
 
@@ -58,13 +56,12 @@ export default function InboxPage() {
                         </Text>
                     </ResponsiveCard>
                 }
-                {data && data.map((group: GroupScheme) => (
+                {data && data.map((group: InboxGroupScheme) => (
                     <div key={group.id}>
                         <Group gap="md" p="xs" align="top"
                             classNames={{ root: `${groupId == group.id && 'bg-gray-700'} hover:bg-gray-700 cursor-pointer rounded-lg` }}
                             onClick={() => {
                                 setEditingMessage(null);
-                                setCurrentGroup(group);
                                 navigate(`/groups/${group.id}`);
                             }}
                         >

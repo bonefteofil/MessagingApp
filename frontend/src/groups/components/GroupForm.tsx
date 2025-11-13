@@ -1,5 +1,4 @@
 import { useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -9,19 +8,16 @@ import { useForm } from "@mantine/form";
 
 import { createGroup, editGroup } from "@groups/api";
 
-import CurrentGroupContext from "@groups/Context";
 import DeveloperModeContext from '@components/DeveloperModeContext';
 
-import type GroupScheme from "@groups/schema";
+import type { GroupScheme } from "@groups/schema";
 
 
 export default function GroupForm({ editingGroup } : { editingGroup?: GroupScheme }) {
     const [opened, { open, close }] = useDisclosure(false);
     const { developerMode } = useContext(DeveloperModeContext);
-    const { setCurrentGroup } = useContext(CurrentGroupContext);
     const createMutation = createGroup();
     const editMutation = editGroup();
-    const navigate = useNavigate();
 
     const form = useForm({
         initialValues: { name: '' },
@@ -34,8 +30,6 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
         if (mutation.isSuccess && mutation.data) {
             close();
             form.reset();
-            setCurrentGroup(mutation.data);
-            navigate(`/groups/${mutation.data.id}`);
         }
     }, [createMutation.isSuccess, editMutation.isSuccess]);
 
@@ -50,48 +44,56 @@ export default function GroupForm({ editingGroup } : { editingGroup?: GroupSchem
         }
     };
 
-    return (
-        <>
+    return (<>
+        {editingGroup ? (
+            <Button
+                radius='md'
+                onClick={open}
+                loading={editMutation.isPending}
+            >
+                <FontAwesomeIcon icon={faPenToSquare} /> Edit Group
+            </Button>
+        ) : (
             <ActionIcon
                 p="md"
                 variant="light"
                 radius={editingGroup ? 'md' : 'xl'}
                 onClick={open}
-                loading={createMutation.isPending || editMutation.isPending}
+                loading={createMutation.isPending}
             >
-                <FontAwesomeIcon icon={editingGroup ? faPenToSquare : faPlus} />
+                <FontAwesomeIcon icon={faPlus} />
             </ActionIcon>
+        )}
 
-            <Modal
-                opened={opened}
-                onClose={close}
-                title={editingGroup ? "Edit group" : "Create a new group"}
-                centered
-                radius='md'>
-                <form onSubmit={handleSubmit}>
-                    <Input
-                        type="text"
-                        data-autofocus
-                        placeholder="Group Name"
-                        radius='md'
-                        size="md"
-                        mb='sm'
-                        {...form.getInputProps('name')}
-                    />
-                    <Button
-                        variant="gradient"
-                        type="submit"
-                        radius='md'
-                        size='input-md'
-                        fullWidth
-                        disabled={form.values.name.trim() === '' && !developerMode}
-                        loading={createMutation.isPending || editMutation.isPending}
-                        loaderProps={{ size: 'sm' }}
-                    >
-                        {editingGroup ? "Save group changes" : "Create group"}
-                    </Button>
-                </form>
-            </Modal>
-        </>
-    );
+        <Modal
+            opened={opened}
+            onClose={close}
+            title={editingGroup ? "Edit group" : "Create a new group"}
+            centered
+            radius='md'>
+            <form onSubmit={handleSubmit}>
+                <Input
+                    type="text"
+                    data-autofocus
+                    placeholder="Group Name"
+                    radius='md'
+                    size="md"
+                    mb='sm'
+                    {...form.getInputProps('name')}
+                />
+                <Button
+                    variant="gradient"
+                    type="submit"
+                    radius='md'
+                    size='input-md'
+                    fullWidth
+                    disabled={form.values.name.trim() === '' && !developerMode}
+                    loading={createMutation.isPending || editMutation.isPending}
+                    loaderProps={{ size: 'sm' }}
+                >
+                    {editingGroup ? "Save group changes" : "Create group"}
+                </Button>
+            </form>
+        </Modal>
+    </>);
 }

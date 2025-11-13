@@ -1,14 +1,15 @@
 import { useContext, useEffect, useRef } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { Stack, Text, Badge, Card } from "@mantine/core";
+import { Stack, Text, Badge, Card, Avatar, Button } from "@mantine/core";
 
 import { getMessages } from '@messages/api';
+import { getGroupById } from '@groups/api';
 
-import CurrentGroupContext from '@groups/Context';
-
-import MessageBubble from '@messages/components/MessageBubble';
+import Header from '@messages/components/Header';
 import SendMessage from '@messages/components/SendMessage';
+import MessageBubble from '@messages/components/MessageBubble';
+import DeveloperModeContext from '@components/DeveloperModeContext';
 import Loading from '@components/Loading';
 import ErrorPage from '@errors/ErrorPage';
 
@@ -16,15 +17,17 @@ import type MessageScheme from '@messages/schema';
 
 
 export default function ChatPage() {
-    const { currentGroup } = useContext(CurrentGroupContext);
-    const { error, data, isLoading } = getMessages();
+    const navigate = useNavigate();
+    const params = useParams();
+    const { data: groupData } = getGroupById(Number(params.groupId));
+    const { data: messages, isLoading, error } = getMessages(params.groupId!);
+    const { developerMode } = useContext(DeveloperModeContext);
     const instantScroll = useRef(true);
-    let lastDate: string | null = null;
     
     // Instantly scroll to the bottom on first load, then, when adding new messages, use smooth scrolling on updates
     useEffect(() => {
         instantScroll.current = true;
-    }, [currentGroup]);
+    }, [groupData]);
     
     useEffect(() => {
         window.scrollTo({
@@ -33,41 +36,51 @@ export default function ChatPage() {
         });
         if (!isLoading)
             instantScroll.current = false;
-    }, [(data?.length > 0) ? data[data.length - 1].id : null]);
+    }, [(messages?.length > 0) ? messages[messages.length - 1].id : null]);
 
-
-    if (!currentGroup) return <Navigate to="/" replace />;
     if (error) return <ErrorPage message={error.message} />;
     
     return (<>
+        <Header element={
+            <Button variant='transparent' onClick={() => navigate("details")}>
+                <>
+                <Avatar />
+                <Text size="sm" truncate="end">{groupData?.name} {developerMode && ` ID: ${groupData?.id}`}</Text>
+                <div style={{ flexGrow: 1 }} />
+                </>
+            </Button>
+        } />
+
         <Stack p='md'>
             <Card mx='auto' radius='md' color='gray' mt='md' className='text-center'>
                 <Text size='md' c='dimmed'>
-                    The group "{currentGroup!.name}" was created on
+                    The group "{groupData?.name}" was created on
                     <br />
-                    {currentGroup!.createdAt}
+                    {groupData?.createdAt}
                 </Text>
             </Card>
 
-            <Loading loading={isLoading || !data} />
-
-            {data && !isLoading && data.map((message: MessageScheme) => {
-                const messageDate = message.createdAt!;
-                const showSeparator = messageDate !== lastDate;
-                lastDate = messageDate;
+            <Loading loading={isLoading || !messages} />
+            {messages && !isLoading && (() => {
+                let lastDate: string | null = null;
                 
-                return (
-                    <Stack key={message.id}>
-                        {showSeparator && (
+                return messages.map((message: MessageScheme) => {
+                    const messageDate = message.createdAt!;
+                    const showSeparator = messageDate !== lastDate;
+                    lastDate = messageDate;
+
+                    if (showSeparator) return (
+                        <Stack key={message.id}>
                             <Badge mx='auto' color='gray'>
                                 <Text size='xs' c='dimmed'>{messageDate}</Text>
                             </Badge>
-                        )}
 
-                        <MessageBubble message={message} />
-                    </Stack>
-                );
-            })}
+                            <MessageBubble message={message} />
+                        </Stack>
+                    );
+                    return <MessageBubble key={message.id} message={message} />
+                });
+            })()}
         </Stack>
 
         <SendMessage />

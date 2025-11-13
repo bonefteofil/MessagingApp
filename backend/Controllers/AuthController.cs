@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using Newtonsoft.Json;
 using backend.Services;
 using backend.Models;
 
@@ -151,13 +150,11 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
             string refreshToken = Request.Cookies["refreshToken"]!;
             if (string.IsNullOrWhiteSpace(refreshToken))
                 return Unauthorized(new { title = "Refresh token is missing" });
-
             string newAccessToken = await TokenService.RegenerateToken(refreshToken, _supabase);
             if (string.IsNullOrWhiteSpace(newAccessToken))
                 return Unauthorized(new { title = "Invalid refresh token" });
 
             SetAccessTokenCookie(newAccessToken);
-            SetUserIdCookie(int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!));
             return Ok();
         }
         catch (Exception ex)

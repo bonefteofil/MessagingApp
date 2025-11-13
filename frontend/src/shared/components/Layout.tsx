@@ -3,7 +3,6 @@ import { useLocation, Outlet } from "react-router-dom";
 import { AppShell } from "@mantine/core";
 
 import InboxPage from "@groups/pages/InboxPage";
-import Header from '@messages/components/Header';
 
 
 export default function Layout() {
@@ -19,7 +18,6 @@ export default function Layout() {
 			}}
 		>
 			<InboxPage />
-			<Header />
 
 			<AppShell.Main py={80}>
 				<Outlet />

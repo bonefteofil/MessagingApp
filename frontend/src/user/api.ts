@@ -144,7 +144,6 @@ export function getUsers() {
             cleanNotifications();
             return result;
         },
-        retry: false,
-        refetchInterval: (query) => { return query.state.status === 'error' ? false : 3000 }
+        retry: false
     });
 }

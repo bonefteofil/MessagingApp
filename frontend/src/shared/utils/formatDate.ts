@@ -1,4 +1,4 @@
-import type GroupScheme from "@groups/schema";
+import type { InboxGroupScheme, GroupScheme } from "@groups/schema";
 import type MessageScheme from "@messages/schema";
 
 
@@ -10,10 +10,17 @@ export function transformMessageDate(message: MessageScheme) {
     } as MessageScheme;
 }
 
-export function transformGroupDate(group: GroupScheme) {
+export function transformInboxGroupDate(group: InboxGroupScheme) {
     return {
         ...group,
         lastMessageAt: formatLastMessageDate(group.lastMessageAt!),
+        createdAt: formatFullDate(group.createdAt!)
+    } as InboxGroupScheme;
+}
+
+export function transformGroupDate(group: GroupScheme) {
+    return {
+        ...group,
         createdAt: formatFullDate(group.createdAt!)
     } as GroupScheme;
 }

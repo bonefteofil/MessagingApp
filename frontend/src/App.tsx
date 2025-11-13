@@ -7,6 +7,7 @@ import ResponsiveCard from "@components/ResponsiveCard";
 
 import Status from "@components/Status";
 import ChatPage from "@messages/pages/ChatPage"
+import GroupPage from "./groups/pages/GroupPage";
 import NotFoundPage from "@errors/404Page";
 
 import AccountPage from "@user/pages/AccountPage";
@@ -31,6 +32,7 @@ export default function App() {
 					<Route element={<Layout />}>
 						<Route path="" element={<ResponsiveCard title="Welcome to Messaging App!" />} />
 						<Route path="groups/:groupId" element={<ChatPage />} />
+						<Route path="groups/:groupId/details" element={<GroupPage />} />
 						<Route path="account" element={<AccountPage />} >
 							<Route path="delete" element={<DeleteAccountPage />} /> 
 						</Route>

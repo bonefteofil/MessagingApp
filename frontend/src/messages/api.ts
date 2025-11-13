@@ -1,28 +1,23 @@
-import { useContext } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { transformMessageDate } from "@utils/formatDate";
 import { authFetch } from "@utils/authFetch";
 
-import CurrentGroupContext from "@groups/Context";
-
 import type MessageScheme from "./schema";
 
 
-export function getMessages() {
-    const { currentGroup } = useContext(CurrentGroupContext);
+export function getMessages(groupId: string) {
 
     return useQuery({
-        queryKey: ["messages", currentGroup?.id],
+        queryKey: ["messages", groupId],
         queryFn: async () => {
-            const result = await authFetch({method: 'GET', route: `/groups/${currentGroup?.id}/messages`, errorText: "Error fetching messages"});
+            const result = await authFetch({method: 'GET', route: `/groups/${groupId}/messages`, errorText: "Error fetching messages"});
 
             const messagesWithLocalTime = result.map((message: MessageScheme) => transformMessageDate(message));
             console.log("Fetched messages:", messagesWithLocalTime);
             return messagesWithLocalTime;
         },
         retry: false,
-        enabled: !!currentGroup,
         refetchInterval: (query) => { return query.state.status === 'error' ? false : 3000 }
     });
 }
@@ -48,7 +43,7 @@ function messageMutation({method, consoleMessage, errorText} : {method: string, 
 
             console.log(consoleMessage, transformMessageDate(result));
             queryClient.invalidateQueries({ queryKey: ['messages', messageBody.groupId] });
-            queryClient.invalidateQueries({ queryKey: ['groups'] });
+            queryClient.invalidateQueries({ queryKey: ['inboxGroups'] });
             return transformMessageDate(result);
         }
     })

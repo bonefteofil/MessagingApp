@@ -1,62 +1,24 @@
-import { useContext, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-import { faAngleLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Group, Button, Text, Avatar, ActionIcon, AppShell } from "@mantine/core";
-
-import { deleteGroup } from "@groups/api";
-
-import CurrentGroupContext from "@groups/Context";
-import DeveloperModeContext from "@components/DeveloperModeContext";
-
-import GroupForm from "@groups/components/GroupForm";
+import { Group, Button, Text, AppShell } from "@mantine/core";
 
 
-export default function Header() {
-    const deleteMutation = deleteGroup();
-    const { currentGroup, setCurrentGroup } = useContext(CurrentGroupContext);
-    const { developerMode } = useContext(DeveloperModeContext);
+export default function Header({ element } : { element: React.ReactNode }) {
     const navigate = useNavigate();
-    const location = useLocation();
-
-    useEffect(() => {
-        if (deleteMutation.isSuccess) {
-            setCurrentGroup(null);
-            navigate("/");
-        }
-    }, [deleteMutation.isSuccess]);
 
     return (
-        <AppShell.Header display={location.pathname === "/" ? "none" : "inherit"} p='sm' ml={{ base: 0, md: 400 }} className="!backdrop-blur-lg !bg-gray-700/30" >
+        <AppShell.Header p='sm' ml={{ base: 0, md: 400 }} className="!backdrop-blur-lg !bg-gray-700/30" >
             <Group gap='5' wrap="nowrap">
 
-                <Button px='5' variant="subtle" onClick={() => { navigate('/'); }}>
+                <Button px='5' variant="subtle" onClick={() => { navigate(-1); }}>
                     <FontAwesomeIcon icon={faAngleLeft} />
                     <Text size="lg">Back</Text>
                 </Button>
 
-                {currentGroup ? (<>
-                    <Avatar />
-                    <Text size="sm" truncate="end">{currentGroup?.name} {developerMode && ` ID: ${currentGroup.id}`}</Text>
-                    <div style={{ flexGrow: 1 }} />
-
-                    <GroupForm editingGroup={currentGroup!} />
-                    <ActionIcon
-                        variant="light"
-                        size='lg'
-                        radius='md'
-                        color="red"
-                        mx='xs'
-                        onClick={() => { deleteMutation.mutate({ id: currentGroup!.id!, name: currentGroup!.name }); }}
-                        loading={deleteMutation.isPending}
-                    >
-                        <FontAwesomeIcon icon={faTrash} />
-                    </ActionIcon>
-                </>) : location.pathname === "/settings" && (
-                    <Text ml="md" size="xl">Settings</Text>
-                )}
-                
+                {element}
             </Group>
         </AppShell.Header>
     );
