@@ -1,4 +1,5 @@
-import type { InboxGroupScheme, GroupScheme } from "@groups/schema";
+import type { SessionDetails } from "@/user/schema";
+import type { InboxGroupScheme, GroupScheme, GroupMemberScheme } from "@groups/schema";
 import type MessageScheme from "@messages/schema";
 
 
@@ -25,10 +26,17 @@ export function transformGroupDate(group: GroupScheme) {
     } as GroupScheme;
 }
 
-export function transformSessionDate(session: { createdAt: string }) {
+export function transformSessionDate(session: SessionDetails) {
     return {
         ...session,
         createdAt: formatLastMessageDate(session.createdAt)
+    };
+}
+
+export function transformMemberDate(member: GroupMemberScheme) {
+    return {
+        ...member,
+        createdAt: formatLastMessageDate(member.createdAt)
     };
 }
 

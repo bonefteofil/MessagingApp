@@ -69,6 +69,42 @@ public class SupabaseInboxGroup : BaseModel
     }
 }
 
+public class GroupMemberDTO
+{
+    public int Id { get; set; }
+    public int GroupId { get; set; }
+    public int UserId { get; set; }
+    public string? Username { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+[Table("Groups_Members")]
+public class SupabaseMemberWithUsername : BaseModel
+{
+    [PrimaryKey("id")]
+    public int Id { get; set; }
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; }
+    [Column("group_id")]
+    public int GroupId { get; set; }
+    [Column("user_id")]
+    public int UserId { get; set; }
+    [Column("username")]
+    public SupabaseUser? User { get; set; }
+
+    public GroupMemberDTO ToDTO()
+    {
+        return new GroupMemberDTO
+        {
+            Id = this.Id,
+            GroupId = this.GroupId,
+            UserId = this.UserId,
+            Username = this.User?.Username,
+            CreatedAt = this.CreatedAt
+        };
+    }
+}
+
 [Table("Groups_Members")]
 public class SupabaseGroupMember : BaseModel
 {

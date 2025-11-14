@@ -7,17 +7,19 @@ import { Text, Avatar, Button, Center } from "@mantine/core";
 
 import { getGroupById, deleteGroup } from "@groups/api";
 
+import GroupMembers from "@groups/components/GroupMembers";
 import GroupForm from "@groups/components/GroupForm";
 import Header from '@messages/components/Header';
 import Loading from "@components/Loading";
 import ResponsiveCard from "@components/ResponsiveCard";
+import ErrorPage from "@errors/ErrorPage";
 
 
 export default function GroupPage() {
     const params = useParams();
     const navigate = useNavigate();
     const deleteMutation = deleteGroup();
-    const { data: groupData, isLoading: isLoadingGroup } = getGroupById(Number(params.groupId));
+    const { data: groupData, isLoading: isLoadingGroup, error: groupError } = getGroupById(Number(params.groupId));
 
     useEffect(() => {
         if (deleteMutation.isSuccess) {
@@ -30,24 +32,28 @@ export default function GroupPage() {
             <Text ml='md' size="xl" truncate="end">Group Info</Text>}
         />
 
-        <ResponsiveCard title={groupData?.name}>
-            {(isLoadingGroup || !groupData) ? <Loading /> : <>
+        {groupError ? <ErrorPage message={groupError.message} /> : (
 
-                <Center><Avatar size='xl' /></Center>
-                <Text>Created: {groupData!.createdAt}</Text>
+            <ResponsiveCard title={groupData?.name}>
+                {(isLoadingGroup || !groupData) ? <Loading /> : <>
 
-                <div style={{ flexGrow: 1 }} />
-                <GroupForm editingGroup={groupData} />
-                <Button
-                    radius='md'
-                    color="red"
-                    onClick={() => { deleteMutation.mutate({ id: groupData!.id!, name: groupData!.name }); }}
-                    loading={deleteMutation.isPending}
-                >
-                    <FontAwesomeIcon icon={faTrash} />
-                    Delete Group
-                </Button>
-            </>}
-        </ResponsiveCard>
+                    <Center><Avatar size='xl' /></Center>
+                    <Text size="xl">Created: {groupData!.createdAt}</Text>
+
+                    <div style={{ flexGrow: 1 }} />
+                    <GroupForm editingGroup={groupData} />
+                    <Button
+                        radius='md'
+                        color="red"
+                        onClick={() => { deleteMutation.mutate({ id: groupData!.id!, name: groupData!.name }); }}
+                        loading={deleteMutation.isPending}
+                    >
+                        <FontAwesomeIcon icon={faTrash} />
+                        Delete Group
+                    </Button>
+                </>}
+            </ResponsiveCard>
+        )}
+        <GroupMembers />
     </>);
 }

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using Newtonsoft.Json;
 using backend.Models;
 
 namespace backend.Controllers;
@@ -15,7 +14,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     private readonly Supabase.Client _supabase = supabase;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GroupDTO>>> GetInboxGroups()
+    public async Task<ActionResult<IEnumerable<InboxGroupDTO>>> GetInboxGroups()
     {
         try
         {
@@ -25,6 +24,53 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
                 .From<SupabaseInboxGroup>()
                 .Where(x => x.UserId == userId)
                 .Order("last_message_at", Supabase.Postgrest.Constants.Ordering.Descending)
+                .Get();
+
+            return Ok(response.Models.Select(x => x.ToDTO()));
+        }
+        catch (Exception ex)
+        {
+            return Conflict(new { title = ex.Message });
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<GroupDTO>> GetGroupData(int id)
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            await Validations.ValidateGroupMembership(id, userId, _supabase);
+
+            var response = await _supabase
+                .From<SupabaseGroup>()
+                .Where(x => x.Id == id)
+                .Get();
+
+            var group = response.Models.FirstOrDefault();
+            if (group == null)
+                return NotFound();
+
+            return Ok(group.ToDTO());
+        }
+        catch (Exception ex)
+        {
+            return Conflict(new { title = ex.Message });
+        }
+    }
+
+    [HttpGet("{id}/members")]
+    public async Task<ActionResult<IEnumerable<GroupMemberDTO>>> GetGroupMembers(int id)
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            await Validations.ValidateGroupMembership(id, userId, _supabase);
+
+            var response = await _supabase
+                .From<SupabaseMemberWithUsername>()
+                .Select("*, username:user_id(username)")
+                .Where(x => x.GroupId == id)
                 .Get();
 
             return Ok(response.Models.Select(x => x.ToDTO()));
@@ -55,6 +101,11 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             var response = await _supabase
                 .From<SupabaseGroup>()
                 .Insert(new SupabaseGroup { Name = group.Name, CreatedAt = DateTime.UtcNow });
+            
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            await _supabase
+                .From<SupabaseGroupMember>()
+                .Insert(new SupabaseGroupMember { GroupId = response.Models.First().Id, UserId = userId });
 
             var createdGroup = response.Models.FirstOrDefault();
             if (createdGroup == null)

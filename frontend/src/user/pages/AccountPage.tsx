@@ -8,15 +8,14 @@ import { getAccountData } from "@user/api";
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
 import LoginHistory from "@user/components/LoginHistory";
-import Header from "@/messages/components/Header";
+import Header from "@messages/components/Header";
 import ResponsiveCard from "@components/ResponsiveCard";
-import Loading from "@components/Loading";
 import ErrorPage from "@errors/ErrorPage";
 
 
 export default function AccountPage() {
     const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
-    const { data, isLoading, error } = getAccountData();
+    const { data, error } = getAccountData();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -32,12 +31,9 @@ export default function AccountPage() {
         <Outlet />
 
         <ResponsiveCard title="Account">
-            <Loading loading={isLoading} />
 
-            {data && <>
-                <Center><Avatar size='xl' /></Center>
-                <Text>Username: <Text component="span" fw={700}>{data.user.username}</Text> </Text>
-            </>}
+            <Center><Avatar size='xl' /></Center>
+            <Text>Username: <Text component="span" fw={700}>{data?.user.username}</Text> </Text>
 
             <Group>
                 <Text>Developer mode:</Text>

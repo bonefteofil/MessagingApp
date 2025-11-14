@@ -19,8 +19,8 @@ import type MessageScheme from '@messages/schema';
 export default function ChatPage() {
     const navigate = useNavigate();
     const params = useParams();
-    const { data: groupData } = getGroupById(Number(params.groupId));
-    const { data: messages, isLoading, error } = getMessages(params.groupId!);
+    const { data: groupData, error: groupError } = getGroupById(Number(params.groupId));
+    const { data: messages, isLoading, error: messagesError } = getMessages(params.groupId!);
     const { developerMode } = useContext(DeveloperModeContext);
     const instantScroll = useRef(true);
     
@@ -37,30 +37,31 @@ export default function ChatPage() {
         if (!isLoading)
             instantScroll.current = false;
     }, [(messages?.length > 0) ? messages[messages.length - 1].id : null]);
-
-    if (error) return <ErrorPage message={error.message} />;
     
     return (<>
         <Header element={
             <Button variant='transparent' onClick={() => navigate("details")}>
-                <>
-                <Avatar />
-                <Text size="sm" truncate="end">{groupData?.name} {developerMode && ` ID: ${groupData?.id}`}</Text>
-                <div style={{ flexGrow: 1 }} />
-                </>
+                {!groupError ? <>
+                    <Avatar />
+                    <Text size="sm" truncate="end">{groupData?.name} {developerMode && ` ID: ${groupData?.id}`}</Text>
+                    <div style={{ flexGrow: 1 }} />
+                </> : <Text size="sm" truncate="end" c="red">{groupError.message}</Text>}
             </Button>
         } />
 
         <Stack p='md'>
-            <Card mx='auto' radius='md' color='gray' mt='md' className='text-center'>
-                <Text size='md' c='dimmed'>
-                    The group "{groupData?.name}" was created on
-                    <br />
-                    {groupData?.createdAt}
-                </Text>
-            </Card>
+            {!groupError &&
+                <Card mx='auto' radius='md' color='gray' mt='md' className='text-center'>
+                    <Text size='md' c='dimmed'>
+                        The group "{groupData?.name}" was created on
+                        <br />
+                        {groupData?.createdAt}
+                    </Text>
+                </Card>
+            }
 
-            <Loading loading={isLoading || !messages} />
+            {messagesError && !messages && <ErrorPage message={messagesError.message} />}
+            <Loading loading={isLoading} />
             {messages && !isLoading && (() => {
                 let lastDate: string | null = null;
                 

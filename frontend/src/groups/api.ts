@@ -1,10 +1,10 @@
 import { useCookies } from "react-cookie";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { transformGroupDate, transformInboxGroupDate } from "@utils/formatDate";
+import { transformGroupDate, transformInboxGroupDate, transformMemberDate } from "@utils/formatDate";
 import { authFetch } from "@utils/authFetch";
 
-import type { GroupScheme, InboxGroupScheme } from "./schema";
+import type { GroupMemberScheme, GroupScheme, InboxGroupScheme } from "./schema";
 
 
 export function getInboxGroups() {
@@ -41,6 +41,22 @@ export function getGroupById(groupId: number) {
     });
 }
 
+export function getGroupMembers(groupId: number) {
+    const [cookies] = useCookies(['userId']);
+
+    return useQuery({
+        queryKey: ["groupMembers", groupId],
+        queryFn: async () => {
+            const result = await authFetch({method: 'GET', route: `/groups/${groupId}/members`, errorText: "Error fetching group members"});
+
+            const membersWithLocalTime = result.map((member: GroupMemberScheme) => transformMemberDate(member));
+            return membersWithLocalTime;
+        },
+        retry: false,
+        enabled: !!cookies.userId,
+    });
+}
+
 export function createGroup() {
     return groupMutation({method: 'POST', consoleMessage: "Group created:", errorText: "Error creating group"});
 }
@@ -62,6 +78,7 @@ function groupMutation({method, consoleMessage, errorText} : {method: string, co
 
             console.log(consoleMessage, transformInboxGroupDate(result));
             queryClient.invalidateQueries({ queryKey: ['inboxGroups'] });
+            queryClient.invalidateQueries({ queryKey: ['group', result.id] });
             return transformInboxGroupDate(result);
         }
     })

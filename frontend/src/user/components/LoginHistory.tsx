@@ -26,7 +26,7 @@ export default function LoginHistory({data} : {data: SessionDetails[] | undefine
                 classNames={{
                     td: 'py-[4px] px-[6px]',
                     th: 'py-[4px] px-[6px]'
-                }}>
+            }}>
                 <Table.Thead>
                     <Table.Tr>
                         <Table.Th>Device</Table.Th>
@@ -35,9 +35,9 @@ export default function LoginHistory({data} : {data: SessionDetails[] | undefine
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                {data && data.map((session, index) => (<>
+                {data && data.map((session) => (
                     
-                    <Table.Tr key={index}>
+                    <Table.Tr key={session.id}>
                         <Table.Td>{session.deviceName}</Table.Td>
                         <Table.Td>{session.createdAt}</Table.Td>
                         <Table.Td>
@@ -74,15 +74,14 @@ export default function LoginHistory({data} : {data: SessionDetails[] | undefine
                             </>)}
                         </Table.Td>
                     </Table.Tr>
-
-                    {developerMode && (
-                        <Code block>
-                            {JSON.stringify(session, null, 2)}
-                        </Code>
-                    )}
-                </>))}
+                ))}
                 </Table.Tbody>
             </Table>
+            {developerMode && (
+                <Code block>
+                    {JSON.stringify(data, null, 2)}
+                </Code>
+            )}
             <Loading loading={!data} />
         </ResponsiveCard>
     );
