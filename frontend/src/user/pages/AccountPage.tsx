@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
 import { Switch, Text, Button, Code, Avatar, Group, Center } from "@mantine/core";
@@ -8,7 +8,7 @@ import { getAccountData } from "@user/api";
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
 import LoginHistory from "@user/components/LoginHistory";
-import Header from "@messages/components/Header";
+import Header from "@components/Header";
 import ResponsiveCard from "@components/ResponsiveCard";
 import ErrorPage from "@errors/ErrorPage";
 
@@ -17,10 +17,6 @@ export default function AccountPage() {
     const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
     const { data, error } = getAccountData();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        console.log("Account data:", data);
-    }, [data]);
 
     if (error) return <ErrorPage message={error.message} />;
 

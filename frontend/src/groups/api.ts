@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { transformGroupDate, transformInboxGroupDate, transformMemberDate } from "@utils/formatDate";
 import { authFetch } from "@utils/authFetch";
 
-import type { GroupMemberScheme, GroupScheme, InboxGroupScheme } from "./schema";
+import type { GroupFormScheme, GroupMemberScheme, InboxGroupScheme } from "./schema";
 
 
 export function getInboxGroups() {
@@ -13,10 +13,13 @@ export function getInboxGroups() {
     return useQuery({
         queryKey: ["inboxGroups"],
         queryFn: async () => {
-            const result = await authFetch({method: 'GET', route: '/groups', errorText: "Error fetching groups"});
+            const result = await authFetch({
+                method: 'GET',
+                route: '/groups',
+                errorText: "Error fetching groups"
+            });
 
             const groupsWithLocalTime = result.map((group: InboxGroupScheme) => transformInboxGroupDate(group));
-            console.log("Fetched groups:", groupsWithLocalTime);
             return groupsWithLocalTime;
         },
         retry: false,
@@ -31,7 +34,11 @@ export function getGroupById(groupId: number) {
     return useQuery({
         queryKey: ["group", groupId],
         queryFn: async () => {
-            const result = await authFetch({method: 'GET', route: `/groups/${groupId}`, errorText: "Error fetching group by id"});
+            const result = await authFetch({
+                method: 'GET',
+                route: `/groups/${groupId}`,
+                errorText: "Error fetching group by id"
+            });
 
             const groupWithLocalTime = transformGroupDate(result);
             return groupWithLocalTime;
@@ -47,7 +54,11 @@ export function getGroupMembers(groupId: number) {
     return useQuery({
         queryKey: ["groupMembers", groupId],
         queryFn: async () => {
-            const result = await authFetch({method: 'GET', route: `/groups/${groupId}/members`, errorText: "Error fetching group members"});
+            const result = await authFetch({
+                method: 'GET',
+                route: `/groups/${groupId}/members`,
+                errorText: "Error fetching group members"
+            });
 
             const membersWithLocalTime = result.map((member: GroupMemberScheme) => transformMemberDate(member));
             return membersWithLocalTime;
@@ -58,27 +69,35 @@ export function getGroupMembers(groupId: number) {
 }
 
 export function createGroup() {
-    return groupMutation({method: 'POST', consoleMessage: "Group created:", errorText: "Error creating group"});
+    return groupMutation({method: 'POST', errorText: "Error creating group"});
 }
 
 export function editGroup() {
-    return groupMutation({method: 'PUT', consoleMessage: "Group updated:", errorText: "Error updating group"});
+    return groupMutation({method: 'PUT', errorText: "Error editing group"});
 }
 
 export function deleteGroup() {
-    return groupMutation({method: 'DELETE', consoleMessage: "Group deleted:", errorText: "Error deleting group"});
+    return groupMutation({method: 'DELETE', errorText: "Error deleting group"});
 }
 
-function groupMutation({method, consoleMessage, errorText} : {method: string, consoleMessage: string, errorText: string}) {
+function groupMutation({method, errorText} : {method: string, errorText: string}) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (groupBody: GroupScheme) => {
-            const result = await authFetch({method: method, route: '/groups', errorText: errorText, body: groupBody});
+        mutationFn: async ({groupBody, groupId}: {groupBody: GroupFormScheme, groupId?: number}) => {
 
-            console.log(consoleMessage, transformInboxGroupDate(result));
+            var route = '/groups';
+            if (groupId) route += `/${groupId}`;
+            const result = await authFetch({
+                method: method,
+                route: route,
+                body: groupBody,
+                errorText: errorText
+            });
+
             queryClient.invalidateQueries({ queryKey: ['inboxGroups'] });
             queryClient.invalidateQueries({ queryKey: ['group', result.id] });
+            queryClient.invalidateQueries({ queryKey: ['groupMembers', result.id] });
             return transformInboxGroupDate(result);
         }
     })

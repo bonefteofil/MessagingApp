@@ -78,6 +78,12 @@ public class GroupMemberDTO
     public DateTime CreatedAt { get; set; }
 }
 
+public class GroupFormDTO
+{
+    public string? Name { get; set; }
+    public List<int> MembersIds { get; set; } = [];
+}
+
 [Table("Groups_Members")]
 public class SupabaseMemberWithUsername : BaseModel
 {

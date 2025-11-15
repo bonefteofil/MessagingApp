@@ -82,7 +82,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<GroupDTO>> CreateGroup(GroupDTO group)
+    public async Task<ActionResult<GroupDTO>> CreateGroup(GroupFormDTO group)
     {
         try
         {
@@ -98,18 +98,33 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             if (count >= 30)
                 return BadRequest(new { title = "Group limit reached (max 30 groups)" });
 
+            // Insert group
             var response = await _supabase
                 .From<SupabaseGroup>()
                 .Insert(new SupabaseGroup { Name = group.Name, CreatedAt = DateTime.UtcNow });
-            
-            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
-            await _supabase
-                .From<SupabaseGroupMember>()
-                .Insert(new SupabaseGroupMember { GroupId = response.Models.First().Id, UserId = userId });
 
             var createdGroup = response.Models.FirstOrDefault();
             if (createdGroup == null)
                 return BadRequest();
+            
+            // Add members
+            var groupId = createdGroup.Id;
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            var newMembersIds = group.MembersIds;
+            newMembersIds.Add(userId);
+
+            for (int i = 0; i < newMembersIds.Count; i++)
+            {
+                var newMember = new SupabaseGroupMember {
+                    GroupId = groupId,
+                    UserId = newMembersIds[i],
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _supabase
+                    .From<SupabaseGroupMember>()
+                    .Insert(newMember);
+            }
 
             return Ok(createdGroup.ToDTO());
         }
@@ -119,8 +134,8 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpPut]
-    public async Task<IActionResult> UpdateGroup(GroupDTO group)
+    [HttpPut("{groupId}")]
+    public async Task<IActionResult> UpdateGroup(int groupId, GroupFormDTO group)
     {
         try
         {
@@ -130,15 +145,58 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             if (group.Name!.Length > 30)
                 return BadRequest(new { title = "Name too long (max 30 characters)" });
 
+            var actualMembers = await _supabase
+                .From<SupabaseGroupMember>()
+                .Where(x => x.GroupId == groupId)
+                .Get();
+
+            // Validate membership
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            if (actualMembers.Models.Find(x => x.UserId == userId) == null)
+                return Forbid("You are not a member of this group.");
+
+            // Update group name
             var response = await _supabase
                 .From<SupabaseGroup>()
-                .Where(x => x.Id == group.Id)
+                .Where(x => x.Id == groupId)
                 .Set(x => x.Name!, group.Name)
                 .Update();
             
             var updatedGroup = response.Models.FirstOrDefault();
             if (updatedGroup == null)
                 return NotFound();
+
+            // Update members
+            var newMembersIds = group.MembersIds;
+            newMembersIds.Add(userId);
+
+            // Remove old members not in new list
+            foreach (var member in actualMembers.Models)
+            {
+                if (!newMembersIds.Contains(member.UserId) && member.UserId != userId)
+                {
+                    await _supabase
+                        .From<SupabaseGroupMember>()
+                        .Delete(member);
+                }
+            }
+
+            // Add new members not in old list
+            foreach (var newMember in newMembersIds)
+            {
+                if (!actualMembers.Models.Any(x => x.UserId == newMember))
+                {
+                    var memberToAdd = new SupabaseGroupMember {
+                        GroupId = groupId,
+                        UserId = newMember,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _supabase
+                        .From<SupabaseGroupMember>()
+                        .Insert(memberToAdd);
+                }
+            }
 
             return Ok(updatedGroup.ToDTO());
         }
@@ -148,14 +206,14 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpDelete]
-    public async Task<IActionResult> DeleteGroup(GroupDTO group)
+    [HttpDelete("{groupId}")]
+    public async Task<IActionResult> DeleteGroup(int groupId)
     {
         try
         {
             var response = await _supabase
                 .From<SupabaseGroup>()
-                .Where(x => x.Id == group.Id)
+                .Where(x => x.Id == groupId)
                 .Get();
 
             var deletedGroup = response.Models.FirstOrDefault();

@@ -19,3 +19,8 @@ export interface GroupMemberScheme {
   username: string;
   createdAt: string;
 }
+
+export interface GroupFormScheme {
+  name: string;
+  membersIds?: number[];
+}

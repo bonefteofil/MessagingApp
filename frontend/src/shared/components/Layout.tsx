@@ -19,7 +19,7 @@ export default function Layout() {
 		>
 			<InboxPage />
 
-			<AppShell.Main py={60}>
+			<AppShell.Main pt={50} pb={90}>
 				<Outlet />
 			</AppShell.Main>
 		</AppShell>

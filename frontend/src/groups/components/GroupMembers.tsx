@@ -1,26 +1,17 @@
 import { useContext } from "react";
-import { useParams } from "react-router-dom";
 
 import { Code, Table, Text } from "@mantine/core";
-
-import { getGroupMembers } from "@groups/api";
 
 import DeveloperModeContext from "@components/DeveloperModeContext";
 
 import ResponsiveCard from "@components/ResponsiveCard";
 import Loading from "@components/Loading";
-import ErrorPage from "@errors/ErrorPage";
 
 import type { GroupMemberScheme } from "@groups/schema";
 
 
-export default function GroupMembers() {
-    const params = useParams();
-    const groupId = Number(params.groupId);
-    const { data: groupMembers, isLoading, error } = getGroupMembers(groupId);
+export default function GroupMembers({groupMembers} : {groupMembers?: GroupMemberScheme[]}) {
     const { developerMode } = useContext(DeveloperModeContext);
-
-    if (error) return <ErrorPage message={error.message} />;
 
     return (
         <ResponsiveCard title={"Members (" + (groupMembers?.length ?? ".") + ")"}>
@@ -46,7 +37,7 @@ export default function GroupMembers() {
                     {JSON.stringify(groupMembers, null, 2)}
                 </Code>
             )}
-            <Loading loading={isLoading} />
+            <Loading loading={!groupMembers} />
         </ResponsiveCard>
     );
 }

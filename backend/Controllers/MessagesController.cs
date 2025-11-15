@@ -132,6 +132,7 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
                 return NotFound();
 
             var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            await Validations.ValidateGroupMembership(deletedMessage.GroupId, userId, _supabase);
             if (deletedMessage.UserId != userId)
                 return Unauthorized(new { title = "You can only delete your own messages." });
 

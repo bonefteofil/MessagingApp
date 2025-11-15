@@ -6,10 +6,10 @@ import { Stack, Text, Badge, Card, Avatar, Button } from "@mantine/core";
 import { getMessages } from '@messages/api';
 import { getGroupById } from '@groups/api';
 
-import Header from '@messages/components/Header';
 import SendMessage from '@messages/components/SendMessage';
 import MessageBubble from '@messages/components/MessageBubble';
 import DeveloperModeContext from '@components/DeveloperModeContext';
+import Header from '@components/Header';
 import Loading from '@components/Loading';
 import ErrorPage from '@errors/ErrorPage';
 
@@ -43,7 +43,7 @@ export default function ChatPage() {
             <Button variant='transparent' onClick={() => navigate("details")}>
                 {!groupError ? <>
                     <Avatar />
-                    <Text size="sm" truncate="end">{groupData?.name} {developerMode && ` ID: ${groupData?.id}`}</Text>
+                    <Text size="sm" truncate="end">{groupData?.name} {developerMode && groupData && ` ID: ${groupData.id}`}</Text>
                     <div style={{ flexGrow: 1 }} />
                 </> : <Text size="sm" truncate="end" c="red">{groupError.message}</Text>}
             </Button>

@@ -84,7 +84,6 @@ export function deleteAccount() {
             const result = await response.json();
             if (!response.ok) return ShowErrorNotification("Error deleting user: " + result.title);
 
-            console.log("User deleted:", result);
             queryClient.invalidateQueries({ queryKey: ['messages'] });
             queryClient.invalidateQueries({ queryKey: ["users"] });
             cleanNotifications();
@@ -140,7 +139,6 @@ export function getUsers() {
 
             if (!response.ok) return ShowErrorNotification("Error getting users: " + result.title);
 
-            console.log("Fetched users:", result);
             cleanNotifications();
             return result;
         },
