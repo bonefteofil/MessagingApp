@@ -68,6 +68,24 @@ export function getGroupMembers(groupId: number) {
     });
 }
 
+export function leaveGroup() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (groupId: number) => {
+
+            const result = await authFetch({
+                method: 'POST',
+                route: `/groups/${groupId}/leave`,
+                errorText: "Error leaving group"
+            });
+
+            queryClient.invalidateQueries({ queryKey: ['inboxGroups'] });
+            return transformInboxGroupDate(result);
+        }
+    })
+}
+
 export function createGroup() {
     return groupMutation({method: 'POST', errorText: "Error creating group"});
 }
@@ -84,16 +102,11 @@ function groupMutation({method, errorText} : {method: string, errorText: string}
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({groupBody, groupId}: {groupBody: GroupFormScheme, groupId?: number}) => {
+        mutationFn: async ({body, groupId}: {body: GroupFormScheme, groupId?: number}) => {
 
             var route = '/groups';
             if (groupId) route += `/${groupId}`;
-            const result = await authFetch({
-                method: method,
-                route: route,
-                body: groupBody,
-                errorText: errorText
-            });
+            const result = await authFetch({ method, route, body, errorText });
 
             queryClient.invalidateQueries({ queryKey: ['inboxGroups'] });
             queryClient.invalidateQueries({ queryKey: ['group', result.id] });

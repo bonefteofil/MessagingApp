@@ -18,7 +18,14 @@ export default function AccountPage() {
     const { data, error } = getAccountData();
     const navigate = useNavigate();
 
-    if (error) return <ErrorPage message={error.message} />;
+    if (error) {
+        return (<>
+            <Header element={
+                <Text ml="md" size="xl" truncate="end">Account Info</Text>
+            } />
+            <ErrorPage message={error.message} />
+        </>);
+    }
 
     return (<>
         <Header element={
@@ -26,10 +33,9 @@ export default function AccountPage() {
         } />
         <Outlet />
 
-        <ResponsiveCard title="Account">
+        <ResponsiveCard title={data?.user.username}>
 
             <Center><Avatar size='xl' /></Center>
-            <Text>Username: <Text component="span" fw={700}>{data?.user.username}</Text> </Text>
 
             <Group>
                 <Text>Developer mode:</Text>

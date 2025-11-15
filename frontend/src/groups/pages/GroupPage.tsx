@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faRightFromBracket, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Text, Avatar, Button, Center } from "@mantine/core";
 
-import { getGroupById, deleteGroup, getGroupMembers } from "@groups/api";
+import { getGroupById, deleteGroup, getGroupMembers, leaveGroup } from "@groups/api";
 
 import GroupMembers from "@groups/components/GroupMembers";
 import GroupForm from "@groups/components/GroupForm";
@@ -20,6 +20,7 @@ export default function GroupPage() {
     const groupId = Number(params.groupId);
     const navigate = useNavigate();
     const deleteMutation = deleteGroup();
+    const leaveMutation = leaveGroup();
     const { data: groupData, isLoading: isLoadingGroup, error: groupError } = getGroupById(groupId);
     const { data: membersData, error: membersError } = getGroupMembers(groupId);
 
@@ -31,10 +32,11 @@ export default function GroupPage() {
     }, []);
 
     useEffect(() => {
-        if (deleteMutation.isSuccess) {
+        console.log("Delete or leave successful, navigating to inbox");
+        if (deleteMutation.isSuccess || leaveMutation.isSuccess) {
             navigate("/", { replace: true });
         }
-    }, [deleteMutation.isSuccess]);
+    }, [deleteMutation.isSuccess, leaveMutation.isSuccess]);
 
     if (groupError || membersError) {
         return (<>
@@ -46,20 +48,35 @@ export default function GroupPage() {
     }
 
     const Actions = (<>
+        {/* Edit Button */}
         <GroupForm editingGroup={groupData} actualMembers={membersData} />
+
+        {/* Leave Button */}
+        <Button
+            radius='md'
+            onClick={() => { leaveMutation.mutate(groupData!.id!); }}
+            loading={leaveMutation.isPending}
+            disabled={deleteMutation.isPending}
+        >
+            Leave Group
+            <FontAwesomeIcon icon={faRightFromBracket} />
+        </Button>
+
+        {/* Delete Button */}
         <Button
             radius='md'
             color="red"
             onClick={() => {
                 deleteMutation.mutate({
-                    groupBody: groupData!,
-                    groupId: groupData!.id! });
-                }
-            }
+                    body: groupData!,
+                    groupId: groupData!.id!
+                });
+            }}
             loading={deleteMutation.isPending}
+            disabled={leaveMutation.isPending}
         >
-            <FontAwesomeIcon icon={faTrash} />
             Delete Group
+            <FontAwesomeIcon icon={faTrash} />
         </Button>
     </>);
     

@@ -206,6 +206,35 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
+    [HttpPost("{groupId}/leave")]
+    public async Task<IActionResult> LeaveGroup(int groupId)
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+
+            var response = await _supabase
+                .From<SupabaseGroupMember>()
+                .Where(x => x.GroupId == groupId && x.UserId == userId)
+                .Get();
+
+            var memberToDelete = response.Models.FirstOrDefault();
+            if (memberToDelete == null)
+                return NotFound();
+
+            await _supabase
+                .From<SupabaseGroupMember>()
+                .Delete(memberToDelete);
+
+            return Ok(new { id = groupId});
+        }
+        catch (Exception ex)
+        {
+            return Conflict(new { title = ex.Message });
+        }
+    }
+
+
     [HttpDelete("{groupId}")]
     public async Task<IActionResult> DeleteGroup(int groupId)
     {

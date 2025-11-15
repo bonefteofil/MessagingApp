@@ -59,7 +59,7 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
         if (developerMode && name === '') name = 'Dev Group';
 
         const mutation = editingGroup ? editMutation : createMutation;
-        mutation.mutate({ groupBody: { name, membersIds: members }, groupId: editingGroup?.id });
+        mutation.mutate({ body: { name, membersIds: members }, groupId: editingGroup?.id });
     };
 
     return (<>
@@ -70,7 +70,8 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
                 radius='md'
                 onClick={open}
             >
-                <FontAwesomeIcon icon={faPenToSquare} /> Edit Group
+                Edit Group
+                <FontAwesomeIcon icon={faPenToSquare} />
             </Button>
         ) : (
             <ActionIcon
