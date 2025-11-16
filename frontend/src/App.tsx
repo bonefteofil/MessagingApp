@@ -6,15 +6,15 @@ import Layout from "@components/Layout";
 import ResponsiveCard from "@components/ResponsiveCard";
 
 import Status from "@components/Status";
-import ChatPage from "@messages/pages/ChatPage"
-import GroupPage from "./groups/pages/GroupPage";
+import ChatPage from "@messages/ChatPage"
+import GroupPage from "@groups/GroupPage";
 import NotFoundPage from "@errors/404Page";
 
-import AccountPage from "@user/pages/AccountPage";
-import LoginPage from "@user/pages/LoginPage";
-import LogoutPage from "@user/pages/LogoutPage";
-import RegisterPage from "@user/pages/RegisterPage";
-import DeleteAccountPage from "@user/pages/DeleteAccountPage";
+import AccountPage from "@user/AccountPage";
+import LoginPage from "@user/LoginPage";
+import LogoutPage from "@user/LogoutPage";
+import RegisterPage from "@user/RegisterPage";
+import DeleteAccountPage from "@user/DeleteAccountPage";
 
 
 export default function App() {

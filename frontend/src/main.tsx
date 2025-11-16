@@ -12,7 +12,7 @@ import './index.css';
 import App from '@/App';
 
 import { DeveloperModeProvider } from '@components/DeveloperModeContext';
-import { EditingMessageProvider } from '@messages/Context';
+import { EditingMessageProvider } from '@messages/components/EditingMessageContext';
 
 const queryClient = new QueryClient();
 

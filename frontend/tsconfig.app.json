@@ -26,12 +26,14 @@
 		"baseUrl": "./src",
 		"paths": {
 			"@/*": ["*"],
-			"@user/*": ["user/*"],
-			"@groups/*": ["groups/*"],
-			"@messages/*": ["messages/*"],
-			"@components/*": ["shared/components/*"],
-			"@utils/*": ["shared/utils/*"],
-			"@errors/*": ["shared/errors/*"]
+			"@user/*": ["pages/user/*"],
+			"@groups/*": ["pages/groups/*"],
+			"@messages/*": ["pages/messages/*"],
+			"@errors/*": ["pages/errors/*"],
+			"@components/*": ["components/*"],
+			"@api/*": ["api/*"],
+			"@utils/*": ["utils/*"],
+			"@schema/*": ["schema/*"]
 		}
 	},
 	"include": ["src"]

@@ -15,19 +15,21 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'@': resolve(__dirname, 'src'),
-			'@user': resolve(__dirname, 'src/user'),
-			'@groups': resolve(__dirname, 'src/groups'),
-			'@messages': resolve(__dirname, 'src/messages'),
-            '@components': resolve(__dirname, 'src/shared/components'),
-            '@utils': resolve(__dirname, 'src/shared/utils'),
-            '@errors': resolve(__dirname, 'src/shared/errors'),
+			'@user': resolve(__dirname, 'src/pages/user'),
+			'@groups': resolve(__dirname, 'src/pages/groups'),
+			'@messages': resolve(__dirname, 'src/pages/messages'),
+            '@errors': resolve(__dirname, 'src/pages/errors'),
+            '@components': resolve(__dirname, 'src/components'),
+            '@api': resolve(__dirname, 'src/api'),
+            '@utils': resolve(__dirname, 'src/utils'),
+            '@schema': resolve(__dirname, 'src/schema')
 		}
 	},
     server: {
         proxy: {
             '/api': {
-                // target: 'http://localhost:5029',
-                target: 'https://messaging.bonefteofil.ro/api',
+                target: 'http://localhost:5029',
+                // target: 'https://messaging.bonefteofil.ro/api',
                 changeOrigin: true,
                 secure: false,
                 rewrite: (path) => path.replace(/^\/api/, ''),
