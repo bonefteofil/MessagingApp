@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { useCookies } from "react-cookie";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,15 +10,12 @@ import { useForm } from "@mantine/form";
 import { getUsers } from "@api/user";
 import { createGroup, editGroup } from "@api/groups";
 
-import DeveloperModeContext from '@components/DeveloperModeContext';
-
 import type { GroupMemberScheme, GroupScheme } from "@schema/groups";
 import type { UserScheme } from "@schema/user";
 
 
 export default function GroupForm({ editingGroup, actualMembers } : { editingGroup?: GroupScheme, actualMembers?: GroupMemberScheme[] }) {
     const [opened, { open, close }] = useDisclosure(false);
-    const { developerMode } = useContext(DeveloperModeContext);
     const { data: users } = getUsers();
     const createMutation = createGroup();
     const editMutation = editGroup();
@@ -56,7 +53,6 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
         e.preventDefault();
         let name = form.values.name;
         let members = form.values.membersId.map(id => Number(id));
-        if (developerMode && name === '') name = 'Dev Group';
 
         const mutation = editingGroup ? editMutation : createMutation;
         mutation.mutate({ body: { name, membersIds: members }, groupId: editingGroup?.id });
@@ -133,7 +129,7 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
                     mt='lg'
                     size='input-md'
                     fullWidth
-                    disabled={form.values.name.trim() === '' && !developerMode || !users}
+                    disabled={form.values.name.trim() === '' || !users}
                     loading={createMutation.isPending || editMutation.isPending}
                     loaderProps={{ size: 'sm' }}
                 >

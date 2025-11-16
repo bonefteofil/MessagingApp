@@ -4,12 +4,11 @@ import { useCookies } from "react-cookie";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-import { Avatar, Divider, Group, Stack, Text, ScrollArea, Code, Box, AppShell, ActionIcon } from "@mantine/core";
+import { Avatar, Divider, Group, Stack, Text, ScrollArea, Box, AppShell, ActionIcon } from "@mantine/core";
 
 import { getInboxGroups } from "@api/groups"
 
 import EditingMessageContext from "@messages/components/EditingMessageContext";
-import DeveloperModeContext from "@components/DeveloperModeContext";
 
 import GroupForm from "@groups/components/GroupForm";
 import ResponsiveCard from "@components/ResponsiveCard";
@@ -21,7 +20,6 @@ import type { InboxGroupScheme } from "@schema/groups";
 
 export default function InboxPage() {
     const { setEditingMessage } = useContext(EditingMessageContext);
-    const { developerMode } = useContext(DeveloperModeContext);
     const [cookies] = useCookies(['userId']);
 
     const { data, error, isLoading } = getInboxGroups();
@@ -82,8 +80,6 @@ export default function InboxPage() {
                                 </Text>
                             </Stack>
                         </Group>
-                        
-                        {developerMode && <Code block>{JSON.stringify(group, null, 2)}</Code>}
 
                         <Divider w={'70%'} mx={'auto'} />
                     </div>

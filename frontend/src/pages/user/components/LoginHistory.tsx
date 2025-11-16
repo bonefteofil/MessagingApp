@@ -1,10 +1,6 @@
-import { useContext } from 'react';
-
-import { Table, Badge, ActionIcon, Button, Code } from '@mantine/core';
+import { Table, Badge, ActionIcon, Button } from '@mantine/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarXmark, faRightFromBracket, faUserSlash } from '@fortawesome/free-solid-svg-icons';
-
-import DeveloperModeContext from '@components/DeveloperModeContext';
 
 import ResponsiveCard from '@components/ResponsiveCard';
 import Loading from '@components/Loading';
@@ -16,7 +12,6 @@ import type { SessionDetails } from '@schema/user';
 
 export default function LoginHistory({data} : {data: SessionDetails[] | undefined}) {
     const revokeMutation = revokeSession();
-    const { developerMode } = useContext(DeveloperModeContext);
 
     return (
         <ResponsiveCard title="Login History">
@@ -77,11 +72,7 @@ export default function LoginHistory({data} : {data: SessionDetails[] | undefine
                 ))}
                 </Table.Tbody>
             </Table>
-            {developerMode && (
-                <Code block>
-                    {JSON.stringify(data, null, 2)}
-                </Code>
-            )}
+
             <Loading loading={!data} />
         </ResponsiveCard>
     );

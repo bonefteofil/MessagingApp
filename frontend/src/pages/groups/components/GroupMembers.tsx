@@ -1,8 +1,4 @@
-import { useContext } from "react";
-
-import { Code, Table, Text } from "@mantine/core";
-
-import DeveloperModeContext from "@components/DeveloperModeContext";
+import { Table, Text } from "@mantine/core";
 
 import ResponsiveCard from "@components/ResponsiveCard";
 import Loading from "@components/Loading";
@@ -11,8 +7,6 @@ import type { GroupMemberScheme } from "@schema/groups";
 
 
 export default function GroupMembers({groupMembers} : {groupMembers?: GroupMemberScheme[]}) {
-    const { developerMode } = useContext(DeveloperModeContext);
-
     return (
         <ResponsiveCard title={"Members (" + (groupMembers?.length ?? ".") + ")"}>
             <Table>
@@ -32,11 +26,6 @@ export default function GroupMembers({groupMembers} : {groupMembers?: GroupMembe
                 ))}
                 </Table.Tbody>
             </Table>
-            {developerMode && (
-                <Code block>
-                    {JSON.stringify(groupMembers, null, 2)}
-                </Code>
-            )}
             <Loading loading={!groupMembers} />
         </ResponsiveCard>
     );

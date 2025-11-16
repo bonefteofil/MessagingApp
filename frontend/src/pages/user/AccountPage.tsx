@@ -1,11 +1,8 @@
-import { useContext } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
-import { Switch, Text, Button, Code, Avatar, Group, Center } from "@mantine/core";
+import { Text, Button, Avatar, Center } from "@mantine/core";
 
 import { getAccountData } from "@api/user";
-
-import DeveloperModeContext from "@components/DeveloperModeContext";
 
 import LoginHistory from "@user/components/LoginHistory";
 import Header from "@components/Header";
@@ -14,7 +11,6 @@ import ErrorPage from "@errors/ErrorPage";
 
 
 export default function AccountPage() {
-    const { developerMode, setDeveloperMode } = useContext(DeveloperModeContext);
     const { data, error } = getAccountData();
     const navigate = useNavigate();
 
@@ -37,22 +33,12 @@ export default function AccountPage() {
 
             <Center><Avatar size='xl' /></Center>
 
-            <Group>
-                <Text>Developer mode:</Text>
-                <Switch size="lg" onLabel="On" offLabel="Off" checked={developerMode} onChange={() => {setDeveloperMode(!developerMode)}}/>
-            </Group>
-
             <Button mt='sm' radius='md' onClick={() => { navigate("/logout"); }}>
                 Logout
             </Button>
             <Button mt='sm' radius='md' color="red" onClick={() => { navigate("/account/delete"); }}>
                 Delete Account
             </Button>
-            {developerMode && (
-                <Code block>
-                    {JSON.stringify(data?.user, null, 2)}
-                </Code>
-            )}
         </ResponsiveCard>
 
         <LoginHistory data={data?.sessions} />

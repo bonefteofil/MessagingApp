@@ -3,18 +3,16 @@ import { useCookies } from 'react-cookie';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
-import { Group, ActionIcon, Text, Card, Code } from "@mantine/core"
+import { Group, ActionIcon, Text, Card } from "@mantine/core"
 
 import { deleteMessage } from '@api/messages';
 
 import EditingMessageContext from './EditingMessageContext';
-import DeveloperModeContext from '@components/DeveloperModeContext';
 
 import type MessageScheme from '@schema/messages';
 
 
 export default function MessageBubble({ message } : { message: MessageScheme }) {
-    const { developerMode } = useContext(DeveloperModeContext);
     const { setEditingMessage } = useContext(EditingMessageContext);
     const [cookies] = useCookies(['userId']);
 
@@ -64,8 +62,6 @@ export default function MessageBubble({ message } : { message: MessageScheme }) 
                     {message.edited && <Text size="xs">Edited</Text>}
                     <Text size="xs">{message.createdTime!}</Text>
                 </Group>
-
-                {developerMode && <Code block>{JSON.stringify(message, null, 2)}</Code>}
             </Card>
         </Group>
     );
