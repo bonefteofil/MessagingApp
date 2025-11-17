@@ -70,34 +70,25 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
     {
         try
         {
-            Response.Cookies.Delete("accessToken");
-            Response.Cookies.Delete("refreshToken");
 
             int userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
             var response = await _supabase
-                .From<SupabaseUser>()
-                .Where(x => x.Id == userId)
+                .From<SupabaseGroup>()
+                .Where(x => x.OwnerId == userId)
                 .Get();
 
-            var deletedUser = response.Models.FirstOrDefault();
-            if (deletedUser == null)
-                return NotFound();
-
-            await _supabase
-                .From<SupabaseMessage>()
-                .Where(x => x.UserId == userId)
-                .Delete();
-
-            await _supabase
-                .From<SupabaseRefreshToken>()
-                .Where(x => x.UserId == userId)
-                .Delete();
+            if (response.Models.FirstOrDefault() != null)
+                return BadRequest(new { title = "You must transfer ownership of your groups before deleting your account." });
 
             await _supabase
                 .From<SupabaseUser>()
-                .Delete(deletedUser);
+                .Where(x => x.Id == userId)
+                .Delete();
 
-            return Ok(deletedUser.ToDTO());
+            Response.Cookies.Delete("accessToken");
+            Response.Cookies.Delete("refreshToken");
+
+            return Ok(new { title = "Account deleted successfully." });
         }
         catch (Exception ex)
         {

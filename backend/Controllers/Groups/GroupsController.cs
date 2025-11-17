@@ -43,7 +43,8 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             await Validations.ValidateGroupMembership(id, userId, _supabase);
 
             var response = await _supabase
-                .From<SupabaseGroup>()
+                .From<SupabaseGroupWithUsername>()
+                .Select("*, username:owner_id(username)")
                 .Where(x => x.Id == id)
                 .Get();
 
@@ -71,6 +72,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
                 .From<SupabaseMemberWithUsername>()
                 .Select("*, username:user_id(username)")
                 .Where(x => x.GroupId == id)
+                .Order("created_at", Supabase.Postgrest.Constants.Ordering.Descending)
                 .Get();
 
             return Ok(response.Models.Select(x => x.ToDTO()));
@@ -99,24 +101,27 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
                 return BadRequest(new { title = "Group limit reached (max 30 groups)" });
 
             // Insert group
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
             var response = await _supabase
                 .From<SupabaseGroup>()
-                .Insert(new SupabaseGroup { Name = group.Name, CreatedAt = DateTime.UtcNow });
+                .Insert(new SupabaseGroup {
+                    Name = group.Name,
+                    CreatedAt = DateTime.UtcNow,
+                    OwnerId = userId
+                });
 
             var createdGroup = response.Models.FirstOrDefault();
             if (createdGroup == null)
                 return BadRequest();
             
             // Add members
-            var groupId = createdGroup.Id;
-            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
             var newMembersIds = group.MembersIds;
             newMembersIds.Add(userId);
 
             for (int i = 0; i < newMembersIds.Count; i++)
             {
                 var newMember = new SupabaseGroupMember {
-                    GroupId = groupId,
+                    GroupId = createdGroup.Id,
                     UserId = newMembersIds[i],
                     CreatedAt = DateTime.UtcNow
                 };
@@ -145,30 +150,34 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             if (group.Name!.Length > 30)
                 return BadRequest(new { title = "Name too long (max 30 characters)" });
 
-            var actualMembers = await _supabase
-                .From<SupabaseGroupMember>()
-                .Where(x => x.GroupId == groupId)
-                .Get();
-
-            // Validate membership
-            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
-            if (actualMembers.Models.Find(x => x.UserId == userId) == null)
-                return Forbid("You are not a member of this group.");
-
-            // Update group name
             var response = await _supabase
                 .From<SupabaseGroup>()
                 .Where(x => x.Id == groupId)
-                .Set(x => x.Name!, group.Name)
-                .Update();
+                .Get();
             
             var updatedGroup = response.Models.FirstOrDefault();
             if (updatedGroup == null)
                 return NotFound();
+            
+            // Validate membership
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            if (updatedGroup.OwnerId != userId)
+                return BadRequest(new { title = "Only the group owner can update the group." });
+
+            // Update group name
+            updatedGroup.Name = group.Name;
+            await _supabase
+                .From<SupabaseGroup>()
+                .Update(updatedGroup);
 
             // Update members
             var newMembersIds = group.MembersIds;
             newMembersIds.Add(userId);
+
+            var actualMembers = await _supabase
+                .From<SupabaseGroupMember>()
+                .Where(x => x.GroupId == groupId)
+                .Get();
 
             // Remove old members not in new list
             foreach (var member in actualMembers.Models)
@@ -206,27 +215,72 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
+    [HttpPost("{groupId}/transfer")]
+    public async Task<IActionResult> TransferGroupOwnership(int groupId, UserDTO newOwner)
+    {
+        try
+        {
+            var response = await _supabase
+                .From<SupabaseGroup>()
+                .Where(x => x.Id == groupId)
+                .Get();
+            
+            var group = response.Models.FirstOrDefault();
+            if (group == null)
+                return NotFound(new { title = "Group not found" });
+
+            // Validate ownership
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            if (group.OwnerId != userId)
+                return BadRequest(new { title = "Only the group owner can transfer ownership." });
+            if (newOwner.Id == userId)
+                return BadRequest(new { title = "You are already the owner of this group." });
+
+            // Validate new owner
+            await Validations.ValidateGroupMembership(groupId, newOwner.Id, _supabase);
+
+            // Transfer ownership
+            group.OwnerId = newOwner.Id;
+            await _supabase
+                .From<SupabaseGroup>()
+                .Update(group);
+
+            return Ok(group.ToDTO());
+            
+        }
+        catch (Exception ex)
+        {
+            return Conflict(new { title = ex.Message });
+        }
+    }
+
     [HttpPost("{groupId}/leave")]
     public async Task<IActionResult> LeaveGroup(int groupId)
     {
         try
         {
-            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
-
-            var response = await _supabase
-                .From<SupabaseGroupMember>()
-                .Where(x => x.GroupId == groupId && x.UserId == userId)
+            var groupResponse = await _supabase
+                .From<SupabaseGroup>()
+                .Select("owner_id")
+                .Where(x => x.Id == groupId)
                 .Get();
 
-            var memberToDelete = response.Models.FirstOrDefault();
-            if (memberToDelete == null)
+            var group = groupResponse.Models.FirstOrDefault();
+            if (group == null)
                 return NotFound();
 
+            // Validate membership
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            if (group.OwnerId == userId)
+                return BadRequest(new { title = "Group owner cannot leave the group. Delete the group instead." });
+
+            // Remove member
             await _supabase
                 .From<SupabaseGroupMember>()
-                .Delete(memberToDelete);
+                .Where(x => x.GroupId == groupId && x.UserId == userId)
+                .Delete();
 
-            return Ok(new { id = groupId});
+            return Ok(group.ToDTO());
         }
         catch (Exception ex)
         {
@@ -249,6 +303,12 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             if (deletedGroup == null)
                 return NotFound();
 
+            // Validate ownership
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            if (deletedGroup.OwnerId != userId)
+                return BadRequest(new { title = "Only the group owner can delete the group." });
+
+            // Delete group
             await _supabase
                 .From<SupabaseGroup>()
                 .Delete(deletedGroup);

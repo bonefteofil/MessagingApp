@@ -12,6 +12,8 @@ public class SupabaseGroup : BaseModel
     public string? Name { get; set; }
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
+    [Column("owner_id")]
+    public int OwnerId { get; set; }
 
     public GroupDTO ToDTO()
     {
@@ -19,10 +21,40 @@ public class SupabaseGroup : BaseModel
         {
             Id = this.Id,
             Name = this.Name,
-            CreatedAt = this.CreatedAt
+            CreatedAt = this.CreatedAt,
+            OwnerId = this.OwnerId
         };
     }
 }
+
+[Table("Groups")]
+public class SupabaseGroupWithUsername : BaseModel
+{
+    [PrimaryKey("id")]
+    public int Id { get; set; }
+    [Column("name")]
+    public string? Name { get; set; }
+    [Column("created_at")]
+    public DateTime? CreatedAt { get; set; }
+    [Column("owner_id")]
+    public int OwnerId { get; set; }
+    [Column("username")]
+    public SupabaseUser? Owner { get; set; }
+
+    public GroupDTO ToDTO()
+    {
+        return new GroupDTO
+        {
+            Id = this.Id,
+            Name = this.Name,
+            CreatedAt = this.CreatedAt,
+            OwnerId = this.OwnerId,
+            Owner = this.Owner?.Username
+        };
+    }
+}
+
+
 
 [Table("Inbox_Groups")]
 public class SupabaseInboxGroup : BaseModel

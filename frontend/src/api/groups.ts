@@ -86,6 +86,27 @@ export function leaveGroup() {
     })
 }
 
+export function transferOewnership() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({groupId, newOwnerId}: {groupId: number, newOwnerId: number}) => {
+
+            const result = await authFetch({
+                method: 'POST',
+                route: `/groups/${groupId}/transfer`,
+                body: { id: newOwnerId },
+                errorText: "Error transferring group ownership"
+            });
+
+            queryClient.invalidateQueries({ queryKey: ['inboxGroups'] });
+            queryClient.invalidateQueries({ queryKey: ['group', groupId] });
+            queryClient.invalidateQueries({ queryKey: ['groupMembers', groupId] });
+            return transformInboxGroupDate(result);
+        }
+    })
+}
+
 export function createGroup() {
     return groupMutation({method: 'POST', errorText: "Error creating group"});
 }

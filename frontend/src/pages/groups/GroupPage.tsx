@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 import { faRightFromBracket, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,8 +8,9 @@ import { Text, Avatar, Button, Center } from "@mantine/core";
 
 import { getGroupById, deleteGroup, getGroupMembers, leaveGroup } from "@api/groups";
 
-import GroupMembers from "@groups/components/GroupMembers";
-import GroupForm from "@groups/components/GroupForm";
+import GroupMembers from "./components/GroupMembers";
+import TransferOewnership from "./components/TransferOwnership";
+import GroupForm from "./components/GroupForm";
 import Header from '@components/Header';
 import Loading from "@components/Loading";
 import ResponsiveCard from "@components/ResponsiveCard";
@@ -17,8 +19,9 @@ import ErrorPage from "@errors/ErrorPage";
 
 export default function GroupPage() {
     const params = useParams();
-    const groupId = Number(params.groupId);
+    const [cookies] = useCookies(['userId']);
     const navigate = useNavigate();
+    const groupId = Number(params.groupId);
     const deleteMutation = deleteGroup();
     const leaveMutation = leaveGroup();
     const { data: groupData, isLoading: isLoadingGroup, error: groupError } = getGroupById(groupId);
@@ -47,20 +50,12 @@ export default function GroupPage() {
         </>);
     }
 
-    const Actions = (<>
+    const AdminActions = (<>
         {/* Edit Button */}
         <GroupForm editingGroup={groupData} actualMembers={membersData} />
 
-        {/* Leave Button */}
-        <Button
-            radius='md'
-            onClick={() => { leaveMutation.mutate(groupData!.id!); }}
-            loading={leaveMutation.isPending}
-            disabled={deleteMutation.isPending}
-        >
-            Leave Group
-            <FontAwesomeIcon icon={faRightFromBracket} />
-        </Button>
+        {/* Transfer Ownership Button */}
+        <TransferOewnership actualMembers={membersData!} />
 
         {/* Delete Button */}
         <Button
@@ -79,6 +74,19 @@ export default function GroupPage() {
             <FontAwesomeIcon icon={faTrash} />
         </Button>
     </>);
+
+    const MemberActions = (<>
+        {/* Leave Button */}
+        <Button
+            radius='md'
+            onClick={() => { leaveMutation.mutate(groupData!.id!); }}
+            loading={leaveMutation.isPending}
+            disabled={deleteMutation.isPending}
+        >
+            Leave Group
+            <FontAwesomeIcon icon={faRightFromBracket} />
+        </Button>
+    </>);
     
     return (<>
         <Header element={
@@ -89,9 +97,12 @@ export default function GroupPage() {
             {(isLoadingGroup || !groupData) ? <Loading /> : <>
 
                 <Center><Avatar size='xl' /></Center>
-                <Text size="xl">Created: {groupData!.createdAt}</Text>
+                <Text size="xl">Owner: {groupData!.owner}</Text>
+                <Text size="xl">Created time: {groupData!.createdAt}</Text>
 
-                {!membersData ? <Loading /> : Actions}
+                {!membersData ? <Loading /> :
+                    groupData!.ownerId === Number(cookies.userId) ? AdminActions : MemberActions
+                }
             </>}
         </ResponsiveCard>
 

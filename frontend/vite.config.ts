@@ -28,8 +28,8 @@ export default defineConfig({
     server: {
         proxy: {
             '/api': {
-                target: 'http://localhost:5029',
-                // target: 'https://messaging.bonefteofil.ro/api',
+                // target: 'http://localhost:5029',
+                target: 'https://messaging.bonefteofil.ro/api',
                 changeOrigin: true,
                 secure: false,
                 rewrite: (path) => path.replace(/^\/api/, ''),

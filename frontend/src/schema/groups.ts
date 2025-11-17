@@ -10,6 +10,8 @@ export interface GroupScheme {
   id?: number;
   name: string;
   createdAt?: string;
+  ownerId?: number;
+  owner?: string;
 }
 
 export interface GroupMemberScheme {
