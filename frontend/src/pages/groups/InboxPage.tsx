@@ -1,30 +1,35 @@
-import { useContext } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-import { Avatar, Divider, Group, Stack, Text, ScrollArea, Box, AppShell, ActionIcon } from "@mantine/core";
+import { Group, Text, ScrollArea, Box, AppShell, ActionIcon } from "@mantine/core";
 
 import { getInboxGroups } from "@api/groups"
 
-import EditingMessageContext from "@messages/components/EditingMessageContext";
-
 import GroupForm from "@groups/components/GroupForm";
-import ResponsiveCard from "@components/ResponsiveCard";
 import Loading from "@components/Loading";
 import ErrorPage from "@errors/ErrorPage";
 
 import type { InboxGroupScheme } from "@schema/groups";
+import { useEffect, useState } from "react";
+import InboxComponent from "./components/InboxComponent";
 
 
 export default function InboxPage() {
-    const { setEditingMessage } = useContext(EditingMessageContext);
-    const [cookies] = useCookies(['userId']);
-
-    const { data, error, isLoading } = getInboxGroups();
-    const { groupId } = useParams();
     const navigate = useNavigate();
+    const [cookies] = useCookies(['userId']);
+    const { data, error, isLoading } = getInboxGroups();
+
+    const [publicGroups, setPublicGroups] = useState<InboxGroupScheme[]>([]);
+    const [privateGroups, setPrivateGroups] = useState<InboxGroupScheme[]>([]);
+
+    useEffect(() => {
+        if (data) {
+            setPublicGroups(data.filter((group: InboxGroupScheme) => group.public));
+            setPrivateGroups(data.filter((group: InboxGroupScheme) => !group.public));
+        }
+    }, [data]);
 
     if (!cookies.userId) return <Navigate to="/login" replace />;
     if (error) return (<AppShell.Navbar withBorder><ErrorPage message={error.message} /></AppShell.Navbar>);
@@ -45,45 +50,18 @@ export default function InboxPage() {
                     </ActionIcon>
                 </Group>
 
+                <Text size="lg" mt="sm" mb="xs" fw={500} px="md">Private Groups ({privateGroups.length})</Text>
+                {privateGroups.map((group: InboxGroupScheme) => {
+                    return <InboxComponent key={group.id} group={group} />
+                })}
+
+                <Text size="lg" mt="sm" mb="xs" fw={500} px="md">Public Groups ({publicGroups.length})</Text>
+                {publicGroups.map((group: InboxGroupScheme) => {
+                    return <InboxComponent key={group.id} group={group} />
+                })}
+
                 <Loading loading={isLoading} />
 
-                {(!data || data.length === 0) && !isLoading &&
-                    <ResponsiveCard title="You are not in any groups yet">
-                        <Text size="md" c="dimmed">
-                            Create a new group or ask someone to add you to a group.
-                        </Text>
-                    </ResponsiveCard>
-                }
-                {data && data.map((group: InboxGroupScheme) => (
-                    <div key={group.id}>
-                        <Group gap="md" p="xs" align="top"
-                            classNames={{ root: `${groupId == group.id && 'bg-gray-700'} hover:bg-gray-700 cursor-pointer rounded-lg` }}
-                            onClick={() => {
-                                setEditingMessage(null);
-                                navigate(`/groups/${group.id}`);
-                            }}
-                        >
-                            <Avatar size="lg" />
-
-                            <Stack gap="0" justify="start" className="overflow-hidden h-max flex-1">
-                                <Group className="w-full" justify="space-between" wrap="nowrap">
-                                    <Text size='lg' truncate="end">
-                                        {group.name}
-                                    </Text>
-                                    <Text size="sm">
-                                        {group.lastMessageAt!}
-                                    </Text>
-                                </Group>
-
-                                <Text size="sm" c="dimmed" truncate="end">
-                                    {group.lastMessage === "" ? "Message null" : (group.lastMessage == null ? "No messages yet" : group.lastMessage)}
-                                </Text>
-                            </Stack>
-                        </Group>
-
-                        <Divider w={'70%'} mx={'auto'} />
-                    </div>
-                ))}
                 <Box h='md' />
             </ScrollArea>
         </AppShell.Navbar>

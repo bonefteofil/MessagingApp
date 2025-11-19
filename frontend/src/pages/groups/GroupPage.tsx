@@ -4,7 +4,7 @@ import { useCookies } from "react-cookie";
 
 import { faRightFromBracket, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Text, Avatar, Button, Center } from "@mantine/core";
+import { Text, Avatar, Button, Center, Table } from "@mantine/core";
 
 import { getGroupById, deleteGroup, getGroupMembers, leaveGroup } from "@api/groups";
 
@@ -35,7 +35,6 @@ export default function GroupPage() {
     }, []);
 
     useEffect(() => {
-        console.log("Delete or leave successful, navigating to inbox");
         if (deleteMutation.isSuccess || leaveMutation.isSuccess) {
             navigate("/", { replace: true });
         }
@@ -97,8 +96,22 @@ export default function GroupPage() {
             {(isLoadingGroup || !groupData) ? <Loading /> : <>
 
                 <Center><Avatar size='xl' /></Center>
-                <Text size="xl">Owner: {groupData!.owner}</Text>
-                <Text size="xl">Created time: {groupData!.createdAt}</Text>
+                <Table>
+                    <Table.Tbody>
+                        <Table.Tr>
+                            <Table.Td> <Text>Owner</Text> </Table.Td>
+                            <Table.Td> <Text>{groupData!.owner}</Text> </Table.Td>
+                        </Table.Tr>
+                        <Table.Tr>
+                            <Table.Td> <Text>Created time</Text> </Table.Td>
+                            <Table.Td> <Text>{groupData!.createdAt}</Text> </Table.Td>
+                        </Table.Tr>
+                        <Table.Tr>
+                            <Table.Td> <Text>Public</Text> </Table.Td>
+                            <Table.Td> <Text>{groupData!.public ? "Yes" : "No"}</Text> </Table.Td>
+                        </Table.Tr>
+                    </Table.Tbody>
+                </Table>
 
                 {!membersData ? <Loading /> :
                     groupData!.ownerId === Number(cookies.userId) ? AdminActions : MemberActions
@@ -106,6 +119,6 @@ export default function GroupPage() {
             </>}
         </ResponsiveCard>
 
-        <GroupMembers groupMembers={membersData} />
+        {groupData && !groupData.public && <GroupMembers groupMembers={membersData} />}
     </>);
 }

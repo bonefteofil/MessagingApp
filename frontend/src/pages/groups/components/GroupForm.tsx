@@ -3,14 +3,14 @@ import { useCookies } from "react-cookie";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { Modal, Button, ActionIcon, Input, MultiSelect, Text } from "@mantine/core";
+import { Modal, Button, ActionIcon, Input, MultiSelect, Text, Switch } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from "@mantine/form";
 
 import { getUsers } from "@api/user";
 import { createGroup, editGroup } from "@api/groups";
 
-import type { GroupMemberScheme, GroupScheme } from "@schema/groups";
+import type { GroupFormScheme, GroupMemberScheme, GroupScheme } from "@schema/groups";
 import type { UserScheme } from "@schema/user";
 
 
@@ -25,7 +25,8 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
     const form = useForm({
         initialValues: {
             name: '',
-            membersId: [] as string[]
+            membersId: [] as string[],
+            public: false
         },
     });
 
@@ -34,6 +35,7 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
         if (opened && editingGroup && actualMembers) {
             form.setValues({
                 name: editingGroup?.name,
+                public: editingGroup?.public || false,
                 membersId: actualMembers
                     .filter((member: GroupMemberScheme) => member.userId !== actualUserId)
                     .map((member: GroupMemberScheme) => member.userId.toString())
@@ -41,6 +43,7 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
         }
     }, [opened]);
 
+    // Close modal on successful mutation
     useEffect(() => {
         const mutation = editingGroup ? editMutation : createMutation;
         if (mutation.isSuccess && mutation.data) {
@@ -49,13 +52,17 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
         }
     }, [createMutation.isSuccess, editMutation.isSuccess]);
 
+    // Handle form submission
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        let name = form.values.name;
-        let members = form.values.membersId.map(id => Number(id));
 
+        const group: GroupFormScheme = {
+            name: form.values.name,
+            public: form.values.public,
+            membersIds: form.values.membersId.map(id => Number(id)),
+        };
         const mutation = editingGroup ? editMutation : createMutation;
-        mutation.mutate({ body: { name, membersIds: members }, groupId: editingGroup?.id });
+        mutation.mutate({ body: group, groupId: editingGroup?.id });
     };
 
     return (<>
@@ -81,6 +88,7 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
         )}
 
         <Modal
+            size="md"
             opened={opened}
             onClose={close}
             title={editingGroup ? "Edit group" : "Create a new group"}
@@ -89,22 +97,28 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
             <form onSubmit={handleSubmit}>
 
                 {/* Group name input */}
+                <Text mb='sm'>Group Name</Text>
                 <Input
-                    type="text"
-                    data-autofocus
-                    placeholder="Group Name"
-                    radius='md'
                     size="md"
-                    mb='sm'
+                    radius='md'
+                    data-autofocus
+                    type="text"
+                    placeholder="Group Name"
                     {...form.getInputProps('name')}
                 />
 
                 {/* Select group members */}
-                <Text mt='md' mb='sm'>Add members</Text>
+                <Text mt='lg' mb='sm'>Add members</Text>
                 {!users ? <Text>Loading...</Text> : (
                     <MultiSelect
+                        size="md"
                         radius='md'
-                        placeholder="Select members"
+                        placeholder={form.values.public ? "Public group - no members" : "Select members"}
+                        searchable
+                        hidePickedOptions
+                        nothingFoundMessage="Not found..."
+                        comboboxProps={{ width: 200 }}
+                        disabled={form.values.public}
                         data={!users ? [] : users
                             .filter((user: UserScheme) => user.id !== actualUserId)
                             .map((user: UserScheme) => ({
@@ -112,22 +126,30 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
                                 label: user.username
                             }))
                         }
-                        value={form.values.membersId}
-                        onChange={(value) => form.setValues({ ...form.values, membersId: value })}
-                        searchable
-                        hidePickedOptions
-                        nothingFoundMessage="Not found..."
-                        comboboxProps={{ width: 200 }}
+                        {...form.getInputProps('membersId')}
                     />
                 )}
 
+                {/* Public group switch */}
+                {editingGroup ? <Text mt='lg'>Public: {editingGroup.public ? "Yes" : "No"}</Text> :
+                    <Switch
+                        mt='lg'
+                        size="md"
+                        label="Public:"
+                        labelPosition="left"
+                        defaultChecked={form.values.public}
+                        disabled={form.values.membersId.length > 0 || editingGroup != null}
+                        {...form.getInputProps('public')}
+                    />
+                }
+
                 {/* Submit button */}
                 <Button
+                    mt='lg'
+                    size='md'
+                    radius='md'
                     variant="gradient"
                     type="submit"
-                    radius='md'
-                    mt='lg'
-                    size='input-md'
                     fullWidth
                     disabled={form.values.name.trim() === '' || !users}
                     loading={createMutation.isPending || editMutation.isPending}

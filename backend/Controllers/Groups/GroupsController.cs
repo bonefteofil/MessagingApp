@@ -94,6 +94,9 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             if (group.Name!.Length > 30)
                 return BadRequest(new { title = "Name too long (max 30 characters)" });
 
+            if (group.Public && group.MembersIds.Count > 0)
+                return BadRequest(new { title = "Public groups cannot have members." });
+
             var count = await _supabase
                 .From<SupabaseGroup>()
                 .Count(Supabase.Postgrest.Constants.CountType.Exact);
@@ -107,6 +110,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
                 .Insert(new SupabaseGroup {
                     Name = group.Name,
                     CreatedAt = DateTime.UtcNow,
+                    Public = group.Public,
                     OwnerId = userId
                 });
 
@@ -158,6 +162,10 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             var updatedGroup = response.Models.FirstOrDefault();
             if (updatedGroup == null)
                 return NotFound();
+            if (group.Public != updatedGroup.Public)
+                return BadRequest(new { title = "Cannot change group visibility." });
+            if (updatedGroup.Public && group.MembersIds.Count > 0)
+                return BadRequest(new { title = "Public groups cannot have members." });
             
             // Validate membership
             var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
@@ -169,6 +177,9 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             await _supabase
                 .From<SupabaseGroup>()
                 .Update(updatedGroup);
+
+            if (updatedGroup.Public)
+                return Ok(updatedGroup.ToDTO());
 
             // Update members
             var newMembersIds = group.MembersIds;

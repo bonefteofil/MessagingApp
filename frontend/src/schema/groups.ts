@@ -1,9 +1,10 @@
 export interface InboxGroupScheme {
   id?: number;
   name: string;
-  lastMessage?: string
-  lastMessageAt?: string
+  lastMessage?: string;
+  lastMessageAt?: string;
   createdAt?: string;
+  public: boolean;
 }
 
 export interface GroupScheme {
@@ -12,6 +13,7 @@ export interface GroupScheme {
   createdAt?: string;
   ownerId?: number;
   owner?: string;
+  public: boolean;
 }
 
 export interface GroupMemberScheme {
@@ -24,5 +26,6 @@ export interface GroupMemberScheme {
 
 export interface GroupFormScheme {
   name: string;
+  public: boolean;
   membersIds?: number[];
 }

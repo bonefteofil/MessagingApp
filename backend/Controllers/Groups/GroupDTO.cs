@@ -7,6 +7,7 @@ public class GroupDTO
     public DateTime? CreatedAt { get; set; }
     public int OwnerId { get; set; }
     public string? Owner { get; set; }
+    public bool Public { get; set; }
 }
 
 public class InboxGroupDTO
@@ -16,6 +17,7 @@ public class InboxGroupDTO
     public DateTime? CreatedAt { get; set; }
     public string? LastMessage { get; set; }
     public DateTime? LastMessageAt { get; set; }
+    public bool Public { get; set; }
 }
 
 public class GroupMemberDTO
@@ -30,5 +32,6 @@ public class GroupMemberDTO
 public class GroupFormDTO
 {
     public string? Name { get; set; }
+    public bool Public { get; set; }
     public List<int> MembersIds { get; set; } = [];
 }

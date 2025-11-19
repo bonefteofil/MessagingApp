@@ -14,6 +14,8 @@ public class SupabaseGroup : BaseModel
     public DateTime? CreatedAt { get; set; }
     [Column("owner_id")]
     public int OwnerId { get; set; }
+    [Column("public")]
+    public bool Public { get; set; }
 
     public GroupDTO ToDTO()
     {
@@ -22,7 +24,8 @@ public class SupabaseGroup : BaseModel
             Id = this.Id,
             Name = this.Name,
             CreatedAt = this.CreatedAt,
-            OwnerId = this.OwnerId
+            OwnerId = this.OwnerId,
+            Public = this.Public
         };
     }
 }
@@ -38,6 +41,8 @@ public class SupabaseGroupWithUsername : BaseModel
     public DateTime? CreatedAt { get; set; }
     [Column("owner_id")]
     public int OwnerId { get; set; }
+    [Column("public")]
+    public bool Public { get; set; }
     [Column("username")]
     public SupabaseUser? Owner { get; set; }
 
@@ -49,12 +54,11 @@ public class SupabaseGroupWithUsername : BaseModel
             Name = this.Name,
             CreatedAt = this.CreatedAt,
             OwnerId = this.OwnerId,
-            Owner = this.Owner?.Username
+            Owner = this.Owner?.Username,
+            Public = this.Public
         };
     }
 }
-
-
 
 [Table("Inbox_Groups")]
 public class SupabaseInboxGroup : BaseModel
@@ -70,8 +74,9 @@ public class SupabaseInboxGroup : BaseModel
     [Column("last_message")]
     public string? LastMessage { get; set; }
     [Column("last_message_at")]
-    public DateTime? LastMessageTime { get; set; }
-
+    public DateTime? LastMessageAt { get; set; }
+    [Column("public")]
+    public bool Public { get; set; }
     public InboxGroupDTO ToDTO()
     {
         return new InboxGroupDTO
@@ -80,7 +85,8 @@ public class SupabaseInboxGroup : BaseModel
             Name = this.Name,
             CreatedAt = this.CreatedAt,
             LastMessage = this.LastMessage,
-            LastMessageAt = this.LastMessageTime
+            LastMessageAt = this.LastMessageAt,
+            Public = this.Public
         };
     }
 }
