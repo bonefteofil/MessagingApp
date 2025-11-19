@@ -52,6 +52,10 @@ export default function TransferOewnership({ actualMembers } : { actualMembers: 
             <Select
                 radius='md'
                 label="Select new owner"
+                placeholder="Choose member"
+                searchable
+                nothingFoundMessage="No members found"
+                comboboxProps={{ width: 200 }}
                 data={actualMembers
                     .filter((member: GroupMemberScheme) => member.userId !== actualUserId)
                     .map((member: GroupMemberScheme) => ({
@@ -60,9 +64,6 @@ export default function TransferOewnership({ actualMembers } : { actualMembers: 
                     }))
                 }
                 onChange={(value) => setNewOwnerId(value ? Number(value) : null)}
-                searchable
-                nothingFoundMessage="Not found..."
-                comboboxProps={{ width: 200 }}
             />
 
             {/* Submit button */}

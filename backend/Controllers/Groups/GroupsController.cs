@@ -22,7 +22,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 
             var response = await _supabase
                 .From<SupabaseInboxGroup>()
-                .Where(x => x.UserId == userId)
+                .Where(x => x.UserId == userId || x.Public == true)
                 .Order("last_message_at", Supabase.Postgrest.Constants.Ordering.Descending)
                 .Get();
 
@@ -34,18 +34,18 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<GroupDTO>> GetGroupData(int id)
+    [HttpGet("{groupId}")]
+    public async Task<ActionResult<GroupDTO>> GetGroupData(int groupId)
     {
         try
         {
             var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
-            await Validations.ValidateGroupMembership(id, userId, _supabase);
+            await Validations.ValidateGroupMembership(groupId, userId, _supabase);
 
             var response = await _supabase
                 .From<SupabaseGroupWithUsername>()
                 .Select("*, username:owner_id(username)")
-                .Where(x => x.Id == id)
+                .Where(x => x.Id == groupId)
                 .Get();
 
             var group = response.Models.FirstOrDefault();
@@ -60,22 +60,46 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpGet("{id}/members")]
-    public async Task<ActionResult<IEnumerable<GroupMemberDTO>>> GetGroupMembers(int id)
+    [HttpGet("{groupId}/members")]
+    public async Task<ActionResult<IEnumerable<GroupMemberDTO>>> GetGroupMembers(int groupId)
     {
         try
         {
-            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
-            await Validations.ValidateGroupMembership(id, userId, _supabase);
+            var groupResponse = await _supabase
+                .From<SupabaseGroup>()
+                .Where(x => x.Id == groupId)
+                .Get();
 
-            var response = await _supabase
+            var actualGroup = groupResponse.Models.FirstOrDefault();
+            if (actualGroup == null)
+                return NotFound(new { title = "Group not found" });
+
+            // If public group, return all users
+            if (actualGroup.Public == true)
+            {
+                var usersResponse = await _supabase
+                    .From<SupabaseUser>()
+                    .Select("*")
+                    .Get();
+                return Ok(usersResponse.Models.Select(x => x.ToGroupMemberDTO(groupId: actualGroup.Id, actualGroup.CreatedAt ?? DateTime.UtcNow)));
+            }
+
+            var membersResponse = await _supabase
                 .From<SupabaseMemberWithUsername>()
                 .Select("*, username:user_id(username)")
-                .Where(x => x.GroupId == id)
+                .Where(x => x.GroupId == groupId)
                 .Order("created_at", Supabase.Postgrest.Constants.Ordering.Descending)
                 .Get();
 
-            return Ok(response.Models.Select(x => x.ToDTO()));
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            if (!membersResponse.Models.Any(x => x.UserId == userId))
+            {
+                var group = groupResponse.Models.FirstOrDefault();
+                if (group == null || group.Public == false)
+                    return BadRequest(new { title = "You are not a member of this group." });
+            }
+
+            return Ok(membersResponse.Models.Select(x => x.ToDTO()));
         }
         catch (Exception ex)
         {
@@ -159,27 +183,27 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
                 .Where(x => x.Id == groupId)
                 .Get();
             
-            var updatedGroup = response.Models.FirstOrDefault();
-            if (updatedGroup == null)
+            var currentGroup = response.Models.FirstOrDefault();
+            if (currentGroup == null)
                 return NotFound();
-            if (group.Public != updatedGroup.Public)
+            if (group.Public != currentGroup.Public)
                 return BadRequest(new { title = "Cannot change group visibility." });
-            if (updatedGroup.Public && group.MembersIds.Count > 0)
+            if (currentGroup.Public && group.MembersIds.Count > 0)
                 return BadRequest(new { title = "Public groups cannot have members." });
             
             // Validate membership
             var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
-            if (updatedGroup.OwnerId != userId)
+            if (currentGroup.OwnerId != userId)
                 return BadRequest(new { title = "Only the group owner can update the group." });
 
             // Update group name
-            updatedGroup.Name = group.Name;
+            currentGroup.Name = group.Name;
             await _supabase
                 .From<SupabaseGroup>()
-                .Update(updatedGroup);
+                .Update(currentGroup);
 
-            if (updatedGroup.Public)
-                return Ok(updatedGroup.ToDTO());
+            if (currentGroup.Public)
+                return Ok(currentGroup.ToDTO());
 
             // Update members
             var newMembersIds = group.MembersIds;
@@ -218,7 +242,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
                 }
             }
 
-            return Ok(updatedGroup.ToDTO());
+            return Ok(currentGroup.ToDTO());
         }
         catch (Exception ex)
         {
@@ -236,27 +260,37 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
                 .Where(x => x.Id == groupId)
                 .Get();
             
-            var group = response.Models.FirstOrDefault();
-            if (group == null)
+            var actualGroup = response.Models.FirstOrDefault();
+            if (actualGroup == null)
                 return NotFound(new { title = "Group not found" });
 
             // Validate ownership
             var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
-            if (group.OwnerId != userId)
+            if (actualGroup.OwnerId != userId)
                 return BadRequest(new { title = "Only the group owner can transfer ownership." });
             if (newOwner.Id == userId)
                 return BadRequest(new { title = "You are already the owner of this group." });
 
             // Validate new owner
-            await Validations.ValidateGroupMembership(groupId, newOwner.Id, _supabase);
+            if (!actualGroup.Public)
+                await Validations.ValidateGroupMembership(groupId, newOwner.Id, _supabase);
 
             // Transfer ownership
-            group.OwnerId = newOwner.Id;
+            actualGroup.OwnerId = newOwner.Id;
             await _supabase
                 .From<SupabaseGroup>()
-                .Update(group);
+                .Update(actualGroup);
 
-            return Ok(group.ToDTO());
+            if (actualGroup.Public)
+            {
+                await _supabase
+                    .From<SupabaseGroupMember>()
+                    .Where(x => x.UserId == actualGroup.OwnerId && x.GroupId == groupId)
+                    .Set(x => x.UserId, newOwner.Id)
+                    .Update();
+            }
+
+            return Ok(actualGroup.ToDTO());
             
         }
         catch (Exception ex)
@@ -279,6 +313,8 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             var group = groupResponse.Models.FirstOrDefault();
             if (group == null)
                 return NotFound();
+            if (group.Public)
+                return BadRequest(new { title = "Cannot leave a public group." });
 
             // Validate membership
             var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
@@ -298,7 +334,6 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
             return Conflict(new { title = ex.Message });
         }
     }
-
 
     [HttpDelete("{groupId}")]
     public async Task<IActionResult> DeleteGroup(int groupId)

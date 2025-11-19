@@ -26,6 +26,7 @@ export default function GroupPage() {
     const leaveMutation = leaveGroup();
     const { data: groupData, isLoading: isLoadingGroup, error: groupError } = getGroupById(groupId);
     const { data: membersData, error: membersError } = getGroupMembers(groupId);
+    const isOwner = groupData?.ownerId === Number(cookies.userId);
 
     useEffect(() => {
         window.scrollTo({
@@ -113,9 +114,9 @@ export default function GroupPage() {
                     </Table.Tbody>
                 </Table>
 
-                {!membersData ? <Loading /> :
-                    groupData!.ownerId === Number(cookies.userId) ? AdminActions : MemberActions
-                }
+                {!membersData && <Loading />}
+                {membersData && isOwner && AdminActions }
+                {membersData && !isOwner && !groupData.public && MemberActions}
             </>}
         </ResponsiveCard>
 

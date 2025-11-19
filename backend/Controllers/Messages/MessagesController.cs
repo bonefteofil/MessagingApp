@@ -79,14 +79,11 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpPut]
-    public async Task<IActionResult> UpdateMessage(int groupId, MessageDTO message)
+    [HttpPut("{messageId}")]
+    public async Task<IActionResult> UpdateMessage(int groupId, int messageId, MessageDTO message)
     {
         try
         {
-            if (message.GroupId != groupId)
-                return BadRequest(new { title = $"Group ID in URL: {groupId} does not match Group ID in message: {message.GroupId}." });
-
             var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
             await Validations.ValidateGroupMembership(groupId, userId, _supabase);
 
@@ -95,21 +92,23 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
 
             var response = await _supabase
                 .From<SupabaseMessage>()
-                .Where(x => x.Id == message.Id)
+                .Where(x => x.Id == messageId)
                 .Get();
 
-            var existingMessage = response.Models.FirstOrDefault();
-            if (existingMessage == null)
+            var actualMessage = response.Models.FirstOrDefault();
+            if (actualMessage == null)
                 return NotFound();
 
-            if (existingMessage.UserId != userId)
+            if (actualMessage.UserId != userId)
                 return Unauthorized(new { title = "You can only edit your own messages." });
 
-            existingMessage.Text = message.Text;
-            existingMessage.Edited = true;
-            await _supabase.From<SupabaseMessage>().Update(existingMessage);
+            actualMessage.Text = message.Text;
+            actualMessage.Edited = true;
+            await _supabase
+                .From<SupabaseMessage>()
+                .Update(actualMessage);
 
-            return Ok(existingMessage.ToDTO());
+            return Ok(actualMessage.ToDTO());
         }
         catch (Exception ex)
         {
@@ -117,14 +116,14 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpDelete]
-    public async Task<IActionResult> DeleteMessage(MessageDTO message)
+    [HttpDelete("{messageId}")]
+    public async Task<IActionResult> DeleteMessage(int messageId)
     {
         try
         {
             var response = await _supabase
                 .From<SupabaseMessage>()
-                .Where(x => x.Id == message.Id)
+                .Where(x => x.Id == messageId)
                 .Get();
 
             var deletedMessage = response.Models.FirstOrDefault();

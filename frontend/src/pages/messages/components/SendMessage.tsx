@@ -9,6 +9,7 @@ import { useForm } from "@mantine/form";
 import { editMessage, sendMessage } from "@api/messages";
 
 import EditingMessageContext from "@messages/components/EditingMessageContext";
+import type MessageScheme from "@/schema/messages";
 
 
 export default function SendMessage() {
@@ -45,11 +46,13 @@ export default function SendMessage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (editingMessage) {
-            editMutation.mutate({ id: editingMessage.id, text: form.values.text, groupId: editingMessage.groupId });
-        } else {
-            sendMutation.mutate({ text: form.values.text, groupId: groupId });
-        }
+
+        const message: MessageScheme = {
+            text: form.values.text.trim(),
+            groupId: groupId,
+        };
+        const mutation = editingMessage ? editMutation : sendMutation;
+        mutation.mutate({ body: message, messageId: editingMessage?.id });
     };
 
     return (

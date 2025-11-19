@@ -130,8 +130,10 @@ function groupMutation({method, errorText} : {method: string, errorText: string}
             const result = await authFetch({ method, route, body, errorText });
 
             queryClient.invalidateQueries({ queryKey: ['inboxGroups'] });
-            queryClient.invalidateQueries({ queryKey: ['group', result.id] });
-            queryClient.invalidateQueries({ queryKey: ['groupMembers', result.id] });
+            if (method !== 'DELETE') {
+                queryClient.invalidateQueries({ queryKey: ['group', result.id] });
+                queryClient.invalidateQueries({ queryKey: ['groupMembers', result.id] });
+            }
             return transformInboxGroupDate(result);
         }
     })

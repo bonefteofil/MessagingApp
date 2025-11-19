@@ -36,8 +36,8 @@ export default function MessageBubble({ message } : { message: MessageScheme }) 
                         size='xl'
                         radius='md'
                         color="red"
-                        onClick={() => {console.log("Deleting message:", message); deleteMutation.mutate({text: message.text, id: message.id, groupId: message.groupId})}}
-                        loading={deleteMutation.isPending && deleteMutation.variables.id === message.id}
+                        onClick={() => { deleteMutation.mutate({ body: message, messageId: message.id }) }}
+                        loading={ deleteMutation.isPending && deleteMutation.variables.body.id === message.id }
                     >
                         <FontAwesomeIcon icon={faTrash} />
                     </ActionIcon>

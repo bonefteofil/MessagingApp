@@ -19,7 +19,7 @@ export default function GroupMembers({groupMembers} : {groupMembers?: GroupMembe
                 <Table.Tbody>
                 
                 {groupMembers && groupMembers.map((member: GroupMemberScheme) => (
-                    <Table.Tr key={member.id}>
+                    <Table.Tr key={member.userId}>
                         <Table.Td><Text>{member.username}</Text></Table.Td>
                         <Table.Td><Text>{member.createdAt}</Text></Table.Td>
                     </Table.Tr>

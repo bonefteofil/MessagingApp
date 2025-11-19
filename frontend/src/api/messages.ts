@@ -37,10 +37,13 @@ function messageMutation({method, errorText} : {method: string, errorText: strin
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (messageBody: MessageScheme) => {
-            const result = await authFetch({method: method, route: `/groups/${messageBody.groupId}/messages`, errorText: errorText, body: messageBody});
+        mutationFn: async ({ body, messageId }: { body: MessageScheme, messageId?: number }) => {
 
-            queryClient.invalidateQueries({ queryKey: ['messages', messageBody.groupId] });
+            var route = `/groups/${body.groupId}/messages`;
+            if (messageId) route += `/${messageId}`;
+            const result = await authFetch({method, route, errorText, body});
+
+            queryClient.invalidateQueries({ queryKey: ['messages', body.groupId] });
             queryClient.invalidateQueries({ queryKey: ['inboxGroups'] });
             return transformMessageDate(result);
         }

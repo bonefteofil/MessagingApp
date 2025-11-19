@@ -19,4 +19,16 @@ public class SupabaseUser : BaseModel
             Username = this.Username
         };
     }
+
+    public GroupMemberDTO ToGroupMemberDTO(int groupId, DateTime createdAt)
+    {
+        return new GroupMemberDTO
+        {
+            Id = this.Id,
+            UserId = this.Id,
+            GroupId = groupId,
+            Username = this.Username,
+            CreatedAt = createdAt
+        };
+    }
 }
