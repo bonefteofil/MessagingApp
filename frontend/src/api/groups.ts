@@ -1,10 +1,11 @@
 import { useCookies } from "react-cookie";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { transformGroupDate, transformInboxGroupDate, transformMemberDate } from "@utils/formatDate";
-import { authFetch } from "@utils/authFetch";
+import { authFetch } from "@api/authFetch";
 
-import type { GroupFormScheme, GroupMemberScheme, InboxGroupScheme } from "../schema/groups";
+import { transformGroupDate, transformInboxGroupDate, transformMemberDate } from "@utils/formatDate";
+
+import type { GroupFormScheme, GroupMemberScheme, InboxGroupScheme } from "@schema/groups";
 
 
 export function getInboxGroups() {
@@ -68,6 +69,14 @@ export function getGroupMembers(groupId: number) {
     });
 }
 
+export function createGroup() {
+    return groupMutation({method: 'POST', errorText: "Error creating group"});
+}
+
+export function editGroup() {
+    return groupMutation({method: 'PUT', errorText: "Error editing group"});
+}
+
 export function leaveGroup() {
     const queryClient = useQueryClient();
 
@@ -75,7 +84,7 @@ export function leaveGroup() {
         mutationFn: async (groupId: number) => {
 
             const result = await authFetch({
-                method: 'POST',
+                method: 'PATCH',
                 route: `/groups/${groupId}/leave`,
                 errorText: "Error leaving group"
             });
@@ -93,7 +102,7 @@ export function transferOewnership() {
         mutationFn: async ({groupId, newOwnerId}: {groupId: number, newOwnerId: number}) => {
 
             const result = await authFetch({
-                method: 'POST',
+                method: 'PATCH',
                 route: `/groups/${groupId}/transfer`,
                 body: { id: newOwnerId },
                 errorText: "Error transferring group ownership"
@@ -105,14 +114,6 @@ export function transferOewnership() {
             return transformInboxGroupDate(result);
         }
     })
-}
-
-export function createGroup() {
-    return groupMutation({method: 'POST', errorText: "Error creating group"});
-}
-
-export function editGroup() {
-    return groupMutation({method: 'PUT', errorText: "Error editing group"});
 }
 
 export function deleteGroup() {

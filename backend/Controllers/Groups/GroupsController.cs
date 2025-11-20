@@ -250,7 +250,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpPost("{groupId}/transfer")]
+    [HttpPatch("{groupId}/transfer")]
     public async Task<IActionResult> TransferGroupOwnership(int groupId, UserDTO newOwner)
     {
         try
@@ -299,7 +299,7 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [HttpPost("{groupId}/leave")]
+    [HttpPatch("{groupId}/leave")]
     public async Task<IActionResult> LeaveGroup(int groupId)
     {
         try

@@ -65,7 +65,7 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete("users")]
+    [HttpDelete("account")]
     public async Task<IActionResult> DeleteAccount()
     {
         try

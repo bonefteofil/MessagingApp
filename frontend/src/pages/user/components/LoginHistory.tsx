@@ -1,6 +1,6 @@
-import { Table, Badge, ActionIcon, Button } from '@mantine/core';
+import { Table, Button } from '@mantine/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarXmark, faRightFromBracket, faUserSlash } from '@fortawesome/free-solid-svg-icons';
+import { faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
 import ResponsiveCard from '@components/ResponsiveCard';
 import Loading from '@components/Loading';
@@ -36,37 +36,20 @@ export default function LoginHistory({data} : {data: SessionDetails[] | undefine
                         <Table.Td>{session.deviceName}</Table.Td>
                         <Table.Td>{session.createdAt}</Table.Td>
                         <Table.Td>
-                            {session.revoked ? (<>
-                                <Badge className="hidden! md:inline!" color="gray">Logged out</Badge>
-                                <FontAwesomeIcon  className='md:hidden!' icon={faUserSlash} />
-                            </>) : session.expired ? (<>
-                                <Badge className="hidden! md:inline!" color="gray">Expired</Badge>
-                                <FontAwesomeIcon  className='md:hidden!' icon={faCalendarXmark} />
-                            </>) : (<>
-                                <Button
-                                    className="hidden! md:inline!"
-                                    size='xs'
-                                    color='green'
-                                    loading={revokeMutation.isPending && revokeMutation.variables === session.id}
-                                    onClick={() => {
-                                        revokeMutation.mutate(session.id);
-                                    }}
-                                >
-                                    Logout
-                                </Button>
-                                <ActionIcon
-                                    className='md:hidden!'
-                                    size="sm"
-                                    color="green"
-                                    radius="xl"
-                                    loading={revokeMutation.isPending && revokeMutation.variables === session.id}
-                                    onClick={() => {
-                                        revokeMutation.mutate(session.id);
-                                    }}
-                                >
-                                    <FontAwesomeIcon size='xs' icon={faRightFromBracket} />
-                                </ActionIcon>
-                            </>)}
+                            <Button
+                                size='xs'
+                                color='green'
+                                loading={revokeMutation.isPending && revokeMutation.variables === session.id}
+                                disabled={session.revoked || session.expired}
+                                onClick={() => { revokeMutation.mutate(session.id) }}
+                                rightSection={ !session.revoked && !session.expired &&
+                                    <FontAwesomeIcon size='xs' icon={ faRightFromBracket } />
+                                }
+                            >
+                                { session.revoked ? "Logged out "
+                                : session.expired ? "Expired "
+                                : "Logout " }
+                            </Button>
                         </Table.Td>
                     </Table.Tr>
                 ))}

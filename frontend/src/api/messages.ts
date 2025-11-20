@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { transformMessageDate } from "@utils/formatDate";
-import { authFetch } from "@utils/authFetch";
+import { authFetch } from "@api/authFetch";
 
-import type MessageScheme from "../schema/messages";
+import { transformMessageDate } from "@utils/formatDate";
+
+import type MessageScheme from "@schema/messages";
 
 
 export function getMessages(groupId: string) {

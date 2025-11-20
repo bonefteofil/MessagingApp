@@ -27,7 +27,7 @@ export default function MessageBubble({ message } : { message: MessageScheme }) 
                         variant="light"
                         size='xl'
                         radius='md'
-                        onClick={() => {console.log("Editing message:", message); setEditingMessage(message)}}
+                        onClick={() => { setEditingMessage(message)} }
                     >
                         <FontAwesomeIcon icon={faPenToSquare} />
                     </ActionIcon>

@@ -9,6 +9,7 @@ import { getInboxGroups } from "@api/groups"
 
 import GroupForm from "@groups/components/GroupForm";
 import Loading from "@components/Loading";
+import Credits from "@components/Credits";
 import ErrorPage from "@errors/ErrorPage";
 
 import type { InboxGroupScheme } from "@schema/groups";
@@ -36,20 +37,20 @@ export default function InboxPage() {
 
     return (
         <AppShell.Navbar withBorder>
-            <ScrollArea type="scroll" px='sm'>
-                <Group p='md'>
-                    <Text flex={1} size="xl" variant="gradient" fw={700}>Chats</Text>
-                    <GroupForm />
-                    <ActionIcon
-                        p="md"
-                        variant="light"
-                        radius='xl'
-                        onClick={() => { navigate("/account"); }}
-                    >
-                        <FontAwesomeIcon icon={faUser} />
-                    </ActionIcon>
-                </Group>
+            <Group p='md'>
+                <Text flex={1} size="xl" variant="gradient" fw={700}>Chats</Text>
+                <GroupForm />
+                <ActionIcon
+                    p="md"
+                    variant="light"
+                    radius='xl'
+                    onClick={() => { navigate("/account"); }}
+                >
+                    <FontAwesomeIcon icon={faUser} />
+                </ActionIcon>
+            </Group>
 
+            <ScrollArea type="scroll" px='sm' flex={1}>
                 <Text size="lg" mt="sm" mb="xs" fw={500} px="md">Private Groups ({privateGroups.length})</Text>
                 {privateGroups.map((group: InboxGroupScheme) => {
                     return <InboxComponent key={group.id} group={group} />
@@ -64,6 +65,8 @@ export default function InboxPage() {
 
                 <Box h='md' />
             </ScrollArea>
+
+            <Credits />
         </AppShell.Navbar>
     );
 }

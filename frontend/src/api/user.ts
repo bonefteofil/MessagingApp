@@ -3,7 +3,8 @@ import { useCookies } from "react-cookie";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cleanNotifications } from "@mantine/notifications";
 
-import { authFetch } from "@utils/authFetch";
+import { authFetch } from "@api/authFetch";
+
 import { transformSessionDate } from "@utils/formatDate";
 import { ShowErrorNotification } from "@utils/showErrorNotification";
 
@@ -50,12 +51,11 @@ export function deleteAccount() {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await fetch(`/api/users`, { method: 'DELETE' });
+            const response = await fetch(`/api/account`, { method: 'DELETE' });
             const result = await response.json();
             if (!response.ok) return ShowErrorNotification("Error deleting user: " + result.title);
 
-            queryClient.invalidateQueries({ queryKey: ['messages'] });
-            queryClient.invalidateQueries({ queryKey: ["users"] });
+            queryClient.clear();
             cleanNotifications();
             return result;
         }

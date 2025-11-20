@@ -53,6 +53,8 @@ export function register() {
 }
 
 export function logoutUser() {
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: async () => {
             try {
@@ -62,7 +64,7 @@ export function logoutUser() {
             } catch (error) {
                 return ShowErrorNotification("Network error logging out: " + error);
             }
-
+            queryClient.clear()
             cleanNotifications();
             return;
         }
@@ -71,6 +73,7 @@ export function logoutUser() {
 
 export function revokeSession() {
     const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: async (sessionId: number) => {
             try {

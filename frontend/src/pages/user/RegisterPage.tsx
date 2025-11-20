@@ -7,6 +7,7 @@ import { useForm } from "@mantine/form";
 import { register } from "@api/auth";
 
 import ResponsiveCard from "@components/ResponsiveCard";
+import Credits from "@/components/Credits";
 
 
 export default function RegisterPage() {
@@ -25,30 +26,34 @@ export default function RegisterPage() {
     if (cookies.userId) return <Navigate to="/" replace />;
 
     return (
-        <ResponsiveCard title="sfsdfs">
-            <form autoComplete="off" id="asdasd-form" onSubmit={handleSubmit} >
-                <Stack align="stretch">
-                    <Input
-                        type="text"
-                        data-autofocus
-                        placeholder="Username"
-                        radius='md'
-                        size="md"
-                        mb='sm'
-                        autoComplete="off"
-                        {...form.getInputProps('username')}
-                    />
-                    <Group justify="center">
-                        <Button radius='md' type="submit" disabled={!form.getValues().username} loading={createMutation.isPending}>
-                            Register
-                        </Button>
-                        <Text>or</Text>
-                        <Button disabled={createMutation.isPending} variant="outline" radius='md' onClick={() => { navigate("/login", { replace: true }); }}>
-                            Go to login
-                        </Button>
-                    </Group>
-                </Stack>
-            </form>
-        </ResponsiveCard>
+        <Stack>
+            <ResponsiveCard title="sfsdfs">
+                <form autoComplete="off" id="asdasd-form" onSubmit={handleSubmit} >
+                    <Stack align="stretch">
+                        <Input
+                            type="text"
+                            data-autofocus
+                            placeholder="Username"
+                            radius='md'
+                            size="md"
+                            mb='sm'
+                            autoComplete="off"
+                            {...form.getInputProps('username')}
+                        />
+                        <Group justify="center">
+                            <Button radius='md' type="submit" disabled={!form.getValues().username} loading={createMutation.isPending}>
+                                Register
+                            </Button>
+                            <Text>or</Text>
+                            <Button disabled={createMutation.isPending} variant="outline" radius='md' onClick={() => { navigate("/login", { replace: true }); }}>
+                                Go to login
+                            </Button>
+                        </Group>
+                    </Stack>
+                </form>
+            </ResponsiveCard>
+
+            <Credits />
+        </Stack>
     )
 }
