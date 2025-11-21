@@ -45,7 +45,7 @@ public static class TokenService
         };
     }
 
-    public static async Task<string> GenerateRefreshToken(int UserId, string DeviceName, Supabase.Client _supabase)
+    public static async Task<string> GenerateRefreshToken(int UserId, string? DeviceName, Supabase.Client _supabase)
     {
         if (string.IsNullOrWhiteSpace(DeviceName))
             throw new ArgumentException("Device name is required", nameof(DeviceName));

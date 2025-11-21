@@ -1,72 +1,82 @@
-import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
-import { Avatar, Button, Group, Radio, Stack, Text } from "@mantine/core";
+import { Button, Group, PasswordInput, Stack, Text, TextInput } from "@mantine/core";
+import { useForm } from "@mantine/form";
 
-import { getUsers } from "@api/user";
 import { loginUser } from "@api/auth";
 
-import ErrorPage from "@errors/ErrorPage";
-import Loading from "@components/Loading";
-import Credits from "@components/Credits";
 import ResponsiveCard from "@components/ResponsiveCard";
-
-import type { UserScheme } from "@schema/user";
+import Credits from "@components/Credits";
 
 
 export default function LoginPage() {
-    const { data, error } = getUsers();
     const loginMutation = loginUser();
     const [cookies] = useCookies(['userId']);
-    const [value, setValue] = useState<UserScheme | null>(null);
     const navigate = useNavigate();
 
+    const form = useForm({
+        initialValues: { username: '', password: '' },
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        loginMutation.mutate({
+            username: form.values.username,
+            password: form.values.password
+        });
+    }
     if (cookies.userId) return <Navigate to="/" replace />;
-    if (error) return <ErrorPage message={error.message} />;
 
     return (
         <Stack>
             <ResponsiveCard title="Login into your account">
-                <Radio.Group value={value?.id!.toString()}>
+                <form autoComplete="true" id="login-form" onSubmit={handleSubmit} >
                     <Stack align="stretch">
-                        <Loading loading={!data} />
 
-                        {data && data.map((user: UserScheme) => (
-                            <Radio.Card
-                                withBorder={false}
-                                value={user.id!.toString()}
-                                radius='md'
-                                key={user.id}
-                            >
-                                <Group
-                                    p="sm"
-                                    classNames={{ root: `rounded-xl cursor-pointer border ${value?.id === user.id ? 'border-gray-200' : 'border-gray-600'}` }}
-                                    onClick={() => setValue(user)}
-                                >
-                                    <Radio.Indicator />
-                                    <Avatar />
-                                    <Text truncate="end">{user.id}, {user.username}</Text>
-                                </Group>
-                            </Radio.Card>
-                        ))}
+                        <TextInput
+                            type="text"
+                            autoFocus
+                            radius='md'
+                            size="md"
+                            mb='sm'
+                            label="Username"
+                            placeholder="Enter your username"
+                            autoComplete="username"
+                            {...form.getInputProps('username')}
+                        />
+                        <PasswordInput
+                            radius='md'
+                            size="md"
+                            mb='sm'
+                            label="Password"
+                            placeholder="Enter your password"
+                            autoComplete="current-password"
+                            {...form.getInputProps('password')}
+                        />
 
                         <Group justify="center">
                             <Button
+                                type="submit"
                                 radius='md'
-                                disabled={!value}
                                 loading={loginMutation.isPending}
-                                onClick={() => { loginMutation.mutate({ username: value!.username }); }}
+                                disabled={!form.getValues().username || !form.getValues().password}
                             >
                                 Log in
                             </Button>
+
                             <Text>or</Text>
-                            <Button radius='md' variant="outline" onClick={() => { navigate("/register", { replace: true }); }}>
+
+                            <Button
+                                radius='md'
+                                variant="outline"
+                                onClick={() => { navigate("/register", { replace: true }); }}
+                            >
                                 Go to register
                             </Button>
                         </Group>
                     </Stack>
-                </Radio.Group>
+                </form>
             </ResponsiveCard>
 
             <Credits />

@@ -18,11 +18,6 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(login.Username))
-                return BadRequest(new { title = "Username is required" });
-            if (string.IsNullOrWhiteSpace(login.DeviceName))
-                return BadRequest(new { title = "Device name is required" });
-
             var response = await _supabase
                 .From<SupabaseUser>()
                 .Where(x => x.Username == login.Username)
@@ -30,7 +25,9 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
 
             var user = response.Models.FirstOrDefault();
             if (user == null)
-                return BadRequest(new { title = "Invalid username or password." });
+                return BadRequest(new { title = "Invalid username." });
+            if (!BCrypt.Net.BCrypt.Verify(login.Password!, user.PasswordHash))
+                return Unauthorized(new { title = "Invalid password." });
 
             string accessToken = TokenService.GenerateAccessToken(user.Id.ToString());
             string refreshToken = await TokenService.GenerateRefreshToken(user.Id, login.DeviceName, _supabase);
@@ -51,14 +48,14 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(newUser.Username))
-                return BadRequest(new { title = "Username is required" });
-
+            if (newUser.Username?.Length < 4)
+                return BadRequest(new { title = "Username must have at least 4 characters" });
             if (newUser.Username!.Length > 20)
-                return BadRequest(new { title = "Username too long (max 20 characters)" });
-
-            if (string.IsNullOrWhiteSpace(newUser.DeviceName))
-                return BadRequest(new { title = "Device name is required" });
+                return BadRequest(new { title = "Username must have at most 20 characters" });
+            if (newUser.Password?.Length < 4)
+                return BadRequest(new { title = "Password must have at least 4 characters" });
+            if (newUser.Password!.Length > 20)
+                return BadRequest(new { title = "Password must have at most 20 characters" });
 
             var count = await _supabase
                 .From<SupabaseUser>()
@@ -66,9 +63,15 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
             if (count >= 30)
                 return BadRequest(new { title = "User limit reached (max 30 users)" });
 
+            SupabaseUser newSupabaseUser = new()
+            {
+                Username = newUser.Username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.Password!)
+            };
+
             var response = await _supabase
                 .From<SupabaseUser>()
-                .Insert(new SupabaseUser { Username = newUser.Username });
+                .Insert(newSupabaseUser);
 
             var createdUser = response.Models.FirstOrDefault();
             if (createdUser == null)

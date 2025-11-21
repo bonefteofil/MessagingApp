@@ -17,13 +17,16 @@ export function loginUser() {
                     body: JSON.stringify(credentials),
                     credentials: 'include'
                 });
-                if (!response.ok) throw new Error(`Error logging in: ${response.status} ${response.statusText}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`${response.status} ${response.statusText} - ${errorData.title}`);
+                }
 
                 cleanNotifications();
                 window.location.href = "/#/";
                 return response.ok;
-            } catch (error) {
-                return ShowErrorNotification("Network error logging in: " + error);
+            } catch (error: any) {
+                return ShowErrorNotification("Error logging in: " + error.message);
             }
         }
     });
@@ -40,13 +43,16 @@ export function register() {
                     body: JSON.stringify(newUser),
                     credentials: 'include'
                 });
-                if (!response.ok) throw new Error(`Error creating user: ${response.status} ${response.statusText}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`${response.status} ${response.statusText} - ${errorData.title}`);
+                }
                 
                 cleanNotifications();
                 window.location.href = "/#/";
                 return response.ok;
-            } catch (error) {
-                return ShowErrorNotification("Network error creating user: " + error);
+            } catch (error: any) {
+                return ShowErrorNotification("Error creating user: " + error.message);
             }
         }
     });

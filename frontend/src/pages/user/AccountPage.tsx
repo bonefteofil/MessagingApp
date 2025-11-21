@@ -29,7 +29,7 @@ export default function AccountPage() {
         } />
         <Outlet />
 
-        <ResponsiveCard title={data?.user.username}>
+        <ResponsiveCard title={data?.user.username || "..."}>
 
             <Center><Avatar size='xl' /></Center>
 

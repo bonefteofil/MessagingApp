@@ -5,6 +5,7 @@ export interface UserScheme {
 
 export interface LoginScheme {
     username: string;
+    password: string;
     deviceName?: string;
 }
 

@@ -15,14 +15,7 @@ export function getUsers() {
     return useQuery({
         queryKey: ["users"],
         queryFn: async () => {
-
-            const response = await fetch(`/api/users`, {method: "GET"});
-            const result = await response.json();
-
-            if (!response.ok) return ShowErrorNotification("Error getting users: " + result.title);
-
-            cleanNotifications();
-            return result;
+            return await authFetch({method: 'GET', route: '/users', errorText: "Error getting users"});
         },
         retry: false
     });

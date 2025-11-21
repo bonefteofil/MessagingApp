@@ -6,6 +6,7 @@ using backend.Models;
 
 namespace backend.Controllers;
 
+[Authorize]
 [ApiController]
 public class UsersController(Supabase.Client supabase) : ControllerBase
 {
@@ -28,7 +29,6 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [Authorize]
     [HttpGet("account")]
     public async Task<ActionResult<UserDTO>> GetAccountData()
     {
@@ -64,7 +64,6 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
         }
     }
 
-    [Authorize]
     [HttpDelete("account")]
     public async Task<IActionResult> DeleteAccount()
     {
