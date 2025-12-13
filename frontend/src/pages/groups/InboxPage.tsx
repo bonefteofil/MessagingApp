@@ -1,15 +1,14 @@
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-import { Group, Text, ScrollArea, Box, AppShell, ActionIcon } from "@mantine/core";
+import { Group, Text, ScrollArea, Box, AppShell, ActionIcon, Button, Center, Anchor } from "@mantine/core";
 
 import { getInboxGroups } from "@api/groups"
 
 import GroupForm from "@groups/components/GroupForm";
 import Loading from "@components/Loading";
-import Credits from "@components/Credits";
 import ErrorPage from "@errors/ErrorPage";
 
 import type { InboxGroupScheme } from "@schema/groups";
@@ -32,7 +31,6 @@ export default function InboxPage() {
         }
     }, [data]);
 
-    if (!cookies.userId) return <Navigate to="/login" replace />;
     if (error) return (<AppShell.Navbar withBorder><ErrorPage message={error.message} /></AppShell.Navbar>);
 
     return (
@@ -45,6 +43,7 @@ export default function InboxPage() {
                     variant="light"
                     radius='xl'
                     onClick={() => { navigate("/account"); }}
+                    disabled={!cookies.userId}
                 >
                     <FontAwesomeIcon icon={faUser} />
                 </ActionIcon>
@@ -56,6 +55,14 @@ export default function InboxPage() {
                     return <InboxComponent key={group.id} group={group} />
                 })}
 
+                {!cookies.userId && 
+                    <Group justify="center" align="center" mt="md" mb="md" gap='xs'>
+                        <Button radius="md" onClick={ () => navigate("/login")}>Login</Button>
+                        <Text>or</Text>
+                        <Button radius="md" onClick={ () => navigate("/register")}>Register</Button>
+                    </Group>
+                }
+
                 <Text size="lg" mt="sm" mb="xs" fw={500} px="md">Public Groups ({publicGroups.length})</Text>
                 {publicGroups.map((group: InboxGroupScheme) => {
                     return <InboxComponent key={group.id} group={group} />
@@ -66,7 +73,13 @@ export default function InboxPage() {
                 <Box h='md' />
             </ScrollArea>
 
-            <Credits />
+            <Center p='sm'>
+                <Text size="lg" c="dimmed">
+                    <Anchor href="https://bonefteofil.ro" target="_blank">Bonef Teofil</Anchor>
+                    {' • 2025 • '}
+                    <Anchor href="https://github.com/bonefteofil/MessagingApp" target="_blank">GitHub</Anchor>
+                </Text>
+            </Center>
         </AppShell.Navbar>
     );
 }

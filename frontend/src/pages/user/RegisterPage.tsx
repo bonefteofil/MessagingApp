@@ -7,7 +7,7 @@ import { useForm } from "@mantine/form";
 import { register } from "@api/auth";
 
 import ResponsiveCard from "@components/ResponsiveCard";
-import Credits from "@components/Credits";
+import Header from "@components/Header";
 
 
 export default function RegisterPage() {
@@ -42,6 +42,9 @@ export default function RegisterPage() {
 
     return (
         <Stack>
+            <Header element={
+                <Text ml="md" size="xl" truncate="end">Register</Text>
+            } />
             <ResponsiveCard title="Register a new account">
                 <form id="register-form" onSubmit={handleSubmit} >
                     <Stack align="stretch">
@@ -96,8 +99,6 @@ export default function RegisterPage() {
                     Username or password cannot be changed later!
                 </Text>
             </ResponsiveCard>
-
-            <Credits />
         </Stack>
     )
 }

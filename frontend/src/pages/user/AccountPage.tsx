@@ -1,4 +1,5 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 import { Text, Button, Avatar, Center } from "@mantine/core";
 
@@ -13,6 +14,9 @@ import ErrorPage from "@errors/ErrorPage";
 export default function AccountPage() {
     const { data, error } = getAccountData();
     const navigate = useNavigate();
+    const [cookies] = useCookies(['userId']);
+
+    if (!cookies.userId) return <Navigate to="/" replace />;
 
     if (error) {
         return (<>

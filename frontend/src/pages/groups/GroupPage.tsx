@@ -114,7 +114,7 @@ export default function GroupPage() {
                     </Table.Tbody>
                 </Table>
 
-                {!membersData && <Loading />}
+                {!membersData && cookies.userId && <Loading />}
                 {membersData && isOwner && AdminActions }
                 {membersData && !isOwner && !groupData.public && MemberActions}
             </>}

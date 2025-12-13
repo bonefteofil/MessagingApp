@@ -1,5 +1,6 @@
 import { useEffect, useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 import { faFloppyDisk, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,6 +19,7 @@ export default function SendMessage() {
     const sendMutation = sendMessage();
     const editMutation = editMessage();
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const [cookies] = useCookies(['userId']);
 
     const form = useForm({
         initialValues: {
@@ -74,8 +76,8 @@ export default function SendMessage() {
                             minRows={editingMessage ? 3 : 1}
                             maxRows={6}
                             autosize
-                            placeholder="Type your message..."
-                            disabled={sendMutation.isPending}
+                            placeholder={cookies.userId ? "Type your message..." : "Login to send messages"}
+                            disabled={sendMutation.isPending || !cookies.userId}
                             styles={{ input: { backgroundColor: 'transparent', borderColor: 'lightgrey' } }}
                             {...form.getInputProps('text')}
                             onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -118,6 +120,7 @@ export default function SendMessage() {
                                 radius='md'
                                 size='input-md'
                                 loading={sendMutation.isPending}
+                                disabled={!cookies.userId}
                             >
                                 <FontAwesomeIcon icon={faPaperPlane} />
                             </ActionIcon>

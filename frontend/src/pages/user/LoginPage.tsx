@@ -6,8 +6,8 @@ import { useForm } from "@mantine/form";
 
 import { loginUser } from "@api/auth";
 
+import Header from "@components/Header";
 import ResponsiveCard from "@components/ResponsiveCard";
-import Credits from "@components/Credits";
 
 
 export default function LoginPage() {
@@ -30,6 +30,9 @@ export default function LoginPage() {
 
     return (
         <Stack>
+            <Header element={
+                <Text ml="md" size="xl" truncate="end">Login</Text>
+            } />
             <ResponsiveCard title="Login into your account">
                 <form autoComplete="true" id="login-form" onSubmit={handleSubmit} >
                     <Stack align="stretch">
@@ -78,8 +81,6 @@ export default function LoginPage() {
                     </Stack>
                 </form>
             </ResponsiveCard>
-
-            <Credits />
         </Stack>
     );
 }

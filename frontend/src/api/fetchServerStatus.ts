@@ -14,6 +14,5 @@ export function FetchServerStatus() {
             }
         },
         retry: false,
-        refetchInterval: 5000,
     })
 }

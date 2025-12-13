@@ -5,7 +5,6 @@ import { Notifications } from '@mantine/notifications';
 import Layout from "@components/Layout";
 import ResponsiveCard from "@components/ResponsiveCard";
 
-import Status from "@components/Status";
 import ChatPage from "@messages/ChatPage"
 import GroupPage from "@groups/GroupPage";
 import NotFoundPage from "@errors/404Page";
@@ -23,19 +22,17 @@ export default function App() {
 			<Notifications />
 
 			<Routes>
-				<Route element={<Status />}>
+				<Route element={<Layout />}>
 					<Route path="*" element={<NotFoundPage />} />
 					<Route path="login" element={<LoginPage />} />
 					<Route path="register" element={<RegisterPage />} />
 					<Route path="logout" element={<LogoutPage />} />
 
-					<Route element={<Layout />}>
-						<Route path="" element={<ResponsiveCard title="Welcome to Messaging App!" />} />
-						<Route path="groups/:groupId" element={<ChatPage />} />
-						<Route path="groups/:groupId/details" element={<GroupPage />} />
-						<Route path="account" element={<AccountPage />} >
-							<Route path="delete" element={<DeleteAccountPage />} /> 
-						</Route>
+					<Route path="" element={<ResponsiveCard title="Welcome to Messaging App!" />} />
+					<Route path="groups/:groupId" element={<ChatPage />} />
+					<Route path="groups/:groupId/details" element={<GroupPage />} />
+					<Route path="account" element={<AccountPage />} >
+						<Route path="delete" element={<DeleteAccountPage />} /> 
 					</Route>
 				</Route>
 			</Routes>

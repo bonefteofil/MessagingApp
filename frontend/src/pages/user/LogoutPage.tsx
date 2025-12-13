@@ -23,7 +23,7 @@ export default function LogoutRoute() {
 
     useEffect(() => {
         if (!cookies.userId)
-            navigate("/login", { replace: true });
+            navigate("/", { replace: true });
 
     }, [cookies.userId]);
 

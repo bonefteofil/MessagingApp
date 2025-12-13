@@ -13,7 +13,7 @@ export async function authFetch({method, route, errorText, body} : {method: stri
     });
 
     // if unauthorized, try to refresh token
-    if (response.status === 401) {
+    if (response.status === 401 && document.cookie.split(';').some(c => c.trim().startsWith('userId='))) {
         response = await fetch('/api/auth/refresh', {
             method: 'POST',
             credentials: 'include',
@@ -28,10 +28,8 @@ export async function authFetch({method, route, errorText, body} : {method: stri
                 credentials: 'include',
                 body: JSON.stringify(body)
             });
-        } else { 
-            window.location.href = '/#/logout';
-            return null;
         }
+        return null;
     }
     // Handle rate limiting
     if (response.status === 429) {

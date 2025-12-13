@@ -13,12 +13,13 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
 {
     private readonly Supabase.Client _supabase = supabase;
 
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MessageDTO>>> GetGroupMessages(int groupId)
     {
         try
         {
-            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti) ?? "-1");
             await Validations.ValidateGroupMembership(groupId, userId, _supabase);
             
             var messages = await _supabase

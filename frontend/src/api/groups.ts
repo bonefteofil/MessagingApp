@@ -9,8 +9,6 @@ import type { GroupFormScheme, GroupMemberScheme, InboxGroupScheme } from "@sche
 
 
 export function getInboxGroups() {
-    const [cookies] = useCookies(['userId']);
-
     return useQuery({
         queryKey: ["inboxGroups"],
         queryFn: async () => {
@@ -24,14 +22,11 @@ export function getInboxGroups() {
             return groupsWithLocalTime;
         },
         retry: false,
-        enabled: !!cookies.userId,
         refetchInterval: (query) => { return query.state.status === 'error' ? false : 3000 }
     });
 }
 
 export function getGroupById(groupId: number) {
-    const [cookies] = useCookies(['userId']);
-
     return useQuery({
         queryKey: ["group", groupId],
         queryFn: async () => {
@@ -45,7 +40,6 @@ export function getGroupById(groupId: number) {
             return groupWithLocalTime;
         },
         retry: false,
-        enabled: !!cookies.userId,
     });
 }
 

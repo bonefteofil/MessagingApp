@@ -72,6 +72,7 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
             <Button
                 radius='md'
                 onClick={open}
+                disabled={!cookies.userId}
             >
                 Edit Group
                 <FontAwesomeIcon icon={faPenToSquare} />
@@ -82,6 +83,7 @@ export default function GroupForm({ editingGroup, actualMembers } : { editingGro
                 variant="light"
                 radius={editingGroup ? 'md' : 'xl'}
                 onClick={open}
+                disabled={!cookies.userId}
             >
                 <FontAwesomeIcon icon={faPlus} />
             </ActionIcon>

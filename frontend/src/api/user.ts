@@ -17,7 +17,8 @@ export function getUsers() {
         queryFn: async () => {
             return await authFetch({method: 'GET', route: '/users', errorText: "Error getting users"});
         },
-        retry: false
+        retry: false,
+        enabled: false
     });
 }
 

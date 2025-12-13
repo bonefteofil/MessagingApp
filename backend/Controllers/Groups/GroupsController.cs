@@ -13,12 +13,13 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
 {
     private readonly Supabase.Client _supabase = supabase;
 
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<InboxGroupDTO>>> GetInboxGroups()
     {
         try
         {
-            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti) ?? "-1");
 
             var response = await _supabase
                 .From<SupabaseInboxGroup>()
@@ -34,12 +35,13 @@ public class GroupsController(Supabase.Client supabase) : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpGet("{groupId}")]
     public async Task<ActionResult<GroupDTO>> GetGroupData(int groupId)
     {
         try
         {
-            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
+            var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti) ?? "-1");
             await Validations.ValidateGroupMembership(groupId, userId, _supabase);
 
             var response = await _supabase
