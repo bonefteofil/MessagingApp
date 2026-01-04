@@ -1,24 +1,24 @@
 import { useCookies } from "react-cookie";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { cleanNotifications } from "@mantine/notifications";
 
-import { authFetch } from "@api/authFetch";
+import { authFetch } from "@api/fetchService";
 
 import { transformSessionDate } from "@utils/formatDate";
-import { ShowErrorNotification } from "@utils/showErrorNotification";
 
 import type { UserScheme, SessionDetails } from "@schema/user";
 
 
 export function getUsers() {
+    const [cookies] = useCookies(['userId']);
+
     return useQuery({
         queryKey: ["users"],
         queryFn: async () => {
             return await authFetch({method: 'GET', route: '/users', errorText: "Error getting users"});
         },
         retry: false,
-        enabled: false
+        enabled: !!cookies.userId,
     });
 }
 
@@ -45,12 +45,11 @@ export function deleteAccount() {
 
     return useMutation({
         mutationFn: async () => {
-            const response = await fetch(`/api/account`, { method: 'DELETE' });
-            const result = await response.json();
-            if (!response.ok) return ShowErrorNotification("Error deleting user: " + result.title);
+            const result = await authFetch({method: 'DELETE', route: '/account', errorText: "Error deleting user"});
 
             queryClient.clear();
-            cleanNotifications();
+            window.location.href = "/";
+            window.location.reload();
             return result;
         }
     });

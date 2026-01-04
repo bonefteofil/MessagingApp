@@ -69,7 +69,6 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
     {
         try
         {
-
             int userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti)!);
             var response = await _supabase
                 .From<SupabaseGroup>()
@@ -86,6 +85,7 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
 
             Response.Cookies.Delete("accessToken");
             Response.Cookies.Delete("refreshToken");
+            Response.Cookies.Delete("userId");
 
             return Ok(new { title = "Account deleted successfully." });
         }
@@ -94,5 +94,4 @@ public class UsersController(Supabase.Client supabase) : ControllerBase
             return Conflict(new { title = ex.Message });
         }
     }
-
 }

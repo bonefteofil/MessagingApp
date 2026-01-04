@@ -62,6 +62,11 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
                 .Count(Supabase.Postgrest.Constants.CountType.Exact);
             if (count >= 30)
                 return BadRequest(new { title = "User limit reached (max 30 users)" });
+            var response = await _supabase.From<SupabaseUser>()
+                .Where(x => x.Username == newUser.Username)
+                .Get();
+            if (response.Models.Count > 0)
+                return BadRequest(new { title = "Username is already taken" });
 
             SupabaseUser newSupabaseUser = new()
             {
@@ -69,7 +74,7 @@ public class AuthController(Supabase.Client supabase) : ControllerBase
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(newUser.Password!)
             };
 
-            var response = await _supabase
+            response = await _supabase
                 .From<SupabaseUser>()
                 .Insert(newSupabaseUser);
 

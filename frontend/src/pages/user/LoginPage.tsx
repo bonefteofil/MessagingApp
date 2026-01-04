@@ -1,7 +1,7 @@
 import { Navigate, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
-import { Button, Group, PasswordInput, Stack, Text, TextInput } from "@mantine/core";
+import { Alert, Button, Group, PasswordInput, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 
 import { loginUser } from "@api/auth";
@@ -36,6 +36,11 @@ export default function LoginPage() {
             <ResponsiveCard title="Login into your account">
                 <form autoComplete="true" id="login-form" onSubmit={handleSubmit} >
                     <Stack align="stretch">
+                        {loginMutation.error && <Alert variant="light" color="red" radius="md">
+                            <Text size="sm">
+                                {(loginMutation.error as Error).message}
+                            </Text>
+                        </Alert>}
 
                         <TextInput
                             type="text"

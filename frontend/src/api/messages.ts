@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { authFetch } from "@api/authFetch";
+import { authFetch } from "@api/fetchService";
 
 import { transformMessageDate } from "@utils/formatDate";
 

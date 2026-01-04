@@ -19,6 +19,9 @@ public class MessagesController(Supabase.Client supabase) : ControllerBase
     {
         try
         {
+            if (!User.Identity!.IsAuthenticated && Request.Cookies.ContainsKey("userId"))
+                return Unauthorized(new { title = "Expired token." });
+
             var userId = int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Jti) ?? "-1");
             await Validations.ValidateGroupMembership(groupId, userId, _supabase);
             

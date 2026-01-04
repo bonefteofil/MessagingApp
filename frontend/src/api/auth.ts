@@ -9,25 +9,21 @@ import type { LoginScheme } from "@schema/user";
 export function loginUser() {
     return useMutation({
         mutationFn: async (credentials: LoginScheme) => {
-            try {
-                credentials.deviceName = navigator.platform;
-                const response = await fetch(`/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(credentials),
-                    credentials: 'include'
-                });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`${response.status} ${response.statusText} - ${errorData.title}`);
-                }
-
-                cleanNotifications();
-                window.location.href = "/#/";
-                return response.ok;
-            } catch (error: any) {
-                return ShowErrorNotification("Error logging in: " + error.message);
+            credentials.deviceName = navigator.platform;
+            const response = await fetch(`/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(credentials),
+                credentials: 'include'
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Error logging in: ${errorData.title}`);
             }
+
+            window.location.href = "/";
+            window.location.reload();
+            return response.ok;
         }
     });
 }
@@ -35,25 +31,21 @@ export function loginUser() {
 export function register() {
     return useMutation({
         mutationFn: async (newUser: LoginScheme) => {
-            try {
-                newUser.deviceName = navigator.platform;
-                const response = await fetch(`/api/auth/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newUser),
-                    credentials: 'include'
-                });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`${response.status} ${response.statusText} - ${errorData.title}`);
-                }
-                
-                cleanNotifications();
-                window.location.href = "/#/";
-                return response.ok;
-            } catch (error: any) {
-                return ShowErrorNotification("Error creating user: " + error.message);
+            newUser.deviceName = navigator.platform;
+            const response = await fetch(`/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUser),
+                credentials: 'include'
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Error registering: ${errorData.title}`);
             }
+            
+            window.location.href = "/";
+            window.location.reload();
+            return response.ok;
         }
     });
 }
@@ -63,16 +55,14 @@ export function logoutUser() {
 
     return useMutation({
         mutationFn: async () => {
-            try {
-                const response = await fetch(`/api/auth/logout`, { method: 'POST', credentials: 'include' });
-                if (!response.ok) throw new Error("Error logging out");
-
-            } catch (error) {
-                return ShowErrorNotification("Network error logging out: " + error);
-            }
-            queryClient.clear()
+            const response = await fetch(`/api/auth/logout`, { method: 'POST', credentials: 'include' });
+            
             cleanNotifications();
-            return;
+            queryClient.clear()
+            window.location.reload();
+            window.location.href = "/";
+            if (!response.ok) throw new Error(`${response.status}`);
+            return response.ok;
         }
     });
 }
@@ -90,7 +80,7 @@ export function revokeSession() {
                 cleanNotifications();
                 return response.ok;
             } catch (error) {
-                return ShowErrorNotification("Network error revoking session: " + error);
+                return ShowErrorNotification("Error revoking session: " + error);
             }
         }
     });

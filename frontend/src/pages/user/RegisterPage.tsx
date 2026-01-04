@@ -1,7 +1,7 @@
 import { Navigate, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
-import { Button, Group, PasswordInput, Stack, Text, TextInput } from "@mantine/core";
+import { Alert, Button, Group, PasswordInput, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 
 import { register } from "@api/auth";
@@ -11,7 +11,7 @@ import Header from "@components/Header";
 
 
 export default function RegisterPage() {
-    const createMutation = register();
+    const registerMutation = register();
     const [cookies] = useCookies(['userId']);
     const navigate = useNavigate();
 
@@ -33,7 +33,7 @@ export default function RegisterPage() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        createMutation.mutate({
+        registerMutation.mutate({
             username: form.values.username,
             password: form.values.password
         });
@@ -48,6 +48,11 @@ export default function RegisterPage() {
             <ResponsiveCard title="Register a new account">
                 <form id="register-form" onSubmit={handleSubmit} >
                     <Stack align="stretch">
+                        {registerMutation.error && <Alert variant="light" color="red" radius="md">
+                            <Text size="sm">
+                                {(registerMutation.error as Error).message}
+                            </Text>
+                        </Alert>}
 
                         <TextInput
                             type="text"
@@ -75,7 +80,7 @@ export default function RegisterPage() {
                             <Button
                                 type="submit"
                                 radius='md'
-                                loading={createMutation.isPending}
+                                loading={registerMutation.isPending}
                                 disabled={!form.getValues().username || !!form.errors.username || !form.getValues().password || !!form.errors.password}
                             >
                                 Register
@@ -84,7 +89,7 @@ export default function RegisterPage() {
                             <Text c="dimmed">or</Text>
 
                             <Button
-                                disabled={createMutation.isPending}
+                                disabled={registerMutation.isPending}
                                 variant="outline"
                                 radius='md'
                                 onClick={() => { navigate("/login", { replace: true }); }}
